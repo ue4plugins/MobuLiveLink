@@ -31,10 +31,11 @@ public class MobuLiveLinkPluginTarget : TargetRules
             string MobuInstallFolder = @"D:\Programs\Autodesk\MotionBuilder " + MobuVersionString;
             string MocPath = Path.Combine(MobuInstallFolder, "bin/x64/moc.exe");
 
-			// TODO: Figure out how to get ModuleDirectory inside of a .target.cs
-            string OutputPath = @"D:\LivelinkPlugin\UnrealEngine-4.18.1-release\Engine\Source\Programs\MobuLiveLinkPlugin\MOC";
+            // TODO: Figure out how to get ModuleDirectory inside of a .target.cs
+            string ModuleDirectory = @"D:\LivelinkPlugin\UnrealEngine-4.18.1-release\Engine\Source\Programs\MobuLiveLinkPlugin";
+            string OutputPath = Path.Combine(ModuleDirectory, "MOC");
             string[] FilesToBeMocced = new string[] {
-                @"D:\LivelinkPlugin\UnrealEngine-4.18.1-release\Engine\Source\Programs\MobuLiveLinkPlugin\Source\Public\MobuLiveLinkLayout"
+                Path.Combine(ModuleDirectory, @"Source\Public\MobuLiveLinkLayout")
             };
 
 			// Add a prebuild step to run MOC for each of the headers that require it
