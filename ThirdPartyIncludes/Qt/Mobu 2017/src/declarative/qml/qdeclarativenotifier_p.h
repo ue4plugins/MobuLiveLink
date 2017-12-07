@@ -1,0 +1,292 @@
+/****************************************************************************
+**
+** Copyright (C) 2014 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
+**
+** This file is part of the QtDeclarative module of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and Digia.  For licensing terms and
+** conditions see http://qt.digia.com/licensing.  For further information
+** use the contact form at http://qt.digia.com/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Digia gives you certain additional
+** rights.  These rights are described in the Digia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3.0 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU General Public License version 3.0 requirements will be
+** met: http://www.gnu.org/copyleft/gpl.html.
+**
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+#ifndef QDECLARATIVENOTIFIER_P_H
+#define QDECLARATIVENOTIFIER_P_H
+
+#include "private/qdeclarativeguard_p.h"
+#include <QtCore/qmetaobject.h>
+
+QT_BEGIN_NAMESPACE
+
+class QDeclarativeNotifierEndpoint;
+class QDeclarativeNotifier
+{
+public:
+    inline QDeclarativeNotifier();
+    inline ~QDeclarativeNotifier();
+    inline void notify();
+
+private:
+    friend class QDeclarativeNotifierEndpoint;
+
+    static void emitNotify(QDeclarativeNotifierEndpoint *);
+    QDeclarativeNotifierEndpoint *endpoints;
+};
+
+class QDeclarativeNotifierEndpoint
+{
+public:
+    inline QDeclarativeNotifierEndpoint();
+    inline QDeclarativeNotifierEndpoint(QObject *t, int m);
+    inline ~QDeclarativeNotifierEndpoint();
+
+    QObject *target;
+    int targetMethod;
+
+    inline bool isConnected();
+    inline bool isConnected(QObject *source, int sourceSignal);
+    inline bool isConnected(QDeclarativeNotifier *);
+
+    void connect(QObject *source, int sourceSignal);
+    inline void connect(QDeclarativeNotifier *);
+
+    // Disconnects unconditionally, regardless of the refcount
+    inline void disconnect();
+
+    // Decreases the refcount and disconnects when refcount reaches 0
+    inline void deref();
+
+    void copyAndClear(QDeclarativeNotifierEndpoint &other);
+
+private:
+    friend class QDeclarativeNotifier;
+
+    struct Signal {
+        QDeclarativeGuard<QObject> source;
+        int sourceSignal;
+    };
+
+    struct Notifier {
+        QDeclarativeNotifier *notifier;
+        QDeclarativeNotifierEndpoint **disconnected;
+
+        QDeclarativeNotifierEndpoint  *next;
+        QDeclarativeNotifierEndpoint **prev;
+    };
+
+    enum { InvalidType, SignalType, NotifierType } type;
+    union {
+        struct {
+            Signal *signal;
+            union {
+                char signalData[sizeof(Signal)];
+                qint64 q_for_alignment_1;
+                double q_for_alignment_2;
+            };
+        } signal;
+        Notifier notifier;
+    };
+
+    quint16 refCount;
+
+    inline Notifier *toNotifier();
+    inline Notifier *asNotifier();
+    inline Signal *toSignal();
+    inline Signal *asSignal();
+};
+
+QDeclarativeNotifier::QDeclarativeNotifier()
+: endpoints(0)
+{
+}
+
+QDeclarativeNotifier::~QDeclarativeNotifier()
+{    
+    QDeclarativeNotifierEndpoint *endpoint = endpoints;
+    while (endpoint) {
+        QDeclarativeNotifierEndpoint::Notifier *n = endpoint->asNotifier();
+        endpoint = n->next;
+
+        n->next = 0;
+        n->prev = 0;
+        n->notifier = 0;
+        if (n->disconnected) *n->disconnected = 0;
+        n->disconnected = 0;
+    }
+    endpoints = 0;
+}
+
+void QDeclarativeNotifier::notify()
+{
+    if (endpoints) emitNotify(endpoints);
+}
+
+QDeclarativeNotifierEndpoint::QDeclarativeNotifierEndpoint()
+    : target(0), targetMethod(0), type(InvalidType), refCount(0)
+{
+}
+
+QDeclarativeNotifierEndpoint::QDeclarativeNotifierEndpoint(QObject *t, int m)
+: target(t), targetMethod(m), type(InvalidType), refCount(0)
+{
+}
+
+QDeclarativeNotifierEndpoint::~QDeclarativeNotifierEndpoint()
+{
+    disconnect();
+    if (SignalType == type) {
+        Signal *s = asSignal();
+        s->~Signal();
+    }
+}
+
+bool QDeclarativeNotifierEndpoint::isConnected()
+{
+    if (SignalType == type) {
+        return asSignal()->source;
+    } else if (NotifierType == type) {
+        return asNotifier()->notifier;
+    } else {
+        return false;
+    }
+}
+
+bool QDeclarativeNotifierEndpoint::isConnected(QObject *source, int sourceSignal)
+{
+    return SignalType == type && asSignal()->source == source && asSignal()->sourceSignal == sourceSignal;
+}
+
+bool QDeclarativeNotifierEndpoint::isConnected(QDeclarativeNotifier *notifier)
+{
+    return NotifierType == type && asNotifier()->notifier == notifier;
+}
+
+void QDeclarativeNotifierEndpoint::connect(QDeclarativeNotifier *notifier)
+{
+    Notifier *n = toNotifier();
+    
+    if (n->notifier == notifier) {
+        refCount++;
+        return;
+    }
+
+    disconnect();
+
+    n->next = notifier->endpoints;
+    if (n->next) { n->next->asNotifier()->prev = &n->next; }
+    notifier->endpoints = this;
+    n->prev = &notifier->endpoints;
+    n->notifier = notifier;
+    refCount++;
+}
+
+void QDeclarativeNotifierEndpoint::disconnect()
+{
+    if (type == SignalType) {
+        Signal *s = asSignal();
+        if (s->source) {
+            QMetaObject::disconnectOne(s->source, s->sourceSignal, target, targetMethod);
+            QObjectPrivate * const priv = QObjectPrivate::get(s->source);
+            const QMetaMethod signal = s->source->metaObject()->method(s->sourceSignal);
+            QVarLengthArray<char> signalSignature;
+            QObjectPrivate::signalSignature(signal, &signalSignature);
+            priv->disconnectNotify(signalSignature.constData());
+            s->source = 0;
+        }
+    } else if (type == NotifierType) {
+        Notifier *n = asNotifier();
+
+        if (n->next) n->next->asNotifier()->prev = n->prev;
+        if (n->prev) *n->prev = n->next;
+        if (n->disconnected) *n->disconnected = 0;
+        n->next = 0;
+        n->prev = 0;
+        n->disconnected = 0;
+        n->notifier = 0;
+    }
+    refCount = 0;
+}
+
+void QDeclarativeNotifierEndpoint::deref()
+{
+    refCount--;
+    if (refCount <= 0)
+        disconnect();
+}
+
+QDeclarativeNotifierEndpoint::Notifier *QDeclarativeNotifierEndpoint::toNotifier()
+{
+    if (NotifierType == type) 
+        return asNotifier();
+
+    if (SignalType == type) {
+        disconnect();
+        Signal *s = asSignal();
+        s->~Signal();
+    }
+
+    type = NotifierType;
+    Notifier *n = asNotifier();
+    n->next = 0;
+    n->prev = 0;
+    n->disconnected = 0;
+    n->notifier = 0;
+    return n;
+}
+
+QDeclarativeNotifierEndpoint::Notifier *QDeclarativeNotifierEndpoint::asNotifier() 
+{ 
+    Q_ASSERT(type == NotifierType);
+    return &notifier;
+}
+
+QDeclarativeNotifierEndpoint::Signal *QDeclarativeNotifierEndpoint::toSignal()
+{
+    if (SignalType == type) 
+        return asSignal();
+
+    disconnect();
+    signal.signal = new (&signal.signalData) Signal;
+    type = SignalType;
+    return signal.signal;
+}
+
+QDeclarativeNotifierEndpoint::Signal *QDeclarativeNotifierEndpoint::asSignal() 
+{ 
+    Q_ASSERT(type == SignalType);
+    return signal.signal;
+}
+
+QT_END_NAMESPACE
+
+#endif // QDECLARATIVENOTIFIER_P_H
+

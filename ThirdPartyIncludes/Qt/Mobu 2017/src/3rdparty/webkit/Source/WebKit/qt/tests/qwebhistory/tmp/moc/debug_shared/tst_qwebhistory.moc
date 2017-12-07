@@ -1,0 +1,133 @@
+/****************************************************************************
+** Meta object code from reading C++ file 'tst_qwebhistory.cpp'
+**
+** Created by: The Qt Meta Object Compiler version 63 (Qt 4.8.6)
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+#if !defined(Q_MOC_OUTPUT_REVISION)
+#error "The header file 'tst_qwebhistory.cpp' doesn't include <QObject>."
+#elif Q_MOC_OUTPUT_REVISION != 63
+#error "This file was generated using the moc from 4.8.6. It"
+#error "cannot be used with the include files from this version of Qt."
+#error "(The moc has changed too much.)"
+#endif
+
+QT_BEGIN_MOC_NAMESPACE
+static const uint qt_meta_data_tst_QWebHistory[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+      18,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      17,   16,   16,   16, 0x0a,
+      24,   16,   16,   16, 0x0a,
+      34,   16,   16,   16, 0x08,
+      42,   16,   16,   16, 0x08,
+      50,   16,   16,   16, 0x08,
+      57,   16,   16,   16, 0x08,
+      67,   16,   16,   16, 0x08,
+      76,   16,   16,   16, 0x08,
+      87,   16,   16,   16, 0x08,
+      95,   16,   16,   16, 0x08,
+     109,   16,   16,   16, 0x08,
+     123,   16,   16,   16, 0x08,
+     137,   16,   16,   16, 0x08,
+     162,   16,   16,   16, 0x08,
+     187,   16,   16,   16, 0x08,
+     212,   16,   16,   16, 0x08,
+     232,   16,   16,   16, 0x08,
+     247,   16,   16,   16, 0x08,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_tst_QWebHistory[] = {
+    "tst_QWebHistory\0\0init()\0cleanup()\0"
+    "title()\0count()\0back()\0forward()\0"
+    "itemAt()\0goToItem()\0items()\0serialize_1()\0"
+    "serialize_2()\0serialize_3()\0"
+    "saveAndRestore_crash_1()\0"
+    "saveAndRestore_crash_2()\0"
+    "saveAndRestore_crash_3()\0popPushState_data()\0"
+    "popPushState()\0clear()\0"
+};
+
+void tst_QWebHistory::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        tst_QWebHistory *_t = static_cast<tst_QWebHistory *>(_o);
+        switch (_id) {
+        case 0: _t->init(); break;
+        case 1: _t->cleanup(); break;
+        case 2: _t->title(); break;
+        case 3: _t->count(); break;
+        case 4: _t->back(); break;
+        case 5: _t->forward(); break;
+        case 6: _t->itemAt(); break;
+        case 7: _t->goToItem(); break;
+        case 8: _t->items(); break;
+        case 9: _t->serialize_1(); break;
+        case 10: _t->serialize_2(); break;
+        case 11: _t->serialize_3(); break;
+        case 12: _t->saveAndRestore_crash_1(); break;
+        case 13: _t->saveAndRestore_crash_2(); break;
+        case 14: _t->saveAndRestore_crash_3(); break;
+        case 15: _t->popPushState_data(); break;
+        case 16: _t->popPushState(); break;
+        case 17: _t->clear(); break;
+        default: ;
+        }
+    }
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData tst_QWebHistory::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject tst_QWebHistory::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_tst_QWebHistory,
+      qt_meta_data_tst_QWebHistory, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &tst_QWebHistory::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *tst_QWebHistory::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *tst_QWebHistory::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_tst_QWebHistory))
+        return static_cast<void*>(const_cast< tst_QWebHistory*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int tst_QWebHistory::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 18)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 18;
+    }
+    return _id;
+}
+QT_END_MOC_NAMESPACE

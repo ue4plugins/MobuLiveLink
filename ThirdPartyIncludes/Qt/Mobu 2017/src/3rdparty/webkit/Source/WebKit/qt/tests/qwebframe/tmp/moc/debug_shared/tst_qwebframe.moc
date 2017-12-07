@@ -1,0 +1,1279 @@
+/****************************************************************************
+** Meta object code from reading C++ file 'tst_qwebframe.cpp'
+**
+** Created by: The Qt Meta Object Compiler version 63 (Qt 4.8.6)
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+#if !defined(Q_MOC_OUTPUT_REVISION)
+#error "The header file 'tst_qwebframe.cpp' doesn't include <QObject>."
+#elif Q_MOC_OUTPUT_REVISION != 63
+#error "This file was generated using the moc from 4.8.6. It"
+#error "cannot be used with the include files from this version of Qt."
+#error "(The moc has changed too much.)"
+#endif
+
+QT_BEGIN_MOC_NAMESPACE
+static const uint qt_meta_data_MyQObject[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+      65,   14, // methods
+      15,  339, // properties
+       3,  384, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       7,       // signalCount
+
+ // signals: signature, parameters, type, tag, flags
+      11,   10,   10,   10, 0x05,
+      26,   22,   10,   10, 0x05,
+      50,   22,   10,   10, 0x05,
+      80,   22,   10,   10, 0x05,
+      96,   10,   10,   10, 0x25,
+     111,  108,   10,   10, 0x05,
+     148,  146,   10,   10, 0x05,
+
+ // slots: signature, parameters, type, tag, flags
+     178,   10,   10,   10, 0x0a,
+     187,   22,   10,   10, 0x0a,
+     209,   22,   10,   10, 0x0a,
+     237,   22,   10,   10, 0x0a,
+     266,   10,   10,   10, 0x0a,
+     285,   22,   10,   10, 0x0a,
+     312,   22,   10,   10, 0x0a,
+     335,   22,   10,   10, 0x0a,
+     365,   22,   10,   10, 0x0a,
+     390,   22,   10,   10, 0x0a,
+     414,   22,   10,   10, 0x0a,
+     436,   22,   10,   10, 0x0a,
+     462,   22,   10,   10, 0x0a,
+     487,   22,   10,   10, 0x0a,
+     512,   22,   10,   10, 0x0a,
+     540,   22,   10,   10, 0x0a,
+     564,   22,   10,   10, 0x0a,
+     590,   22,   10,   10, 0x0a,
+     617,   22,   10,   10, 0x0a,
+     647,   22,   10,   10, 0x0a,
+     665,   10,   10,   10, 0x09,
+     683,   10,   10,   10, 0x08,
+
+ // methods: signature, parameters, type, tag, flags
+     705,  699,   10,   10, 0x02,
+     730,   10,   10,   10, 0x02,
+     744,   22,   10,   10, 0x02,
+     771,   22,   10,   10, 0x02,
+     809,   22,   10,   10, 0x02,
+     840,   22,   10,   10, 0x02,
+     873,   22,   10,   10, 0x02,
+     917,  907,   10,   10, 0x02,
+     953,   10,  949,   10, 0x02,
+     989,   10,  979,   10, 0x02,
+    1028,   10, 1020,   10, 0x02,
+    1057,  907,   10,   10, 0x02,
+    1095, 1088,   10,   10, 0x02,
+    1126, 1088,   10,   10, 0x02,
+    1184,   10, 1177,   10, 0x02,
+    1229,   10, 1211,   10, 0x02,
+    1278,   10, 1265,   10, 0x02,
+    1312,   10,   10,   10, 0x02,
+    1365,   10, 1356,   10, 0x02,
+    1415, 1411, 1399,   10, 0x02,
+    1469, 1467, 1458,   10, 0x02,
+    1520, 1517, 1505,   10, 0x02,
+    1573, 1411, 1562,   10, 0x02,
+    1617, 1613, 1356,   10, 0x02,
+    1670, 1664, 1657,   10, 0x02,
+    1709, 1703,   10,   10, 0x02,
+    1754,   22,   10,   10, 0x02,
+    1788,   22,   10,   10, 0x02,
+    1821,   22,   10,   10, 0x02,
+    1855,  907,   10,   10, 0x02,
+    1900, 1895,   10,   10, 0x22,
+    1932,   10,   10,   10, 0x02,
+    1958,   10,   10,   10, 0x02,
+    1989,   22,   10,   10, 0x02,
+    2021,   22,   10,   10, 0x02,
+    2054,   22,   10,   10, 0x02,
+
+ // properties: name, type, flags
+    2083,  949, 0x02095103,
+    2095, 1458, 0xff095103,
+    2124, 2111, 0x09095103,
+    2144, 1505, 0x08095103,
+    2163, 1020, 0x0a095103,
+    2190, 2178, 0x0b095103,
+    2220, 2209, 0x0c095103,
+    2238, 1657, 0x42095103,
+    2259, 2252, 0x06091103,
+    2274,  949, 0x02095102,
+    2292,  949, 0x02095001,
+    2322, 2309, 0x4c095103,
+    2342, 2331, 0x0009510b,
+    2373, 2361, 0x0009510b,
+    2392, 1356, 0x88095103,
+
+ // enums: name, flags, count, data
+    1177, 0x0,    3,  396,
+    2411, 0x0,    3,  402,
+    2420, 0x1,    5,  408,
+
+ // enum data: key, value
+    2428, uint(MyQObject::FooPolicy),
+    2438, uint(MyQObject::BarPolicy),
+    2448, uint(MyQObject::BazPolicy),
+    2458, uint(MyQObject::FooStrategy),
+    2470, uint(MyQObject::BarStrategy),
+    2482, uint(MyQObject::BazStrategy),
+    2494, uint(MyQObject::NoAbility),
+    2504, uint(MyQObject::FooAbility),
+    2515, uint(MyQObject::BarAbility),
+    2526, uint(MyQObject::BazAbility),
+    2537, uint(MyQObject::AllAbility),
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_MyQObject[] = {
+    "MyQObject\0\0mySignal()\0arg\0"
+    "mySignalWithIntArg(int)\0"
+    "mySignalWithDoubleArg(double)\0"
+    "mySignal2(bool)\0mySignal2()\0dt\0"
+    "mySignalWithDateTimeArg(QDateTime)\0r\0"
+    "mySignalWithRegexArg(QRegExp)\0mySlot()\0"
+    "mySlotWithIntArg(int)\0mySlotWithDoubleArg(double)\0"
+    "mySlotWithStringArg(QString)\0"
+    "myOverloadedSlot()\0myOverloadedSlot(QObject*)\0"
+    "myOverloadedSlot(bool)\0"
+    "myOverloadedSlot(QStringList)\0"
+    "myOverloadedSlot(double)\0"
+    "myOverloadedSlot(float)\0myOverloadedSlot(int)\0"
+    "myOverloadedSlot(QString)\0"
+    "myOverloadedSlot(QColor)\0"
+    "myOverloadedSlot(QBrush)\0"
+    "myOverloadedSlot(QDateTime)\0"
+    "myOverloadedSlot(QDate)\0"
+    "myOverloadedSlot(QRegExp)\0"
+    "myOverloadedSlot(QVariant)\0"
+    "myOverloadedSlot(QWebElement)\0"
+    "qscript_call(int)\0myProtectedSlot()\0"
+    "myPrivateSlot()\0value\0setBrushProperty(QBrush)\0"
+    "myInvokable()\0myInvokableWithIntArg(int)\0"
+    "myInvokableWithLonglongArg(qlonglong)\0"
+    "myInvokableWithFloatArg(float)\0"
+    "myInvokableWithDoubleArg(double)\0"
+    "myInvokableWithStringArg(QString)\0"
+    "arg1,arg2\0myInvokableWithIntArgs(int,int)\0"
+    "int\0myInvokableReturningInt()\0qlonglong\0"
+    "myInvokableReturningLongLong()\0QString\0"
+    "myInvokableReturningString()\0"
+    "myInvokableWithIntArg(int,int)\0policy\0"
+    "myInvokableWithEnumArg(Policy)\0"
+    "myInvokableWithQualifiedEnumArg(MyQObject::Policy)\0"
+    "Policy\0myInvokableReturningEnum()\0"
+    "MyQObject::Policy\0myInvokableReturningQualifiedEnum()\0"
+    "QVector<int>\0myInvokableReturningVectorOfInt()\0"
+    "myInvokableWithVectorOfIntArg(QVector<int>)\0"
+    "QObject*\0myInvokableReturningQObjectStar()\0"
+    "QObjectList\0lst\0"
+    "myInvokableWithQObjectListArg(QObjectList)\0"
+    "QVariant\0v\0myInvokableWithVariantArg(QVariant)\0"
+    "QVariantMap\0vm\0myInvokableWithVariantMapArg(QVariantMap)\0"
+    "QList<int>\0myInvokableWithListOfIntArg(QList<int>)\0"
+    "obj\0myInvokableWithQObjectStarArg(QObject*)\0"
+    "QBrush\0brush\0myInvokableWithQBrushArg(QBrush)\0"
+    "style\0myInvokableWithBrushStyleArg(Qt::BrushStyle)\0"
+    "myInvokableWithVoidStarArg(void*)\0"
+    "myInvokableWithAmbiguousArg(int)\0"
+    "myInvokableWithAmbiguousArg(uint)\0"
+    "myInvokableWithDefaultArgs(int,QString)\0"
+    "arg1\0myInvokableWithDefaultArgs(int)\0"
+    "myInvokableReturningRef()\0"
+    "myInvokableReturningConstRef()\0"
+    "myInvokableWithPointArg(QPoint)\0"
+    "myInvokableWithPointArg(QPointF)\0"
+    "myInvokableWithBoolArg(bool)\0intProperty\0"
+    "variantProperty\0QVariantList\0"
+    "variantListProperty\0variantMapProperty\0"
+    "stringProperty\0QStringList\0"
+    "stringListProperty\0QByteArray\0"
+    "byteArrayProperty\0brushProperty\0double\0"
+    "hiddenProperty\0writeOnlyProperty\0"
+    "readOnlyProperty\0QKeySequence\0shortcut\0"
+    "CustomType\0propWithCustomType\0QWebElement\0"
+    "webElementProperty\0objectStarProperty\0"
+    "Strategy\0Ability\0FooPolicy\0BarPolicy\0"
+    "BazPolicy\0FooStrategy\0BarStrategy\0"
+    "BazStrategy\0NoAbility\0FooAbility\0"
+    "BarAbility\0BazAbility\0AllAbility\0"
+};
+
+void MyQObject::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        MyQObject *_t = static_cast<MyQObject *>(_o);
+        switch (_id) {
+        case 0: _t->mySignal(); break;
+        case 1: _t->mySignalWithIntArg((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 2: _t->mySignalWithDoubleArg((*reinterpret_cast< double(*)>(_a[1]))); break;
+        case 3: _t->mySignal2((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 4: _t->mySignal2(); break;
+        case 5: _t->mySignalWithDateTimeArg((*reinterpret_cast< QDateTime(*)>(_a[1]))); break;
+        case 6: _t->mySignalWithRegexArg((*reinterpret_cast< QRegExp(*)>(_a[1]))); break;
+        case 7: _t->mySlot(); break;
+        case 8: _t->mySlotWithIntArg((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 9: _t->mySlotWithDoubleArg((*reinterpret_cast< double(*)>(_a[1]))); break;
+        case 10: _t->mySlotWithStringArg((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 11: _t->myOverloadedSlot(); break;
+        case 12: _t->myOverloadedSlot((*reinterpret_cast< QObject*(*)>(_a[1]))); break;
+        case 13: _t->myOverloadedSlot((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 14: _t->myOverloadedSlot((*reinterpret_cast< const QStringList(*)>(_a[1]))); break;
+        case 15: _t->myOverloadedSlot((*reinterpret_cast< double(*)>(_a[1]))); break;
+        case 16: _t->myOverloadedSlot((*reinterpret_cast< float(*)>(_a[1]))); break;
+        case 17: _t->myOverloadedSlot((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 18: _t->myOverloadedSlot((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 19: _t->myOverloadedSlot((*reinterpret_cast< const QColor(*)>(_a[1]))); break;
+        case 20: _t->myOverloadedSlot((*reinterpret_cast< const QBrush(*)>(_a[1]))); break;
+        case 21: _t->myOverloadedSlot((*reinterpret_cast< const QDateTime(*)>(_a[1]))); break;
+        case 22: _t->myOverloadedSlot((*reinterpret_cast< const QDate(*)>(_a[1]))); break;
+        case 23: _t->myOverloadedSlot((*reinterpret_cast< const QRegExp(*)>(_a[1]))); break;
+        case 24: _t->myOverloadedSlot((*reinterpret_cast< const QVariant(*)>(_a[1]))); break;
+        case 25: _t->myOverloadedSlot((*reinterpret_cast< const QWebElement(*)>(_a[1]))); break;
+        case 26: _t->qscript_call((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 27: _t->myProtectedSlot(); break;
+        case 28: _t->myPrivateSlot(); break;
+        case 29: _t->setBrushProperty((*reinterpret_cast< const QBrush(*)>(_a[1]))); break;
+        case 30: _t->myInvokable(); break;
+        case 31: _t->myInvokableWithIntArg((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 32: _t->myInvokableWithLonglongArg((*reinterpret_cast< qlonglong(*)>(_a[1]))); break;
+        case 33: _t->myInvokableWithFloatArg((*reinterpret_cast< float(*)>(_a[1]))); break;
+        case 34: _t->myInvokableWithDoubleArg((*reinterpret_cast< double(*)>(_a[1]))); break;
+        case 35: _t->myInvokableWithStringArg((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 36: _t->myInvokableWithIntArgs((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 37: { int _r = _t->myInvokableReturningInt();
+            if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
+        case 38: { qlonglong _r = _t->myInvokableReturningLongLong();
+            if (_a[0]) *reinterpret_cast< qlonglong*>(_a[0]) = _r; }  break;
+        case 39: { QString _r = _t->myInvokableReturningString();
+            if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = _r; }  break;
+        case 40: _t->myInvokableWithIntArg((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 41: _t->myInvokableWithEnumArg((*reinterpret_cast< Policy(*)>(_a[1]))); break;
+        case 42: _t->myInvokableWithQualifiedEnumArg((*reinterpret_cast< MyQObject::Policy(*)>(_a[1]))); break;
+        case 43: { Policy _r = _t->myInvokableReturningEnum();
+            if (_a[0]) *reinterpret_cast< Policy*>(_a[0]) = _r; }  break;
+        case 44: { MyQObject::Policy _r = _t->myInvokableReturningQualifiedEnum();
+            if (_a[0]) *reinterpret_cast< MyQObject::Policy*>(_a[0]) = _r; }  break;
+        case 45: { QVector<int> _r = _t->myInvokableReturningVectorOfInt();
+            if (_a[0]) *reinterpret_cast< QVector<int>*>(_a[0]) = _r; }  break;
+        case 46: _t->myInvokableWithVectorOfIntArg((*reinterpret_cast< const QVector<int>(*)>(_a[1]))); break;
+        case 47: { QObject* _r = _t->myInvokableReturningQObjectStar();
+            if (_a[0]) *reinterpret_cast< QObject**>(_a[0]) = _r; }  break;
+        case 48: { QObjectList _r = _t->myInvokableWithQObjectListArg((*reinterpret_cast< const QObjectList(*)>(_a[1])));
+            if (_a[0]) *reinterpret_cast< QObjectList*>(_a[0]) = _r; }  break;
+        case 49: { QVariant _r = _t->myInvokableWithVariantArg((*reinterpret_cast< const QVariant(*)>(_a[1])));
+            if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = _r; }  break;
+        case 50: { QVariantMap _r = _t->myInvokableWithVariantMapArg((*reinterpret_cast< const QVariantMap(*)>(_a[1])));
+            if (_a[0]) *reinterpret_cast< QVariantMap*>(_a[0]) = _r; }  break;
+        case 51: { QList<int> _r = _t->myInvokableWithListOfIntArg((*reinterpret_cast< const QList<int>(*)>(_a[1])));
+            if (_a[0]) *reinterpret_cast< QList<int>*>(_a[0]) = _r; }  break;
+        case 52: { QObject* _r = _t->myInvokableWithQObjectStarArg((*reinterpret_cast< QObject*(*)>(_a[1])));
+            if (_a[0]) *reinterpret_cast< QObject**>(_a[0]) = _r; }  break;
+        case 53: { QBrush _r = _t->myInvokableWithQBrushArg((*reinterpret_cast< const QBrush(*)>(_a[1])));
+            if (_a[0]) *reinterpret_cast< QBrush*>(_a[0]) = _r; }  break;
+        case 54: _t->myInvokableWithBrushStyleArg((*reinterpret_cast< Qt::BrushStyle(*)>(_a[1]))); break;
+        case 55: _t->myInvokableWithVoidStarArg((*reinterpret_cast< void*(*)>(_a[1]))); break;
+        case 56: _t->myInvokableWithAmbiguousArg((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 57: _t->myInvokableWithAmbiguousArg((*reinterpret_cast< uint(*)>(_a[1]))); break;
+        case 58: _t->myInvokableWithDefaultArgs((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2]))); break;
+        case 59: _t->myInvokableWithDefaultArgs((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 60: _t->myInvokableReturningRef(); break;
+        case 61: _t->myInvokableReturningConstRef(); break;
+        case 62: _t->myInvokableWithPointArg((*reinterpret_cast< const QPoint(*)>(_a[1]))); break;
+        case 63: _t->myInvokableWithPointArg((*reinterpret_cast< const QPointF(*)>(_a[1]))); break;
+        case 64: _t->myInvokableWithBoolArg((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        default: ;
+        }
+    }
+}
+
+const QMetaObjectExtraData MyQObject::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject MyQObject::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_MyQObject,
+      qt_meta_data_MyQObject, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &MyQObject::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *MyQObject::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *MyQObject::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_MyQObject))
+        return static_cast<void*>(const_cast< MyQObject*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int MyQObject::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 65)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 65;
+    }
+#ifndef QT_NO_PROPERTIES
+      else if (_c == QMetaObject::ReadProperty) {
+        void *_v = _a[0];
+        switch (_id) {
+        case 0: *reinterpret_cast< int*>(_v) = intProperty(); break;
+        case 1: *reinterpret_cast< QVariant*>(_v) = variantProperty(); break;
+        case 2: *reinterpret_cast< QVariantList*>(_v) = variantListProperty(); break;
+        case 3: *reinterpret_cast< QVariantMap*>(_v) = variantMapProperty(); break;
+        case 4: *reinterpret_cast< QString*>(_v) = stringProperty(); break;
+        case 5: *reinterpret_cast< QStringList*>(_v) = stringListProperty(); break;
+        case 6: *reinterpret_cast< QByteArray*>(_v) = byteArrayProperty(); break;
+        case 7: *reinterpret_cast< QBrush*>(_v) = brushProperty(); break;
+        case 8: *reinterpret_cast< double*>(_v) = hiddenProperty(); break;
+        case 10: *reinterpret_cast< int*>(_v) = readOnlyProperty(); break;
+        case 11: *reinterpret_cast< QKeySequence*>(_v) = shortcut(); break;
+        case 12: *reinterpret_cast< CustomType*>(_v) = propWithCustomType(); break;
+        case 13: *reinterpret_cast< QWebElement*>(_v) = webElementProperty(); break;
+        case 14: *reinterpret_cast< QObject**>(_v) = objectStarProperty(); break;
+        }
+        _id -= 15;
+    } else if (_c == QMetaObject::WriteProperty) {
+        void *_v = _a[0];
+        switch (_id) {
+        case 0: setIntProperty(*reinterpret_cast< int*>(_v)); break;
+        case 1: setVariantProperty(*reinterpret_cast< QVariant*>(_v)); break;
+        case 2: setVariantListProperty(*reinterpret_cast< QVariantList*>(_v)); break;
+        case 3: setVariantMapProperty(*reinterpret_cast< QVariantMap*>(_v)); break;
+        case 4: setStringProperty(*reinterpret_cast< QString*>(_v)); break;
+        case 5: setStringListProperty(*reinterpret_cast< QStringList*>(_v)); break;
+        case 6: setByteArrayProperty(*reinterpret_cast< QByteArray*>(_v)); break;
+        case 7: setBrushProperty(*reinterpret_cast< QBrush*>(_v)); break;
+        case 8: setHiddenProperty(*reinterpret_cast< double*>(_v)); break;
+        case 9: setWriteOnlyProperty(*reinterpret_cast< int*>(_v)); break;
+        case 11: setShortcut(*reinterpret_cast< QKeySequence*>(_v)); break;
+        case 12: setPropWithCustomType(*reinterpret_cast< CustomType*>(_v)); break;
+        case 13: setWebElementProperty(*reinterpret_cast< QWebElement*>(_v)); break;
+        case 14: setObjectStarProperty(*reinterpret_cast< QObject**>(_v)); break;
+        }
+        _id -= 15;
+    } else if (_c == QMetaObject::ResetProperty) {
+        _id -= 15;
+    } else if (_c == QMetaObject::QueryPropertyDesignable) {
+        _id -= 15;
+    } else if (_c == QMetaObject::QueryPropertyScriptable) {
+        _id -= 15;
+    } else if (_c == QMetaObject::QueryPropertyStored) {
+        _id -= 15;
+    } else if (_c == QMetaObject::QueryPropertyEditable) {
+        _id -= 15;
+    } else if (_c == QMetaObject::QueryPropertyUser) {
+        _id -= 15;
+    }
+#endif // QT_NO_PROPERTIES
+    return _id;
+}
+
+// SIGNAL 0
+void MyQObject::mySignal()
+{
+    QMetaObject::activate(this, &staticMetaObject, 0, 0);
+}
+
+// SIGNAL 1
+void MyQObject::mySignalWithIntArg(int _t1)
+{
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 1, _a);
+}
+
+// SIGNAL 2
+void MyQObject::mySignalWithDoubleArg(double _t1)
+{
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 2, _a);
+}
+
+// SIGNAL 3
+void MyQObject::mySignal2(bool _t1)
+{
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 3, _a);
+}
+
+// SIGNAL 5
+void MyQObject::mySignalWithDateTimeArg(QDateTime _t1)
+{
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 5, _a);
+}
+
+// SIGNAL 6
+void MyQObject::mySignalWithRegexArg(QRegExp _t1)
+{
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 6, _a);
+}
+static const uint qt_meta_data_MyWebElementSlotOnlyObject[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       1,   19, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      36,   28,   27,   27, 0x0a,
+
+ // properties: name, type, flags
+      83,   75, 0x0a095001,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_MyWebElementSlotOnlyObject[] = {
+    "MyWebElementSlotOnlyObject\0\0element\0"
+    "doSomethingWithWebElement(QWebElement)\0"
+    "QString\0tagName\0"
+};
+
+void MyWebElementSlotOnlyObject::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        MyWebElementSlotOnlyObject *_t = static_cast<MyWebElementSlotOnlyObject *>(_o);
+        switch (_id) {
+        case 0: _t->doSomethingWithWebElement((*reinterpret_cast< const QWebElement(*)>(_a[1]))); break;
+        default: ;
+        }
+    }
+}
+
+const QMetaObjectExtraData MyWebElementSlotOnlyObject::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject MyWebElementSlotOnlyObject::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_MyWebElementSlotOnlyObject,
+      qt_meta_data_MyWebElementSlotOnlyObject, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &MyWebElementSlotOnlyObject::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *MyWebElementSlotOnlyObject::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *MyWebElementSlotOnlyObject::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_MyWebElementSlotOnlyObject))
+        return static_cast<void*>(const_cast< MyWebElementSlotOnlyObject*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int MyWebElementSlotOnlyObject::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 1)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 1;
+    }
+#ifndef QT_NO_PROPERTIES
+      else if (_c == QMetaObject::ReadProperty) {
+        void *_v = _a[0];
+        switch (_id) {
+        case 0: *reinterpret_cast< QString*>(_v) = tagName(); break;
+        }
+        _id -= 1;
+    } else if (_c == QMetaObject::WriteProperty) {
+        _id -= 1;
+    } else if (_c == QMetaObject::ResetProperty) {
+        _id -= 1;
+    } else if (_c == QMetaObject::QueryPropertyDesignable) {
+        _id -= 1;
+    } else if (_c == QMetaObject::QueryPropertyScriptable) {
+        _id -= 1;
+    } else if (_c == QMetaObject::QueryPropertyStored) {
+        _id -= 1;
+    } else if (_c == QMetaObject::QueryPropertyEditable) {
+        _id -= 1;
+    } else if (_c == QMetaObject::QueryPropertyUser) {
+        _id -= 1;
+    }
+#endif // QT_NO_PROPERTIES
+    return _id;
+}
+static const uint qt_meta_data_MyEnumTestQObject[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       3,   14, // methods
+       6,   29, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       1,       // signalCount
+
+ // signals: signature, parameters, type, tag, flags
+      19,   18,   18,   18, 0x05,
+
+ // slots: signature, parameters, type, tag, flags
+      30,   18,   18,   18, 0x0a,
+      39,   18,   18,   18, 0x0a,
+
+ // properties: name, type, flags
+      61,   53, 0x0a095001,
+      64,   53, 0x0a095001,
+      67,   53, 0x0a091001,
+      70,   53, 0x0a095001,
+      73,   53, 0x0a091001,
+      76,   53, 0x0a095001,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_MyEnumTestQObject[] = {
+    "MyEnumTestQObject\0\0mySignal()\0mySlot()\0"
+    "myOtherSlot()\0QString\0p1\0p2\0p3\0p4\0p5\0"
+    "p6\0"
+};
+
+void MyEnumTestQObject::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        MyEnumTestQObject *_t = static_cast<MyEnumTestQObject *>(_o);
+        switch (_id) {
+        case 0: _t->mySignal(); break;
+        case 1: _t->mySlot(); break;
+        case 2: _t->myOtherSlot(); break;
+        default: ;
+        }
+    }
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData MyEnumTestQObject::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject MyEnumTestQObject::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_MyEnumTestQObject,
+      qt_meta_data_MyEnumTestQObject, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &MyEnumTestQObject::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *MyEnumTestQObject::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *MyEnumTestQObject::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_MyEnumTestQObject))
+        return static_cast<void*>(const_cast< MyEnumTestQObject*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int MyEnumTestQObject::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 3)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 3;
+    }
+#ifndef QT_NO_PROPERTIES
+      else if (_c == QMetaObject::ReadProperty) {
+        void *_v = _a[0];
+        switch (_id) {
+        case 0: *reinterpret_cast< QString*>(_v) = p1(); break;
+        case 1: *reinterpret_cast< QString*>(_v) = p2(); break;
+        case 2: *reinterpret_cast< QString*>(_v) = p3(); break;
+        case 3: *reinterpret_cast< QString*>(_v) = p4(); break;
+        case 4: *reinterpret_cast< QString*>(_v) = p5(); break;
+        case 5: *reinterpret_cast< QString*>(_v) = p6(); break;
+        }
+        _id -= 6;
+    } else if (_c == QMetaObject::WriteProperty) {
+        _id -= 6;
+    } else if (_c == QMetaObject::ResetProperty) {
+        _id -= 6;
+    } else if (_c == QMetaObject::QueryPropertyDesignable) {
+        _id -= 6;
+    } else if (_c == QMetaObject::QueryPropertyScriptable) {
+        _id -= 6;
+    } else if (_c == QMetaObject::QueryPropertyStored) {
+        _id -= 6;
+    } else if (_c == QMetaObject::QueryPropertyEditable) {
+        _id -= 6;
+    } else if (_c == QMetaObject::QueryPropertyUser) {
+        _id -= 6;
+    }
+#endif // QT_NO_PROPERTIES
+    return _id;
+}
+
+// SIGNAL 0
+void MyEnumTestQObject::mySignal()
+{
+    QMetaObject::activate(this, &staticMetaObject, 0, 0);
+}
+static const uint qt_meta_data_tst_QWebFrame[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+      69,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      15,   14,   14,   14, 0x0a,
+      22,   14,   14,   14, 0x0a,
+      32,   14,   14,   14, 0x08,
+      60,   14,   14,   14, 0x08,
+      83,   14,   14,   14, 0x08,
+     107,   14,   14,   14, 0x08,
+     124,   14,   14,   14, 0x08,
+     142,   14,   14,   14, 0x08,
+     165,   14,   14,   14, 0x08,
+     178,   14,   14,   14, 0x08,
+     197,   14,   14,   14, 0x08,
+     217,   14,   14,   14, 0x08,
+     237,   14,   14,   14, 0x08,
+     249,   14,   14,   14, 0x08,
+     264,   14,   14,   14, 0x08,
+     282,   14,   14,   14, 0x08,
+     303,   14,   14,   14, 0x08,
+     320,   14,   14,   14, 0x08,
+     332,   14,   14,   14, 0x08,
+     348,   14,   14,   14, 0x08,
+     365,   14,   14,   14, 0x08,
+     389,   14,   14,   14, 0x08,
+     404,   14,   14,   14, 0x08,
+     421,   14,   14,   14, 0x08,
+     433,   14,   14,   14, 0x08,
+     445,   14,   14,   14, 0x08,
+     460,   14,   14,   14, 0x08,
+     498,   14,   14,   14, 0x08,
+     535,   14,   14,   14, 0x08,
+     567,   14,   14,   14, 0x08,
+     609,   14,   14,   14, 0x08,
+     619,   14,   14,   14, 0x08,
+     641,   14,   14,   14, 0x08,
+     662,   14,   14,   14, 0x08,
+     683,   14,   14,   14, 0x08,
+     702,   14,   14,   14, 0x08,
+     713,   14,   14,   14, 0x08,
+     726,   14,   14,   14, 0x08,
+     744,   14,   14,   14, 0x08,
+     761,   14,   14,   14, 0x08,
+     775,   14,   14,   14, 0x08,
+     787,   14,   14,   14, 0x08,
+     799,   14,   14,   14, 0x08,
+     814,   14,   14,   14, 0x08,
+     824,   14,   14,   14, 0x08,
+     838,   14,   14,   14, 0x08,
+     855,   14,   14,   14, 0x08,
+     869,   14,   14,   14, 0x08,
+     886,   14,   14,   14, 0x08,
+     903,   14,   14,   14, 0x08,
+     919,   14,   14,   14, 0x08,
+     946,   14,   14,   14, 0x08,
+     979,   14,   14,   14, 0x08,
+    1006,   14,   14,   14, 0x08,
+    1028,   14,   14,   14, 0x08,
+    1046,   14,   14,   14, 0x08,
+    1059,   14,   14,   14, 0x08,
+    1090,   14,   14,   14, 0x08,
+    1115,   14,   14,   14, 0x08,
+    1141,   14,   14,   14, 0x08,
+    1162,   14,   14,   14, 0x08,
+    1178,   14,   14,   14, 0x08,
+    1196,   14,   14,   14, 0x08,
+    1212,   14,   14,   14, 0x08,
+    1228,   14,   14,   14, 0x08,
+    1251,   14,   14,   14, 0x08,
+    1269,   14,   14,   14, 0x08,
+    1302,   14,   14,   14, 0x08,
+    1330,   14,   14,   14, 0x08,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_tst_QWebFrame[] = {
+    "tst_QWebFrame\0\0init()\0cleanup()\0"
+    "horizontalScrollAfterBack()\0"
+    "getSetStaticProperty()\0getSetDynamicProperty()\0"
+    "getSetChildren()\0callQtInvokable()\0"
+    "connectAndDisconnect()\0classEnums()\0"
+    "classConstructor()\0overrideInvokable()\0"
+    "transferInvokable()\0findChild()\0"
+    "findChildren()\0overloadedSlots()\0"
+    "webElementSlotOnly()\0enumerate_data()\0"
+    "enumerate()\0objectDeleted()\0"
+    "typeConversion()\0arrayObjectEnumerable()\0"
+    "symmetricUrl()\0progressSignal()\0"
+    "urlChange()\0domCycles()\0requestedUrl()\0"
+    "requestedUrlAfterSetAndLoadFailures()\0"
+    "javaScriptWindowObjectCleared_data()\0"
+    "javaScriptWindowObjectCleared()\0"
+    "javaScriptWindowObjectClearedOnEvaluate()\0"
+    "setHtml()\0setHtmlWithResource()\0"
+    "setHtmlWithBaseURL()\0setHtmlWithJSAlert()\0"
+    "ipv6HostEncoding()\0metaData()\0"
+    "popupFocus()\0inputFieldFocus()\0"
+    "hitTestContent()\0jsByteArray()\0"
+    "ownership()\0nullValue()\0baseUrl_data()\0"
+    "baseUrl()\0hasSetFocus()\0renderGeometry()\0"
+    "renderHints()\0scrollPosition()\0"
+    "scrollToAnchor()\0scrollbarsOff()\0"
+    "evaluateWillCauseRepaint()\0"
+    "qObjectWrapperWithSameIdentity()\0"
+    "introspectQtMethods_data()\0"
+    "introspectQtMethods()\0setContent_data()\0"
+    "setContent()\0setCacheLoadControlAttribute()\0"
+    "setUrlWithPendingLoads()\0"
+    "setUrlWithFragment_data()\0"
+    "setUrlWithFragment()\0setUrlToEmpty()\0"
+    "setUrlToInvalid()\0setUrlHistory()\0"
+    "setUrlSameUrl()\0setUrlThenLoads_data()\0"
+    "setUrlThenLoads()\0loadFinishedAfterNotFoundError()\0"
+    "loadInSignalHandlers_data()\0"
+    "loadInSignalHandlers()\0"
+};
+
+void tst_QWebFrame::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        tst_QWebFrame *_t = static_cast<tst_QWebFrame *>(_o);
+        switch (_id) {
+        case 0: _t->init(); break;
+        case 1: _t->cleanup(); break;
+        case 2: _t->horizontalScrollAfterBack(); break;
+        case 3: _t->getSetStaticProperty(); break;
+        case 4: _t->getSetDynamicProperty(); break;
+        case 5: _t->getSetChildren(); break;
+        case 6: _t->callQtInvokable(); break;
+        case 7: _t->connectAndDisconnect(); break;
+        case 8: _t->classEnums(); break;
+        case 9: _t->classConstructor(); break;
+        case 10: _t->overrideInvokable(); break;
+        case 11: _t->transferInvokable(); break;
+        case 12: _t->findChild(); break;
+        case 13: _t->findChildren(); break;
+        case 14: _t->overloadedSlots(); break;
+        case 15: _t->webElementSlotOnly(); break;
+        case 16: _t->enumerate_data(); break;
+        case 17: _t->enumerate(); break;
+        case 18: _t->objectDeleted(); break;
+        case 19: _t->typeConversion(); break;
+        case 20: _t->arrayObjectEnumerable(); break;
+        case 21: _t->symmetricUrl(); break;
+        case 22: _t->progressSignal(); break;
+        case 23: _t->urlChange(); break;
+        case 24: _t->domCycles(); break;
+        case 25: _t->requestedUrl(); break;
+        case 26: _t->requestedUrlAfterSetAndLoadFailures(); break;
+        case 27: _t->javaScriptWindowObjectCleared_data(); break;
+        case 28: _t->javaScriptWindowObjectCleared(); break;
+        case 29: _t->javaScriptWindowObjectClearedOnEvaluate(); break;
+        case 30: _t->setHtml(); break;
+        case 31: _t->setHtmlWithResource(); break;
+        case 32: _t->setHtmlWithBaseURL(); break;
+        case 33: _t->setHtmlWithJSAlert(); break;
+        case 34: _t->ipv6HostEncoding(); break;
+        case 35: _t->metaData(); break;
+        case 36: _t->popupFocus(); break;
+        case 37: _t->inputFieldFocus(); break;
+        case 38: _t->hitTestContent(); break;
+        case 39: _t->jsByteArray(); break;
+        case 40: _t->ownership(); break;
+        case 41: _t->nullValue(); break;
+        case 42: _t->baseUrl_data(); break;
+        case 43: _t->baseUrl(); break;
+        case 44: _t->hasSetFocus(); break;
+        case 45: _t->renderGeometry(); break;
+        case 46: _t->renderHints(); break;
+        case 47: _t->scrollPosition(); break;
+        case 48: _t->scrollToAnchor(); break;
+        case 49: _t->scrollbarsOff(); break;
+        case 50: _t->evaluateWillCauseRepaint(); break;
+        case 51: _t->qObjectWrapperWithSameIdentity(); break;
+        case 52: _t->introspectQtMethods_data(); break;
+        case 53: _t->introspectQtMethods(); break;
+        case 54: _t->setContent_data(); break;
+        case 55: _t->setContent(); break;
+        case 56: _t->setCacheLoadControlAttribute(); break;
+        case 57: _t->setUrlWithPendingLoads(); break;
+        case 58: _t->setUrlWithFragment_data(); break;
+        case 59: _t->setUrlWithFragment(); break;
+        case 60: _t->setUrlToEmpty(); break;
+        case 61: _t->setUrlToInvalid(); break;
+        case 62: _t->setUrlHistory(); break;
+        case 63: _t->setUrlSameUrl(); break;
+        case 64: _t->setUrlThenLoads_data(); break;
+        case 65: _t->setUrlThenLoads(); break;
+        case 66: _t->loadFinishedAfterNotFoundError(); break;
+        case 67: _t->loadInSignalHandlers_data(); break;
+        case 68: _t->loadInSignalHandlers(); break;
+        default: ;
+        }
+    }
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData tst_QWebFrame::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject tst_QWebFrame::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_tst_QWebFrame,
+      qt_meta_data_tst_QWebFrame, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &tst_QWebFrame::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *tst_QWebFrame::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *tst_QWebFrame::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_tst_QWebFrame))
+        return static_cast<void*>(const_cast< tst_QWebFrame*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int tst_QWebFrame::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 69)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 69;
+    }
+    return _id;
+}
+static const uint qt_meta_data_StringListTestObject[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      31,   21,   22,   21, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_StringListTestObject[] = {
+    "StringListTestObject\0\0QVariant\0"
+    "stringList()\0"
+};
+
+void StringListTestObject::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        StringListTestObject *_t = static_cast<StringListTestObject *>(_o);
+        switch (_id) {
+        case 0: { QVariant _r = _t->stringList();
+            if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = _r; }  break;
+        default: ;
+        }
+    }
+}
+
+const QMetaObjectExtraData StringListTestObject::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject StringListTestObject::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_StringListTestObject,
+      qt_meta_data_StringListTestObject, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &StringListTestObject::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *StringListTestObject::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *StringListTestObject::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_StringListTestObject))
+        return static_cast<void*>(const_cast< StringListTestObject*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int StringListTestObject::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 1)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_FakeReply[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       2,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      11,   10,   10,   10, 0x08,
+      30,   10,   10,   10, 0x08,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_FakeReply[] = {
+    "FakeReply\0\0continueRedirect()\0"
+    "continueError()\0"
+};
+
+void FakeReply::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        FakeReply *_t = static_cast<FakeReply *>(_o);
+        switch (_id) {
+        case 0: _t->continueRedirect(); break;
+        case 1: _t->continueError(); break;
+        default: ;
+        }
+    }
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData FakeReply::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject FakeReply::staticMetaObject = {
+    { &QNetworkReply::staticMetaObject, qt_meta_stringdata_FakeReply,
+      qt_meta_data_FakeReply, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &FakeReply::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *FakeReply::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *FakeReply::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_FakeReply))
+        return static_cast<void*>(const_cast< FakeReply*>(this));
+    return QNetworkReply::qt_metacast(_clname);
+}
+
+int FakeReply::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QNetworkReply::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 2)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 2;
+    }
+    return _id;
+}
+static const uint qt_meta_data_FakeNetworkManager[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_FakeNetworkManager[] = {
+    "FakeNetworkManager\0"
+};
+
+void FakeNetworkManager::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    Q_UNUSED(_o);
+    Q_UNUSED(_id);
+    Q_UNUSED(_c);
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData FakeNetworkManager::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject FakeNetworkManager::staticMetaObject = {
+    { &QNetworkAccessManager::staticMetaObject, qt_meta_stringdata_FakeNetworkManager,
+      qt_meta_data_FakeNetworkManager, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &FakeNetworkManager::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *FakeNetworkManager::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *FakeNetworkManager::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_FakeNetworkManager))
+        return static_cast<void*>(const_cast< FakeNetworkManager*>(this));
+    return QNetworkAccessManager::qt_metacast(_clname);
+}
+
+int FakeNetworkManager::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QNetworkAccessManager::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+static const uint qt_meta_data_TestFactory[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // methods: signature, parameters, type, tag, flags
+      22,   12,   13,   12, 0x02,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_TestFactory[] = {
+    "TestFactory\0\0QObject*\0getNewObject()\0"
+};
+
+void TestFactory::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        TestFactory *_t = static_cast<TestFactory *>(_o);
+        switch (_id) {
+        case 0: { QObject* _r = _t->getNewObject();
+            if (_a[0]) *reinterpret_cast< QObject**>(_a[0]) = _r; }  break;
+        default: ;
+        }
+    }
+}
+
+const QMetaObjectExtraData TestFactory::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject TestFactory::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_TestFactory,
+      qt_meta_data_TestFactory, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &TestFactory::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *TestFactory::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *TestFactory::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_TestFactory))
+        return static_cast<void*>(const_cast< TestFactory*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int TestFactory::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 1)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 1;
+    }
+    return _id;
+}
+static const uint qt_meta_data_URLSetter[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       2,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       1,       // signalCount
+
+ // signals: signature, parameters, type, tag, flags
+      11,   10,   10,   10, 0x05,
+
+ // slots: signature, parameters, type, tag, flags
+      22,   10,   10,   10, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_URLSetter[] = {
+    "URLSetter\0\0finished()\0execute()\0"
+};
+
+void URLSetter::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        URLSetter *_t = static_cast<URLSetter *>(_o);
+        switch (_id) {
+        case 0: _t->finished(); break;
+        case 1: _t->execute(); break;
+        default: ;
+        }
+    }
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData URLSetter::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject URLSetter::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_URLSetter,
+      qt_meta_data_URLSetter, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &URLSetter::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *URLSetter::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *URLSetter::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_URLSetter))
+        return static_cast<void*>(const_cast< URLSetter*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int URLSetter::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 2)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 2;
+    }
+    return _id;
+}
+
+// SIGNAL 0
+void URLSetter::finished()
+{
+    QMetaObject::activate(this, &staticMetaObject, 0, 0);
+}
+QT_END_MOC_NAMESPACE

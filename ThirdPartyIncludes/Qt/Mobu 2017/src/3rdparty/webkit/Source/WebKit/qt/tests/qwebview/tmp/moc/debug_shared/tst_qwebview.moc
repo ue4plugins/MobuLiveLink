@@ -1,0 +1,197 @@
+/****************************************************************************
+** Meta object code from reading C++ file 'tst_qwebview.cpp'
+**
+** Created by: The Qt Meta Object Compiler version 63 (Qt 4.8.6)
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+#if !defined(Q_MOC_OUTPUT_REVISION)
+#error "The header file 'tst_qwebview.cpp' doesn't include <QObject>."
+#elif Q_MOC_OUTPUT_REVISION != 63
+#error "This file was generated using the moc from 4.8.6. It"
+#error "cannot be used with the include files from this version of Qt."
+#error "(The moc has changed too much.)"
+#endif
+
+QT_BEGIN_MOC_NAMESPACE
+static const uint qt_meta_data_tst_QWebView[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+      14,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      14,   13,   13,   13, 0x0a,
+      29,   13,   13,   13, 0x0a,
+      47,   13,   13,   13, 0x0a,
+      54,   13,   13,   13, 0x0a,
+      64,   13,   13,   13, 0x08,
+      91,   13,   13,   13, 0x08,
+     105,   13,   13,   13, 0x08,
+     124,   13,   13,   13, 0x08,
+     141,   13,   13,   13, 0x08,
+     153,   13,   13,   13, 0x08,
+     177,   13,   13,   13, 0x08,
+     195,   13,   13,   13, 0x08,
+     208,   13,   13,   13, 0x08,
+     226,   13,   13,   13, 0x08,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_tst_QWebView[] = {
+    "tst_QWebView\0\0initTestCase()\0"
+    "cleanupTestCase()\0init()\0cleanup()\0"
+    "renderingAfterMaxAndBack()\0renderHints()\0"
+    "getWebKitVersion()\0reusePage_data()\0"
+    "reusePage()\0microFocusCoordinates()\0"
+    "focusInputTypes()\0crashTests()\0"
+    "setPalette_data()\0setPalette()\0"
+};
+
+void tst_QWebView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        tst_QWebView *_t = static_cast<tst_QWebView *>(_o);
+        switch (_id) {
+        case 0: _t->initTestCase(); break;
+        case 1: _t->cleanupTestCase(); break;
+        case 2: _t->init(); break;
+        case 3: _t->cleanup(); break;
+        case 4: _t->renderingAfterMaxAndBack(); break;
+        case 5: _t->renderHints(); break;
+        case 6: _t->getWebKitVersion(); break;
+        case 7: _t->reusePage_data(); break;
+        case 8: _t->reusePage(); break;
+        case 9: _t->microFocusCoordinates(); break;
+        case 10: _t->focusInputTypes(); break;
+        case 11: _t->crashTests(); break;
+        case 12: _t->setPalette_data(); break;
+        case 13: _t->setPalette(); break;
+        default: ;
+        }
+    }
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData tst_QWebView::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject tst_QWebView::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_tst_QWebView,
+      qt_meta_data_tst_QWebView, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &tst_QWebView::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *tst_QWebView::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *tst_QWebView::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_tst_QWebView))
+        return static_cast<void*>(const_cast< tst_QWebView*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int tst_QWebView::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 14)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 14;
+    }
+    return _id;
+}
+static const uint qt_meta_data_WebViewCrashTest[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       1,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      27,   18,   17,   17, 0x08,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_WebViewCrashTest[] = {
+    "WebViewCrashTest\0\0progress\0loading(int)\0"
+};
+
+void WebViewCrashTest::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        WebViewCrashTest *_t = static_cast<WebViewCrashTest *>(_o);
+        switch (_id) {
+        case 0: _t->loading((*reinterpret_cast< int(*)>(_a[1]))); break;
+        default: ;
+        }
+    }
+}
+
+const QMetaObjectExtraData WebViewCrashTest::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject WebViewCrashTest::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_WebViewCrashTest,
+      qt_meta_data_WebViewCrashTest, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &WebViewCrashTest::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *WebViewCrashTest::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *WebViewCrashTest::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_WebViewCrashTest))
+        return static_cast<void*>(const_cast< WebViewCrashTest*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int WebViewCrashTest::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 1)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 1;
+    }
+    return _id;
+}
+QT_END_MOC_NAMESPACE

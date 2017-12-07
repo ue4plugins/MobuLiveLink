@@ -1,0 +1,170 @@
+/****************************************************************************
+** Meta object code from reading C++ file 'tst_qwebelement.cpp'
+**
+** Created by: The Qt Meta Object Compiler version 63 (Qt 4.8.6)
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+#if !defined(Q_MOC_OUTPUT_REVISION)
+#error "The header file 'tst_qwebelement.cpp' doesn't include <QObject>."
+#elif Q_MOC_OUTPUT_REVISION != 63
+#error "This file was generated using the moc from 4.8.6. It"
+#error "cannot be used with the include files from this version of Qt."
+#error "(The moc has changed too much.)"
+#endif
+
+QT_BEGIN_MOC_NAMESPACE
+static const uint qt_meta_data_tst_QWebElement[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+      33,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      17,   16,   16,   16, 0x0a,
+      24,   16,   16,   16, 0x0a,
+      34,   16,   16,   16, 0x08,
+      45,   16,   16,   16, 0x08,
+      64,   16,   16,   16, 0x08,
+      77,   16,   16,   16, 0x08,
+      92,   16,   16,   16, 0x08,
+     109,   16,   16,   16, 0x08,
+     119,   16,   16,   16, 0x08,
+     134,   16,   16,   16, 0x08,
+     146,   16,   16,   16, 0x08,
+     165,   16,   16,   16, 0x08,
+     181,   16,   16,   16, 0x08,
+     203,   16,   16,   16, 0x08,
+     221,   16,   16,   16, 0x08,
+     240,   16,   16,   16, 0x08,
+     261,   16,   16,   16, 0x08,
+     279,   16,   16,   16, 0x08,
+     287,   16,   16,   16, 0x08,
+     295,   16,   16,   16, 0x08,
+     311,   16,   16,   16, 0x08,
+     330,   16,   16,   16, 0x08,
+     353,   16,   16,   16, 0x08,
+     362,   16,   16,   16, 0x08,
+     370,   16,   16,   16, 0x08,
+     384,   16,   16,   16, 0x08,
+     398,   16,   16,   16, 0x08,
+     420,   16,   16,   16, 0x08,
+     433,   16,   16,   16, 0x08,
+     457,   16,   16,   16, 0x08,
+     484,   16,   16,   16, 0x08,
+     498,   16,   16,   16, 0x08,
+     507,   16,   16,   16, 0x08,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_tst_QWebElement[] = {
+    "tst_QWebElement\0\0init()\0cleanup()\0"
+    "textHtml()\0simpleCollection()\0"
+    "attributes()\0attributesNS()\0"
+    "listAttributes()\0classes()\0namespaceURI()\0"
+    "iteration()\0nonConstIterator()\0"
+    "constIterator()\0foreachManipulation()\0"
+    "emptyCollection()\0appendCollection()\0"
+    "evaluateJavaScript()\0documentElement()\0"
+    "frame()\0style()\0computedStyle()\0"
+    "appendAndPrepend()\0insertBeforeAndAfter()\0"
+    "remove()\0clear()\0replaceWith()\0"
+    "encloseWith()\0encloseContentsWith()\0"
+    "nullSelect()\0firstChildNextSibling()\0"
+    "lastChildPreviousSibling()\0hasSetFocus()\0"
+    "render()\0addElementToHead()\0"
+};
+
+void tst_QWebElement::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        tst_QWebElement *_t = static_cast<tst_QWebElement *>(_o);
+        switch (_id) {
+        case 0: _t->init(); break;
+        case 1: _t->cleanup(); break;
+        case 2: _t->textHtml(); break;
+        case 3: _t->simpleCollection(); break;
+        case 4: _t->attributes(); break;
+        case 5: _t->attributesNS(); break;
+        case 6: _t->listAttributes(); break;
+        case 7: _t->classes(); break;
+        case 8: _t->namespaceURI(); break;
+        case 9: _t->iteration(); break;
+        case 10: _t->nonConstIterator(); break;
+        case 11: _t->constIterator(); break;
+        case 12: _t->foreachManipulation(); break;
+        case 13: _t->emptyCollection(); break;
+        case 14: _t->appendCollection(); break;
+        case 15: _t->evaluateJavaScript(); break;
+        case 16: _t->documentElement(); break;
+        case 17: _t->frame(); break;
+        case 18: _t->style(); break;
+        case 19: _t->computedStyle(); break;
+        case 20: _t->appendAndPrepend(); break;
+        case 21: _t->insertBeforeAndAfter(); break;
+        case 22: _t->remove(); break;
+        case 23: _t->clear(); break;
+        case 24: _t->replaceWith(); break;
+        case 25: _t->encloseWith(); break;
+        case 26: _t->encloseContentsWith(); break;
+        case 27: _t->nullSelect(); break;
+        case 28: _t->firstChildNextSibling(); break;
+        case 29: _t->lastChildPreviousSibling(); break;
+        case 30: _t->hasSetFocus(); break;
+        case 31: _t->render(); break;
+        case 32: _t->addElementToHead(); break;
+        default: ;
+        }
+    }
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData tst_QWebElement::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject tst_QWebElement::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_tst_QWebElement,
+      qt_meta_data_tst_QWebElement, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &tst_QWebElement::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *tst_QWebElement::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *tst_QWebElement::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_tst_QWebElement))
+        return static_cast<void*>(const_cast< tst_QWebElement*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int tst_QWebElement::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 33)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 33;
+    }
+    return _id;
+}
+QT_END_MOC_NAMESPACE

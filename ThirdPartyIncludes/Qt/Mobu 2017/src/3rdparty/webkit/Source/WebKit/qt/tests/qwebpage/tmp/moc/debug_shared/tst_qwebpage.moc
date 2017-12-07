@@ -1,0 +1,688 @@
+/****************************************************************************
+** Meta object code from reading C++ file 'tst_qwebpage.cpp'
+**
+** Created by: The Qt Meta Object Compiler version 63 (Qt 4.8.6)
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+#if !defined(Q_MOC_OUTPUT_REVISION)
+#error "The header file 'tst_qwebpage.cpp' doesn't include <QObject>."
+#elif Q_MOC_OUTPUT_REVISION != 63
+#error "This file was generated using the moc from 4.8.6. It"
+#error "cannot be used with the include files from this version of Qt."
+#error "(The moc has changed too much.)"
+#endif
+
+QT_BEGIN_MOC_NAMESPACE
+static const uint qt_meta_data_EventSpy[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_EventSpy[] = {
+    "EventSpy\0"
+};
+
+void EventSpy::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    Q_UNUSED(_o);
+    Q_UNUSED(_id);
+    Q_UNUSED(_c);
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData EventSpy::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject EventSpy::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_EventSpy,
+      qt_meta_data_EventSpy, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &EventSpy::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *EventSpy::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *EventSpy::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_EventSpy))
+        return static_cast<void*>(const_cast< EventSpy*>(this));
+    if (!strcmp(_clname, "QList<QEvent::Type>"))
+        return static_cast< QList<QEvent::Type>*>(const_cast< EventSpy*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int EventSpy::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+static const uint qt_meta_data_tst_QWebPage[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+      64,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      14,   13,   13,   13, 0x0a,
+      21,   13,   13,   13, 0x0a,
+      31,   13,   13,   13, 0x0a,
+      46,   13,   13,   13, 0x08,
+      61,   13,   13,   13, 0x08,
+      79,   13,   13,   13, 0x08,
+      97,   13,   13,   13, 0x08,
+     123,   13,   13,   13, 0x08,
+     146,   13,   13,   13, 0x08,
+     161,   13,   13,   13, 0x08,
+     183,   13,   13,   13, 0x08,
+     222,   13,   13,   13, 0x08,
+     239,   13,   13,   13, 0x08,
+     256,   13,   13,   13, 0x08,
+     267,   13,   13,   13, 0x08,
+     286,   13,   13,   13, 0x08,
+     324,   13,   13,   13, 0x08,
+     335,   13,   13,   13, 0x08,
+     368,   13,   13,   13, 0x08,
+     402,   13,   13,   13, 0x08,
+     423,   13,   13,   13, 0x08,
+     439,   13,   13,   13, 0x08,
+     467,   13,   13,   13, 0x08,
+     490,   13,   13,   13, 0x08,
+     513,   13,   13,   13, 0x08,
+     549,   13,   13,   13, 0x08,
+     567,   13,   13,   13, 0x08,
+     583,   13,   13,   13, 0x08,
+     597,   13,   13,   13, 0x08,
+     616,   13,   13,   13, 0x08,
+     626,   13,   13,   13, 0x08,
+     641,   13,   13,   13, 0x08,
+     658,   13,   13,   13, 0x08,
+     703,   13,   13,   13, 0x08,
+     721,   13,   13,   13, 0x08,
+     745,   13,   13,   13, 0x08,
+     774,   13,   13,   13, 0x08,
+     804,   13,   13,   13, 0x08,
+     820,   13,   13,   13, 0x08,
+     840,   13,   13,   13, 0x08,
+     855,   13,   13,   13, 0x08,
+     885,   13,   13,   13, 0x08,
+     910,   13,   13,   13, 0x08,
+     932,   13,   13,   13, 0x08,
+     953,   13,   13,   13, 0x08,
+     983,   13,   13,   13, 0x08,
+    1014,   13,   13,   13, 0x08,
+    1047,   13,   13,   13, 0x08,
+    1074,   13,   13,   13, 0x08,
+    1086,   13,   13,   13, 0x08,
+    1129,   13,   13,   13, 0x08,
+    1147,   13,   13,   13, 0x08,
+    1160,   13,   13,   13, 0x08,
+    1197,   13,   13,   13, 0x08,
+    1212,   13,   13,   13, 0x08,
+    1230,   13,   13,   13, 0x08,
+    1261,   13,   13,   13, 0x08,
+    1272,   13,   13,   13, 0x08,
+    1295,   13,   13,   13, 0x08,
+    1312,   13,   13,   13, 0x08,
+    1337,   13,   13,   13, 0x08,
+    1359,   13,   13,   13, 0x08,
+    1402,   13,   13,   13, 0x08,
+    1426,   13,   13,   13, 0x08,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_tst_QWebPage[] = {
+    "tst_QWebPage\0\0init()\0cleanup()\0"
+    "cleanupFiles()\0initTestCase()\0"
+    "cleanupTestCase()\0contextMenuCopy()\0"
+    "acceptNavigationRequest()\0"
+    "geolocationRequestJS()\0loadFinished()\0"
+    "popupFormSubmission()\0"
+    "acceptNavigationRequestWithNewWindow()\0"
+    "userStyleSheet()\0loadHtml5Video()\0"
+    "modified()\0contextMenuCrash()\0"
+    "updatePositionDependentActionsCrash()\0"
+    "database()\0createPluginWithPluginsEnabled()\0"
+    "createPluginWithPluginsDisabled()\0"
+    "destroyPlugin_data()\0destroyPlugin()\0"
+    "createViewlessPlugin_data()\0"
+    "createViewlessPlugin()\0graphicsWidgetPlugin()\0"
+    "multiplePageGroupsAndLocalStorage()\0"
+    "cursorMovements()\0textSelection()\0"
+    "textEditing()\0backActionUpdate()\0"
+    "frameAt()\0requestCache()\0loadCachedPage()\0"
+    "protectBindingsRuntimeObjectsFromCollector()\0"
+    "localURLSchemes()\0testOptionalJSObjects()\0"
+    "testLocalStorageVisibility()\0"
+    "testEnablePersistentStorage()\0"
+    "consoleOutput()\0inputMethods_data()\0"
+    "inputMethods()\0inputMethodsTextFormat_data()\0"
+    "inputMethodsTextFormat()\0defaultTextEncoding()\0"
+    "errorPageExtension()\0errorPageExtensionInIFrames()\0"
+    "errorPageExtensionInFrameset()\0"
+    "errorPageExtensionLoadFinished()\0"
+    "userAgentApplicationName()\0viewModes()\0"
+    "crashTests_LazyInitializationOfMainFrame()\0"
+    "screenshot_data()\0screenshot()\0"
+    "originatingObjectInNetworkRequests()\0"
+    "testJSPrompt()\0showModalDialog()\0"
+    "testStopScheduledPageRefresh()\0"
+    "findText()\0supportedContentType()\0"
+    "infiniteLoopJS()\0navigatorCookieEnabled()\0"
+    "deleteQWebViewTwice()\0"
+    "renderOnRepaintRequestedShouldNotRecurse()\0"
+    "loadSignalsOrder_data()\0loadSignalsOrder()\0"
+};
+
+void tst_QWebPage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        tst_QWebPage *_t = static_cast<tst_QWebPage *>(_o);
+        switch (_id) {
+        case 0: _t->init(); break;
+        case 1: _t->cleanup(); break;
+        case 2: _t->cleanupFiles(); break;
+        case 3: _t->initTestCase(); break;
+        case 4: _t->cleanupTestCase(); break;
+        case 5: _t->contextMenuCopy(); break;
+        case 6: _t->acceptNavigationRequest(); break;
+        case 7: _t->geolocationRequestJS(); break;
+        case 8: _t->loadFinished(); break;
+        case 9: _t->popupFormSubmission(); break;
+        case 10: _t->acceptNavigationRequestWithNewWindow(); break;
+        case 11: _t->userStyleSheet(); break;
+        case 12: _t->loadHtml5Video(); break;
+        case 13: _t->modified(); break;
+        case 14: _t->contextMenuCrash(); break;
+        case 15: _t->updatePositionDependentActionsCrash(); break;
+        case 16: _t->database(); break;
+        case 17: _t->createPluginWithPluginsEnabled(); break;
+        case 18: _t->createPluginWithPluginsDisabled(); break;
+        case 19: _t->destroyPlugin_data(); break;
+        case 20: _t->destroyPlugin(); break;
+        case 21: _t->createViewlessPlugin_data(); break;
+        case 22: _t->createViewlessPlugin(); break;
+        case 23: _t->graphicsWidgetPlugin(); break;
+        case 24: _t->multiplePageGroupsAndLocalStorage(); break;
+        case 25: _t->cursorMovements(); break;
+        case 26: _t->textSelection(); break;
+        case 27: _t->textEditing(); break;
+        case 28: _t->backActionUpdate(); break;
+        case 29: _t->frameAt(); break;
+        case 30: _t->requestCache(); break;
+        case 31: _t->loadCachedPage(); break;
+        case 32: _t->protectBindingsRuntimeObjectsFromCollector(); break;
+        case 33: _t->localURLSchemes(); break;
+        case 34: _t->testOptionalJSObjects(); break;
+        case 35: _t->testLocalStorageVisibility(); break;
+        case 36: _t->testEnablePersistentStorage(); break;
+        case 37: _t->consoleOutput(); break;
+        case 38: _t->inputMethods_data(); break;
+        case 39: _t->inputMethods(); break;
+        case 40: _t->inputMethodsTextFormat_data(); break;
+        case 41: _t->inputMethodsTextFormat(); break;
+        case 42: _t->defaultTextEncoding(); break;
+        case 43: _t->errorPageExtension(); break;
+        case 44: _t->errorPageExtensionInIFrames(); break;
+        case 45: _t->errorPageExtensionInFrameset(); break;
+        case 46: _t->errorPageExtensionLoadFinished(); break;
+        case 47: _t->userAgentApplicationName(); break;
+        case 48: _t->viewModes(); break;
+        case 49: _t->crashTests_LazyInitializationOfMainFrame(); break;
+        case 50: _t->screenshot_data(); break;
+        case 51: _t->screenshot(); break;
+        case 52: _t->originatingObjectInNetworkRequests(); break;
+        case 53: _t->testJSPrompt(); break;
+        case 54: _t->showModalDialog(); break;
+        case 55: _t->testStopScheduledPageRefresh(); break;
+        case 56: _t->findText(); break;
+        case 57: _t->supportedContentType(); break;
+        case 58: _t->infiniteLoopJS(); break;
+        case 59: _t->navigatorCookieEnabled(); break;
+        case 60: _t->deleteQWebViewTwice(); break;
+        case 61: _t->renderOnRepaintRequestedShouldNotRecurse(); break;
+        case 62: _t->loadSignalsOrder_data(); break;
+        case 63: _t->loadSignalsOrder(); break;
+        default: ;
+        }
+    }
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData tst_QWebPage::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject tst_QWebPage::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_tst_QWebPage,
+      qt_meta_data_tst_QWebPage, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &tst_QWebPage::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *tst_QWebPage::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *tst_QWebPage::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_tst_QWebPage))
+        return static_cast<void*>(const_cast< tst_QWebPage*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int tst_QWebPage::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 64)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 64;
+    }
+    return _id;
+}
+static const uint qt_meta_data_JSTestPage[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       2,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: signature, parameters, type, tag, flags
+      17,   11,   12,   11, 0x0a,
+      59,   45,   11,   11, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_JSTestPage[] = {
+    "JSTestPage\0\0bool\0shouldInterruptJavaScript()\0"
+    "frame,feature\0"
+    "requestPermission(QWebFrame*,QWebPage::Feature)\0"
+};
+
+void JSTestPage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        JSTestPage *_t = static_cast<JSTestPage *>(_o);
+        switch (_id) {
+        case 0: { bool _r = _t->shouldInterruptJavaScript();
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = _r; }  break;
+        case 1: _t->requestPermission((*reinterpret_cast< QWebFrame*(*)>(_a[1])),(*reinterpret_cast< QWebPage::Feature(*)>(_a[2]))); break;
+        default: ;
+        }
+    }
+}
+
+const QMetaObjectExtraData JSTestPage::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject JSTestPage::staticMetaObject = {
+    { &QWebPage::staticMetaObject, qt_meta_stringdata_JSTestPage,
+      qt_meta_data_JSTestPage, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &JSTestPage::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *JSTestPage::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *JSTestPage::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_JSTestPage))
+        return static_cast<void*>(const_cast< JSTestPage*>(this));
+    return QWebPage::qt_metacast(_clname);
+}
+
+int JSTestPage::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QWebPage::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 2)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 2;
+    }
+    return _id;
+}
+static const uint qt_meta_data_JSPromptPage[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_JSPromptPage[] = {
+    "JSPromptPage\0"
+};
+
+void JSPromptPage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    Q_UNUSED(_o);
+    Q_UNUSED(_id);
+    Q_UNUSED(_c);
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData JSPromptPage::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject JSPromptPage::staticMetaObject = {
+    { &QWebPage::staticMetaObject, qt_meta_stringdata_JSPromptPage,
+      qt_meta_data_JSPromptPage, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &JSPromptPage::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *JSPromptPage::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *JSPromptPage::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_JSPromptPage))
+        return static_cast<void*>(const_cast< JSPromptPage*>(this));
+    return QWebPage::qt_metacast(_clname);
+}
+
+int JSPromptPage::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QWebPage::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+static const uint qt_meta_data_TestModalPage[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_TestModalPage[] = {
+    "TestModalPage\0"
+};
+
+void TestModalPage::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    Q_UNUSED(_o);
+    Q_UNUSED(_id);
+    Q_UNUSED(_c);
+    Q_UNUSED(_a);
+}
+
+const QMetaObjectExtraData TestModalPage::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject TestModalPage::staticMetaObject = {
+    { &QWebPage::staticMetaObject, qt_meta_stringdata_TestModalPage,
+      qt_meta_data_TestModalPage, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &TestModalPage::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *TestModalPage::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *TestModalPage::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_TestModalPage))
+        return static_cast<void*>(const_cast< TestModalPage*>(this));
+    return QWebPage::qt_metacast(_clname);
+}
+
+int TestModalPage::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QWebPage::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    return _id;
+}
+static const uint qt_meta_data_RepaintRequestedRenderer[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       2,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       1,       // signalCount
+
+ // signals: signature, parameters, type, tag, flags
+      26,   25,   25,   25, 0x05,
+
+ // slots: signature, parameters, type, tag, flags
+      42,   37,   25,   25, 0x08,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_RepaintRequestedRenderer[] = {
+    "RepaintRequestedRenderer\0\0finished()\0"
+    "rect\0onRepaintRequested(QRect)\0"
+};
+
+void RepaintRequestedRenderer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        RepaintRequestedRenderer *_t = static_cast<RepaintRequestedRenderer *>(_o);
+        switch (_id) {
+        case 0: _t->finished(); break;
+        case 1: _t->onRepaintRequested((*reinterpret_cast< const QRect(*)>(_a[1]))); break;
+        default: ;
+        }
+    }
+}
+
+const QMetaObjectExtraData RepaintRequestedRenderer::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject RepaintRequestedRenderer::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_RepaintRequestedRenderer,
+      qt_meta_data_RepaintRequestedRenderer, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &RepaintRequestedRenderer::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *RepaintRequestedRenderer::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *RepaintRequestedRenderer::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_RepaintRequestedRenderer))
+        return static_cast<void*>(const_cast< RepaintRequestedRenderer*>(this));
+    return QObject::qt_metacast(_clname);
+}
+
+int RepaintRequestedRenderer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 2)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 2;
+    }
+    return _id;
+}
+
+// SIGNAL 0
+void RepaintRequestedRenderer::finished()
+{
+    QMetaObject::activate(this, &staticMetaObject, 0, 0);
+}
+static const uint qt_meta_data_SpyForLoadSignalsOrder[] = {
+
+ // content:
+       6,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       2,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       1,       // signalCount
+
+ // signals: signature, parameters, type, tag, flags
+      24,   23,   23,   23, 0x05,
+
+ // slots: signature, parameters, type, tag, flags
+      52,   43,   23,   23, 0x0a,
+
+       0        // eod
+};
+
+static const char qt_meta_stringdata_SpyForLoadSignalsOrder[] = {
+    "SpyForLoadSignalsOrder\0\0lastLoadProgress()\0"
+    "progress\0onLoadProgress(int)\0"
+};
+
+void SpyForLoadSignalsOrder::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        SpyForLoadSignalsOrder *_t = static_cast<SpyForLoadSignalsOrder *>(_o);
+        switch (_id) {
+        case 0: _t->lastLoadProgress(); break;
+        case 1: _t->onLoadProgress((*reinterpret_cast< int(*)>(_a[1]))); break;
+        default: ;
+        }
+    }
+}
+
+const QMetaObjectExtraData SpyForLoadSignalsOrder::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
+const QMetaObject SpyForLoadSignalsOrder::staticMetaObject = {
+    { &QStateMachine::staticMetaObject, qt_meta_stringdata_SpyForLoadSignalsOrder,
+      qt_meta_data_SpyForLoadSignalsOrder, &staticMetaObjectExtraData }
+};
+
+#ifdef Q_NO_DATA_RELOCATION
+const QMetaObject &SpyForLoadSignalsOrder::getStaticMetaObject() { return staticMetaObject; }
+#endif //Q_NO_DATA_RELOCATION
+
+const QMetaObject *SpyForLoadSignalsOrder::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+}
+
+void *SpyForLoadSignalsOrder::qt_metacast(const char *_clname)
+{
+    if (!_clname) return 0;
+    if (!strcmp(_clname, qt_meta_stringdata_SpyForLoadSignalsOrder))
+        return static_cast<void*>(const_cast< SpyForLoadSignalsOrder*>(this));
+    return QStateMachine::qt_metacast(_clname);
+}
+
+int SpyForLoadSignalsOrder::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QStateMachine::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 2)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 2;
+    }
+    return _id;
+}
+
+// SIGNAL 0
+void SpyForLoadSignalsOrder::lastLoadProgress()
+{
+    QMetaObject::activate(this, &staticMetaObject, 0, 0);
+}
+QT_END_MOC_NAMESPACE
