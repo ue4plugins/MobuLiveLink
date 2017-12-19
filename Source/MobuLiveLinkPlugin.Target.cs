@@ -39,13 +39,13 @@ public class MobuLiveLinkPluginTarget : TargetRules
             };
 
 			// Add a prebuild step to run MOC for each of the headers that require it
-            foreach (string FileToBeMocced in FilesToBeMocced)
-            {
-                string FileName = Path.GetFileName(FileToBeMocced);
-                string MoccedFile = Path.Combine(OutputPath, FileName);
-                PreBuildSteps.Add("echo \"" + MocPath + "\" \"" + FileToBeMocced + ".h\"" + " -o \"" + MoccedFile + "_moc.cpp\"");
-                PreBuildSteps.Add("\"" + MocPath + "\" \"" + FileToBeMocced + ".h\"" + " -o \"" + MoccedFile + "_moc.cpp\"");
-            }
+            //foreach (string FileToBeMocced in FilesToBeMocced)
+            //{
+            //    string FileName = Path.GetFileName(FileToBeMocced);
+            //    string MoccedFile = Path.Combine(OutputPath, FileName);
+            //    PreBuildSteps.Add("echo \"" + MocPath + "\" \"" + FileToBeMocced + ".h\"" + " -o \"" + MoccedFile + "_moc.cpp\"");
+            //    PreBuildSteps.Add("\"" + MocPath + "\" \"" + FileToBeMocced + ".h\"" + " -o \"" + MoccedFile + "_moc.cpp\"");
+            //}
         }
         }
 }

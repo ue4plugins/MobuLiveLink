@@ -1,6 +1,6 @@
 ﻿// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
-#include "MobuLiveLinkLayout_moc.cpp"
+#include "MobuLiveLinkLayout.h"
 
 #define MOBULIVELINK__LAYOUT	MobuLiveLinkLayout
 
@@ -11,10 +11,15 @@ FBRegisterDeviceLayout(MOBULIVELINK__LAYOUT,
 
 //#pragma optimize("", off)
 
+//MobuLiveLinkLayout* MobuLiveLinkQtFrame::CreatingLayout = nullptr;
+
 bool MobuLiveLinkLayout::FBCreate()
 {
 	// Get a handle on the device.
 	LiveLinkDevice = ((MobuLiveLink *)(FBDevice *)Device);
+
+	FBPropertyPublish(this, ObjectSelection, "ObjectSelection", NULL, NULL);
+	ObjectSelection.SetFilter(FBModel::GetInternalClassId());
 
 	UICreate();
 	UIConfigure();
@@ -30,14 +35,18 @@ bool MobuLiveLinkLayout::FBCreate()
 void MobuLiveLinkLayout::FBDestroy()
 {
 	// Remove device & system callbacks
-	OnIdle.Remove(this, (FBCallback)&MobuLiveLinkLayout::EventUIIdle);
+	FBTrace("Destroying\n");
+	/*delete ChildQtWidget;
+	ChildQtWidget = nullptr;*/
+	System.OnUIIdle.Remove(this, (FBCallback)&MobuLiveLinkLayout::EventUIIdle);
 	LiveLinkDevice->OnStatusChange.Remove(this, (FBCallback)&MobuLiveLinkLayout::EventDeviceStatusChange);
 }
 
-
 void MobuLiveLinkLayout::UICreate()
 {
-	int S = 4;	
+	int S, W, H;		// space, height
+	S = 4;
+	H = 25;
 
 	// Create regions
 	AddRegion("MainLayout", "MainLayout", 
@@ -47,9 +56,42 @@ void MobuLiveLinkLayout::UICreate()
 		-S, kFBAttachBottom, "", 1.00);
 
 	// Assign regions
-	SetControl("MainLayout", QtFrame);
-	QtFrame.SetCreator((FBWidgetHolder::WidgetCreator)MobuLiveLinkQtFrame::CreateFunction);
-	//MobuLiveLinkQtFrame::CreatingLayout = this;
+	SetControl("MainLayout", StreamLayout);
+
+	W = 110;
+	H = 18;
+
+	// Add regions
+
+	StreamLayout.AddRegion("ObjectSelector", "ObjectSelector",
+		S, kFBAttachLeft, "", 1.00,
+		S, kFBAttachTop, "", 1.00,
+		2 * W, kFBAttachNone, NULL, 1.00,
+		H, kFBAttachNone, NULL, 1.00);
+
+	StreamLayout.AddRegion("AddToStreamButton", "AddToStreamButton",
+		S, kFBAttachRight, "ObjectSelector", 1.00,
+		0, kFBAttachTop, "ObjectSelector", 1.00,
+		W, kFBAttachNone, NULL, 1.00,
+		H, kFBAttachNone, NULL, 1.00);
+
+
+	StreamLayout.AddRegion("RemoveFromStreamButton", "RemoveFromStreamButton",
+		S, kFBAttachRight, "AddToStreamButton", 1.00,
+		0, kFBAttachTop, "AddToStreamButton", 1.00,
+		W, kFBAttachNone, NULL, 1.00,
+		H, kFBAttachNone, NULL, 1.00);
+
+	StreamLayout.AddRegion("StreamSpread", "StreamSpread",
+		S, kFBAttachLeft, "", 1.00,
+		S, kFBAttachBottom, "ObjectSelector", 1.00,
+		-S, kFBAttachRight, "", 1.00,
+		-S, kFBAttachBottom, "", 1.00);
+
+	StreamLayout.SetControl("ObjectSelector", ObjectSelector);
+	StreamLayout.SetControl("AddToStreamButton", AddToStreamButton);
+	StreamLayout.SetControl("RemoveFromStreamButton", RemoveFromStreamButton);
+	StreamLayout.SetControl("StreamSpread", StreamSpread);
 }
 
 
@@ -57,6 +99,14 @@ void MobuLiveLinkLayout::UICreate()
 void MobuLiveLinkLayout::UIConfigure()
 {
 	SetBorder("MainLayout", kFBStandardBorder, false, true, 1, 0, 90, 0);
+
+	ObjectSelector.Property = &ObjectSelection;
+
+	AddToStreamButton.Caption = "Add";
+	AddToStreamButton.Justify = kFBTextJustifyCenter;
+
+	RemoveFromStreamButton.Caption = "Remove";
+	RemoveFromStreamButton.Justify = kFBTextJustifyCenter;
 }
 
 
@@ -82,25 +132,4 @@ void MobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 	{
 		UIRefresh();
 	}
-}
-
-
-void* MobuLiveLinkQtFrame::CreateFunction(void* widgetParent)
-{
-	MobuLiveLinkQtFrame* layout = new MobuLiveLinkQtFrame((QWidget*)widgetParent);
-	return (void*)layout;
-}
-
-MobuLiveLinkQtFrame::MobuLiveLinkQtFrame(QWidget* parent) 
-: QFrame(parent)
-{
-	QHBoxLayout* TestLayout = new QHBoxLayout();
-	setLayout(TestLayout);
-
-	QLabel* TestLabel = new QLabel("This is a test label using Qt");
-	TestLabel->setAlignment(Qt::AlignVCenter | Qt::AlignCenter);
-	TestLabel->setMaximumWidth(200);
-	TestLabel->setMinimumWidth(200);
-
-	TestLayout->addWidget(TestLabel);
 }

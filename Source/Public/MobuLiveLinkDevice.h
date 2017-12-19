@@ -43,7 +43,7 @@ public:
 	bool Start();		//!< Start device (online).
 
 	//--- The following will be called by the real-time engine.
-	virtual bool AnimationNodeNotify(FBAnimationNode* AnimationNode, FBEvaluateInfo* EvaluateInfo);	//!< Real-time evaluation for node.
+	//virtual bool AnimationNodeNotify(FBAnimationNode* AnimationNode, FBEvaluateInfo* EvaluateInfo);	//!< Real-time evaluation for node.
 	virtual void DeviceIONotify(kDeviceIOs  Action, FBDeviceNotifyInfo &DeviceNotifyInfo);	//!< Notification of/for Device IO.
 	virtual bool DeviceEvaluationNotify(kTransportMode Mode, FBEvaluateInfo* EvaluateInfo);	//!< Evaluation the device (write to hardware).
 	virtual bool DeviceOperation(kDeviceOperations Operation);	//!< Operate device.
@@ -53,7 +53,7 @@ public:
 	virtual bool FbxRetrieve(FBFbxObject* FbxObject, kFbxObjectStore StoreWhat);	//!< Retrieve from FBX file.
 
 public:
-	const FString mProviderName = (TEXT("Mobu Live Link"));
+	const FString mProviderName = TEXT("Mobu Live Link");
 
 private:
 

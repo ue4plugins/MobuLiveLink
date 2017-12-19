@@ -1,4 +1,4 @@
-
+﻿
 
 #include "RequiredProgramMainCPPInclude.h"
 
@@ -61,6 +61,8 @@ bool FBLibrary::LibInit()
 	//FModuleManager::Get().LoadModule(TEXT("LiveLink"));
 	GLog->TearDown(); //clean up existing output devices
 	GLog->AddOutputDevice(new FMobuOutputDevice()); //Add Mobu output device
+
+	FBTrace("Set up Engine Loop and stuff\n");
 
 	return true;
 }

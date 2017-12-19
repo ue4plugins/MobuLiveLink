@@ -38,6 +38,7 @@ bool MobuLiveLink::FBCreate()
 	lPeriod.SetSecondDouble(1.0/60.0);
 	SamplingPeriod	= lPeriod;
 
+	StartLiveLink();
 	return true;
 }
 
@@ -95,8 +96,6 @@ bool MobuLiveLink::Start()
 	lProgress.Caption	= "Setting up device";
 	lProgress.Text	= "Setting sampling rate";
 
-	StartLiveLink();
-
 	SetDeviceInformation("Status: Online");
 
 	return true;
@@ -110,8 +109,6 @@ bool MobuLiveLink::Stop()
 {
 	FBProgress	lProgress;
 	lProgress.Caption	= "Shutting down device";
-
-	StopLiveLink();
 
 	SetDeviceInformation("Status: Offline");
 
@@ -141,10 +138,10 @@ bool MobuLiveLink::Reset()
 /************************************************
  *	Real-Time Engine Evaluation.
  ************************************************/
-bool MobuLiveLink::AnimationNodeNotify(FBAnimationNode* pAnimationNode ,FBEvaluateInfo* pEvaluateInfo)
-{
-    return true;
-}
+//bool MobuLiveLink::AnimationNodeNotify(FBAnimationNode* pAnimationNode ,FBEvaluateInfo* pEvaluateInfo)
+//{
+//    return true;
+//}
 
 /************************************************
  *	Device Evaluation Notify.
@@ -152,6 +149,7 @@ bool MobuLiveLink::AnimationNodeNotify(FBAnimationNode* pAnimationNode ,FBEvalua
 bool MobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo* pEvaluateInfo)
 {
 	ScopedFastLock scoped_lock(mCleanUpLock);
+	FBTrace("Tickity Tick\n");
 	return true;
 }
 
@@ -216,6 +214,9 @@ void MobuLiveLink::StartLiveLink()
 {
 	StopLiveLink();
 	LiveLinkProvider = ILiveLinkProvider::CreateLiveLinkProvider(mProviderName);
+	
+	FBTrace("Live Link Started!\n");
+	FBTrace(LiveLinkProvider->IsEndpointValid() ? "Endpoint Valid\n" : "Endpoint Invalid\n");
 }
 
 
@@ -224,5 +225,7 @@ void MobuLiveLink::StopLiveLink()
 	if (LiveLinkProvider.IsValid())
 	{
 		LiveLinkProvider = nullptr;
+		FBTrace("Deleting Live Link\n");
 	}
+	FBTrace("Live Link Stopped!\n");
 }
