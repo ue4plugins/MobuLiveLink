@@ -1,6 +1,7 @@
 ﻿// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
+#include <string>
 #include "MobuLiveLinkDevice.h"
 
 
@@ -21,6 +22,7 @@ public:
 	// Main Layout: Events
 	void EventDeviceStatusChange(HISender Sender, HKEvent Event);
 	void EventUIIdle(HISender Sender, HKEvent Event);
+	void EventAddToStream(HISender Sender, HKEvent Event);
 
 public:
 
@@ -32,6 +34,12 @@ public:
 	FBSpread					StreamSpread;
 
 private:
+
+	typedef void (MobuLiveLinkLayout::*ModelStoreFunctionType)(FBModel* CameraModel);
+
+	void StoreCamera(FBModel* CameraModel);
+
+	TMap<int, ModelStoreFunctionType> ModelStoreFunctions;
 
 	FBSystem				System;
 	MobuLiveLink*			LiveLinkDevice;

@@ -13,8 +13,14 @@ FBRegisterDeviceLayout(MOBULIVELINK__LAYOUT,
 
 //MobuLiveLinkLayout* MobuLiveLinkQtFrame::CreatingLayout = nullptr;
 
+#define IntToChar(input) std::to_string(input).c_str()
+
 bool MobuLiveLinkLayout::FBCreate()
 {
+	// Set up Storage Functions
+
+	ModelStoreFunctions.Emplace(FBCamera::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreCamera);
+
 	// Get a handle on the device.
 	LiveLinkDevice = ((MobuLiveLink *)(FBDevice *)Device);
 
@@ -104,9 +110,25 @@ void MobuLiveLinkLayout::UIConfigure()
 
 	AddToStreamButton.Caption = "Add";
 	AddToStreamButton.Justify = kFBTextJustifyCenter;
+	AddToStreamButton.OnClick.Add(this, (FBCallback)&MobuLiveLinkLayout::EventAddToStream);
 
 	RemoveFromStreamButton.Caption = "Remove";
 	RemoveFromStreamButton.Justify = kFBTextJustifyCenter;
+
+	StreamSpread.Caption = "Object Root";
+	StreamSpread.MultiSelect = true;
+	StreamSpread.ColumnAdd("Subject Name", 0);
+	StreamSpread.ColumnAdd("Stream Type", 1);
+	StreamSpread.ColumnAdd("Status", 2);
+
+	StreamSpread.RowAdd(IntToChar(FBLight::TypeInfo));
+	StreamSpread.RowAdd("Light");
+	StreamSpread.RowAdd(IntToChar(FBCamera::TypeInfo));
+	StreamSpread.RowAdd("Camera");
+	StreamSpread.RowAdd(IntToChar(FBModelSkeleton::TypeInfo));
+	StreamSpread.RowAdd("Skeleton");
+	StreamSpread.RowAdd(IntToChar(FBModel::TypeInfo));
+	StreamSpread.RowAdd("Model");
 }
 
 
@@ -132,4 +154,47 @@ void MobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 	{
 		UIRefresh();
 	}
+}
+
+void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
+{
+	for (int CharIndex = 0; CharIndex < ObjectSelection.GetCount(); ++CharIndex)
+	{
+		FBModel* Model = (FBModel*)ObjectSelection.GetAt(CharIndex);
+		ModelStoreFunctionType* StoreFunction = ModelStoreFunctions.Find(Model->GetTypeId());
+		if (StoreFunction != nullptr)
+		{
+			(this->*(*StoreFunction))(Model);
+		}
+		else
+		{
+			FBTrace("Unknown Object Type for: ");
+			FBTrace(Model->LongName);
+			FBTrace("\n");
+		}
+		//if (Model->GetTypeId() == FBLight::TypeInfo)
+		//{
+		//	StreamSpread.RowAdd("Light");
+		//}
+		//else if (Model->GetTypeId() == FBCamera::TypeInfo)
+		//{
+		//	StreamSpread.RowAdd("Camera");
+		//}
+		//else if (Model->GetTypeId() == FBModelSkeleton::TypeInfo)
+		//{
+		//	StreamSpread.RowAdd("Skeleton");
+		//}
+		//else
+		//{
+		//	StreamSpread.RowAdd("Other");
+		//}
+	}
+}
+
+void MobuLiveLinkLayout::StoreCamera(FBModel* Model)
+{
+	FBCamera* CameraModel = (FBCamera*)Model;
+	FBTrace(Model->LongName);
+	FBTrace(" is a Camera!\n");
+
 }
