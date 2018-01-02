@@ -42,8 +42,7 @@ void MobuLiveLinkLayout::FBDestroy()
 {
 	// Remove device & system callbacks
 	FBTrace("Destroying\n");
-	/*delete ChildQtWidget;
-	ChildQtWidget = nullptr;*/
+
 	System.OnUIIdle.Remove(this, (FBCallback)&MobuLiveLinkLayout::EventUIIdle);
 	LiveLinkDevice->OnStatusChange.Remove(this, (FBCallback)&MobuLiveLinkLayout::EventDeviceStatusChange);
 }
@@ -114,21 +113,16 @@ void MobuLiveLinkLayout::UIConfigure()
 
 	RemoveFromStreamButton.Caption = "Remove";
 	RemoveFromStreamButton.Justify = kFBTextJustifyCenter;
+	RemoveFromStreamButton.OnClick.Add(this, (FBCallback)&MobuLiveLinkLayout::EventRemoveFromStream);
 
 	StreamSpread.Caption = "Object Root";
+	//StreamSpread.GetColumn(-1).Width = 0;
 	StreamSpread.MultiSelect = true;
 	StreamSpread.ColumnAdd("Subject Name", 0);
 	StreamSpread.ColumnAdd("Stream Type", 1);
+	StreamSpread.GetColumn(1).Style = kFBCellStyleMenu;
 	StreamSpread.ColumnAdd("Status", 2);
-
-	StreamSpread.RowAdd(IntToChar(FBLight::TypeInfo));
-	StreamSpread.RowAdd("Light");
-	StreamSpread.RowAdd(IntToChar(FBCamera::TypeInfo));
-	StreamSpread.RowAdd("Camera");
-	StreamSpread.RowAdd(IntToChar(FBModelSkeleton::TypeInfo));
-	StreamSpread.RowAdd("Skeleton");
-	StreamSpread.RowAdd(IntToChar(FBModel::TypeInfo));
-	StreamSpread.RowAdd("Model");
+	StreamSpread.GetColumn(2).Style = kFBCellStyle2StatesButton;
 }
 
 
@@ -139,12 +133,16 @@ void MobuLiveLinkLayout::UIRefresh()
 
 void MobuLiveLinkLayout::UIReset()
 {
+	for (const auto Object : LiveLinkDevice->StreamObjects)
+	{
+		AddSpreadRowFromStreamObject(Object);
+	}
 }
 
 
 void MobuLiveLinkLayout::EventDeviceStatusChange(HISender Sender, HKEvent Event)
 {
-	UIReset();
+	// UIReset();
 }
 
 
@@ -156,45 +154,57 @@ void MobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 	}
 }
 
+void MobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
+{
+	StreamSpread.RowAdd(Object->RootModel->LongName, (kReference)Object->RootModel);
+	StreamSpread.SetCell((kReference)Object->RootModel, 0, "Blah");
+	StreamSpread.SetCell((kReference)Object->RootModel, 1, Object->GetStreamOptions());
+	StreamSpread.SetCell((kReference)Object->RootModel, 2, true);
+	StreamSpread.SetCell((kReference)Object->RootModel, 2, "Active");
+}
+
+
+FORCEINLINE bool IsModelInDeviceStream(const MobuLiveLink* Device, const FBModel* Model)
+{
+	return Device->StreamObjects.ContainsByPredicate([Model](const TSharedPtr<StreamObject> Storage) { return Storage->RootModel == Model; });
+}
+
 void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 {
 	for (int CharIndex = 0; CharIndex < ObjectSelection.GetCount(); ++CharIndex)
 	{
 		FBModel* Model = (FBModel*)ObjectSelection.GetAt(CharIndex);
-		ModelStoreFunctionType* StoreFunction = ModelStoreFunctions.Find(Model->GetTypeId());
-		if (StoreFunction != nullptr)
+		if (!IsModelInDeviceStream(LiveLinkDevice, Model))
 		{
-			(this->*(*StoreFunction))(Model);
+			ModelStoreFunctionType* StoreFunction = ModelStoreFunctions.Find(Model->GetTypeId());
+			if (StoreFunction != nullptr)
+			{
+				StreamObjectPtr StoreObject = (this->*(*StoreFunction))(Model);
+				LiveLinkDevice->StreamObjects.Emplace(StoreObject);
+				AddSpreadRowFromStreamObject(StoreObject);
+				FBTrace("Added New Object to StreamObject\n");
+			}
+			else
+			{
+				FBTrace("Unknown Object Type for: ");
+				FBTrace(Model->LongName);
+				FBTrace("\n");
+			}
 		}
-		else
-		{
-			FBTrace("Unknown Object Type for: ");
-			FBTrace(Model->LongName);
-			FBTrace("\n");
-		}
-		//if (Model->GetTypeId() == FBLight::TypeInfo)
-		//{
-		//	StreamSpread.RowAdd("Light");
-		//}
-		//else if (Model->GetTypeId() == FBCamera::TypeInfo)
-		//{
-		//	StreamSpread.RowAdd("Camera");
-		//}
-		//else if (Model->GetTypeId() == FBModelSkeleton::TypeInfo)
-		//{
-		//	StreamSpread.RowAdd("Skeleton");
-		//}
-		//else
-		//{
-		//	StreamSpread.RowAdd("Other");
-		//}
 	}
+	ObjectSelection.Clear();
 }
 
-void MobuLiveLinkLayout::StoreCamera(FBModel* Model)
+void MobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 {
-	FBCamera* CameraModel = (FBCamera*)Model;
+	
+}
+
+MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreCamera(const FBModel* Model)
+{
 	FBTrace(Model->LongName);
 	FBTrace(" is a Camera!\n");
 
+	StreamObjectPtr CameraStore(new CameraStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
+	return CameraStore;
 }

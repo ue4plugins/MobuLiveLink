@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "StreamStore.h"
 #include "CommandLine.h"
 #include "TaskGraphInterfaces.h"
 #include "ModuleManager.h"
@@ -26,7 +27,6 @@ class MobuLiveLink : public FBDevice
 {
 	//--- FiLMBOX declaration
 	FBDeviceDeclare(MobuLiveLink, FBDevice);
-
 public:
 	void StartLiveLink();
 	void StopLiveLink();
@@ -54,12 +54,17 @@ public:
 
 public:
 	const FString mProviderName = TEXT("Mobu Live Link");
+	TArray<TSharedPtr<StreamObject>> StreamObjects;
+	
+	TSharedPtr<ILiveLinkProvider> LiveLinkProvider;
 
 private:
 
 	double SamplingRate;
 	FBDeviceSamplingMode SamplingType;
 	FBFastLock mCleanUpLock;
+
+	
 
 	void SetDeviceInformation(const char* NewDeviceInformation);
 };

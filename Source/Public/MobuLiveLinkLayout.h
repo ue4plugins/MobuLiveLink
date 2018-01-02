@@ -8,7 +8,7 @@
 class MobuLiveLinkLayout : public FBDeviceLayout
 {
 	FBDeviceLayoutDeclare(MobuLiveLinkLayout, FBDeviceLayout);
-
+	
 public:
 	virtual bool FBCreate();
 	virtual void FBDestroy();
@@ -23,6 +23,7 @@ public:
 	void EventDeviceStatusChange(HISender Sender, HKEvent Event);
 	void EventUIIdle(HISender Sender, HKEvent Event);
 	void EventAddToStream(HISender Sender, HKEvent Event);
+	void EventRemoveFromStream(HISender Sender, HKEvent Event);
 
 public:
 
@@ -35,11 +36,14 @@ public:
 
 private:
 
-	typedef void (MobuLiveLinkLayout::*ModelStoreFunctionType)(FBModel* CameraModel);
+	typedef TSharedPtr<StreamObject> StreamObjectPtr;
+	typedef StreamObjectPtr (MobuLiveLinkLayout::*ModelStoreFunctionType)(FBModel* CameraModel);
 
-	void StoreCamera(FBModel* CameraModel);
+	StreamObjectPtr StoreCamera(const FBModel* CameraModel);
 
 	TMap<int, ModelStoreFunctionType> ModelStoreFunctions;
+
+	void AddSpreadRowFromStreamObject(StreamObjectPtr Object);
 
 	FBSystem				System;
 	MobuLiveLink*			LiveLinkDevice;

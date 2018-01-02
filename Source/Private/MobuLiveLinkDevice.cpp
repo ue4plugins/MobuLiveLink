@@ -2,10 +2,6 @@
 #include "MobuLiveLinkDevice.h"
 
 
-
-TSharedPtr<ILiveLinkProvider> LiveLinkProvider;
-
-
 //--- Device strings
 #define MOBULIVELINK__CLASS	MOBULIVELINK__CLASSNAME
 #define MOBULIVELINK__NAME	MOBULIVELINK__CLASSSTR
@@ -19,7 +15,7 @@ FBRegisterDevice		(	MOBULIVELINK__NAME,
 							MOBULIVELINK__CLASS,
 							MOBULIVELINK__LABEL,
 							MOBULIVELINK__DESC,
-							FB_DEFAULT_SDK_ICON		);	// Icon filename (default=Open Reality icon)
+							"C:/Users/david.hibbitts/Pictures/UE_128.png"		);	// Icon filename (default=Open Reality icon)
 
 struct ScopedFastLock
 {
@@ -149,7 +145,10 @@ bool MobuLiveLink::Reset()
 bool MobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo* pEvaluateInfo)
 {
 	ScopedFastLock scoped_lock(mCleanUpLock);
-	FBTrace("Tickity Tick\n");
+	for (auto Object : StreamObjects)
+	{
+		Object->GetStreamData();
+	}
 	return true;
 }
 
