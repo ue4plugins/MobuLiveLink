@@ -10,8 +10,8 @@ class MobuLiveLinkLayout : public FBDeviceLayout
 	FBDeviceLayoutDeclare(MobuLiveLinkLayout, FBDeviceLayout);
 	
 public:
-	virtual bool FBCreate();
-	virtual void FBDestroy();
+	bool FBCreate() override;
+	void FBDestroy() override;
 
 	// UI Management
 	void UICreate();
@@ -24,6 +24,7 @@ public:
 	void EventUIIdle(HISender Sender, HKEvent Event);
 	void EventAddToStream(HISender Sender, HKEvent Event);
 	void EventRemoveFromStream(HISender Sender, HKEvent Event);
+	void EventStreamSpreadCellChange(HISender Sender, HKEvent Event);
 
 public:
 
@@ -40,6 +41,8 @@ private:
 	typedef StreamObjectPtr (MobuLiveLinkLayout::*ModelStoreFunctionType)(FBModel* CameraModel);
 
 	StreamObjectPtr StoreCamera(const FBModel* CameraModel);
+	StreamObjectPtr StoreLight(const FBModel* LightModel);
+	StreamObjectPtr StoreGeneric(const FBModel* Model);
 
 	TMap<int, ModelStoreFunctionType> ModelStoreFunctions;
 

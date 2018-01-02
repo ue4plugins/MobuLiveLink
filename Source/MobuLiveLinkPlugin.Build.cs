@@ -31,26 +31,20 @@ public class MobuLiveLinkPlugin : ModuleRules
         {
             string MobuVersionString = "2017";
             string MobuInstallFolder = @"D:\Programs\Autodesk\MotionBuilder " + MobuVersionString;
-            string QtFolder = Path.GetFullPath(Path.Combine(ModuleDirectory, "../ThirdPartyIncludes/Qt/Mobu " + MobuVersionString));
 
             // Make sure this version of Mobu is actually installed
             if (Directory.Exists(MobuInstallFolder))
             {
                 PrivateIncludePaths.Add(Path.Combine(MobuInstallFolder, "OpenRealitySDK/include"));
-                PrivateIncludePaths.Add(Path.Combine(QtFolder, "include"));
-                PrivateIncludePaths.Add(Path.GetFullPath(Path.Combine(ModuleDirectory, "../MOC")));
 
                 if (Target.Platform == UnrealTargetPlatform.Win64)  // @todo: Support other platforms?
                 {
                     PublicLibraryPaths.Add(Path.Combine(MobuInstallFolder, "OpenRealitySDK/lib/x64"));
-                    PublicLibraryPaths.Add(Path.Combine(QtFolder, "lib"));
 
                     // Mobu and Qt libraries we're depending on
                     PublicAdditionalLibraries.AddRange(new string[]
                         {
                             "fbsdk.lib",
-                            "QtCore4.lib",
-                            "QtGui4.lib"
                         }
                     );
                 }

@@ -32,8 +32,8 @@ public:
 	void StopLiveLink();
 
 	//--- FiLMBOX Construction/Destruction
-	virtual bool FBCreate();		//!< FiLMBOX constructor.
-	virtual void FBDestroy();		//!< FiLMBOX destructor.
+	bool FBCreate() override;		//!< FiLMBOX constructor.
+	void FBDestroy() override;		//!< FiLMBOX destructor.
 
 	//--- Initialisation/Shutdown
 	bool Init();		//!< Initialize/create device.
@@ -44,17 +44,17 @@ public:
 
 	//--- The following will be called by the real-time engine.
 	//virtual bool AnimationNodeNotify(FBAnimationNode* AnimationNode, FBEvaluateInfo* EvaluateInfo);	//!< Real-time evaluation for node.
-	virtual void DeviceIONotify(kDeviceIOs  Action, FBDeviceNotifyInfo &DeviceNotifyInfo);	//!< Notification of/for Device IO.
-	virtual bool DeviceEvaluationNotify(kTransportMode Mode, FBEvaluateInfo* EvaluateInfo);	//!< Evaluation the device (write to hardware).
-	virtual bool DeviceOperation(kDeviceOperations Operation);	//!< Operate device.
+	void DeviceIONotify(kDeviceIOs  Action, FBDeviceNotifyInfo &DeviceNotifyInfo) override;	//!< Notification of/for Device IO.
+	bool DeviceEvaluationNotify(kTransportMode Mode, FBEvaluateInfo* EvaluateInfo) override;	//!< Evaluation the device (write to hardware).
+	bool DeviceOperation(kDeviceOperations Operation) override;	//!< Operate device.
 
 	//--- FBX Load/Save.
-	virtual bool FbxStore(FBFbxObject* FbxObject, kFbxObjectStore StoreWhat);	//!< Store in FBX file.
-	virtual bool FbxRetrieve(FBFbxObject* FbxObject, kFbxObjectStore StoreWhat);	//!< Retrieve from FBX file.
+	bool FbxStore(FBFbxObject* FbxObject, kFbxObjectStore StoreWhat) override;	//!< Store in FBX file.
+	bool FbxRetrieve(FBFbxObject* FbxObject, kFbxObjectStore StoreWhat) override;	//!< Retrieve from FBX file.
 
 public:
 	const FString mProviderName = TEXT("Mobu Live Link");
-	TArray<TSharedPtr<StreamObject>> StreamObjects;
+	TMap<kReference, TSharedPtr<StreamObject>> StreamObjects;
 	
 	TSharedPtr<ILiveLinkProvider> LiveLinkProvider;
 

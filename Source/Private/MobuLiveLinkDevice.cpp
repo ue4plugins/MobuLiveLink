@@ -145,9 +145,9 @@ bool MobuLiveLink::Reset()
 bool MobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo* pEvaluateInfo)
 {
 	ScopedFastLock scoped_lock(mCleanUpLock);
-	for (auto Object : StreamObjects)
+	for (auto MapPair : StreamObjects)
 	{
-		Object->GetStreamData();
+		MapPair.Value->GetStreamData();
 	}
 	return true;
 }
