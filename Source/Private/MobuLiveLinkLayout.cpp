@@ -23,12 +23,15 @@ bool MobuLiveLinkLayout::FBCreate()
 
 	ModelStoreFunctions.Emplace(FBCamera::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreCamera);
 	ModelStoreFunctions.Emplace(FBLight::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreLight);
-
+	ModelStoreFunctions.Emplace(FBModelSkeleton::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreSkeleton);
+	ModelStoreFunctions.Emplace(FBModelRoot::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreSkeleton);
+	ModelStoreFunctions.Emplace(FBModelNull::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreGeneric);
 	// Get a handle on the device.
 	LiveLinkDevice = ((MobuLiveLink *)(FBDevice *)Device);
 
 	FBPropertyPublish(this, ObjectSelection, "ObjectSelection", NULL, NULL);
 	ObjectSelection.SetFilter(FBModel::GetInternalClassId());
+	ObjectSelection.SetSingleConnect(true);
 
 	UICreate();
 	UIConfigure();
@@ -162,7 +165,8 @@ void MobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 void MobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
 {
 	StreamSpread.RowAdd(Object->RootModel->LongName, (kReference)Object->RootModel);
-	StreamSpread.SetCell((kReference)Object->RootModel, 0, Object->RootModel->LongName);
+
+	StreamSpread.SetCell((kReference)Object->RootModel, 0, FStringToChar(Object->GetSubjectName().ToString()));
 	StreamSpread.SetCell((kReference)Object->RootModel, 1, FStringToChar(Object->GetStreamOptions()));
 	StreamSpread.SetCell((kReference)Object->RootModel, 2, true);
 	StreamSpread.SetCell((kReference)Object->RootModel, 2, "Active");
@@ -186,11 +190,14 @@ void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 		if (!IsModelInDeviceStream(LiveLinkDevice, Model))
 		{
 			ModelStoreFunctionType* StoreFunction = ModelStoreFunctions.Find(Model->GetTypeId());
-			StreamObjectPtr StoreObject = (StoreFunction != nullptr) ? (this->*(*StoreFunction))(Model) : StoreGeneric(Model);
+			if (StoreFunction != nullptr)
+			{
+				StreamObjectPtr StoreObject = (this->*(*StoreFunction))(Model);
 
-			LiveLinkDevice->StreamObjects.Emplace((kReference)Model, StoreObject);
-			AddSpreadRowFromStreamObject(StoreObject);
-			FBTrace("Added New Object to StreamObject\n");
+				LiveLinkDevice->StreamObjects.Emplace((kReference)Model, StoreObject);
+				AddSpreadRowFromStreamObject(StoreObject);
+				FBTrace("Added New Object to StreamObject\n");
+			}
 
 		}
 	}
@@ -262,8 +269,19 @@ MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreLight(const FBModel
 MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreGeneric(const FBModel* Model)
 {
 	FBTrace(Model->LongName);
-	FBTrace(" is an Unknown Type!\n");
+	FBTrace(" is an Unknown Type! - ");
+	FBTrace(((FBModel*)Model)->ClassName());
+	FBTrace("\n");
 
 	StreamObjectPtr GenericStore(new GenericStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
 	return GenericStore;
+}
+
+MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreSkeleton(const FBModel* Model)
+{
+	FBTrace(Model->LongName);
+	FBTrace(" is a Skeleton!\n");
+
+	StreamObjectPtr SkeletonStore(new SkeletonHeirarchyStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
+	return SkeletonStore;
 }
