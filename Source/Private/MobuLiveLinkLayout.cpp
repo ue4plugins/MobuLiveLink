@@ -16,6 +16,7 @@ FBRegisterDeviceLayout(MOBULIVELINK__LAYOUT,
 
 #define IntToChar(input) std::to_string(input).c_str()
 #define FStringToChar(input) ((std::string)TCHAR_TO_UTF8(*input)).c_str()
+#define BoolToActiveText(input) (input ? "Active" : "Inactive")
 
 bool MobuLiveLinkLayout::FBCreate()
 {
@@ -26,12 +27,13 @@ bool MobuLiveLinkLayout::FBCreate()
 	ModelStoreFunctions.Emplace(FBModelSkeleton::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreSkeleton);
 	ModelStoreFunctions.Emplace(FBModelRoot::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreSkeleton);
 	ModelStoreFunctions.Emplace(FBModelNull::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreGeneric);
+
 	// Get a handle on the device.
 	LiveLinkDevice = ((MobuLiveLink *)(FBDevice *)Device);
 
 	FBPropertyPublish(this, ObjectSelection, "ObjectSelection", NULL, NULL);
 	ObjectSelection.SetFilter(FBModel::GetInternalClassId());
-	ObjectSelection.SetSingleConnect(true);
+	ObjectSelection.SetSingleConnect(false);
 
 	UICreate();
 	UIConfigure();
@@ -39,7 +41,6 @@ bool MobuLiveLinkLayout::FBCreate()
 
 	LiveLinkDevice->OnStatusChange.Add(this, (FBCallback)&MobuLiveLinkLayout::EventDeviceStatusChange);
 	System.OnUIIdle.Add(this, (FBCallback)&MobuLiveLinkLayout::EventUIIdle);
-
 	return true;
 }
 
@@ -105,7 +106,14 @@ void MobuLiveLinkLayout::UICreate()
 	StreamLayout.SetControl("StreamSpread", StreamSpread);
 }
 
-
+void MobuLiveLinkLayout::CreateSpreadColumns()
+{
+	StreamSpread.ColumnAdd("Subject Name", 0);
+	StreamSpread.ColumnAdd("Stream Type", 1);
+	StreamSpread.GetColumn(1).Style = kFBCellStyleMenu;
+	StreamSpread.ColumnAdd("Status", 2);
+	StreamSpread.GetColumn(2).Style = kFBCellStyle2StatesButton;
+}
 
 void MobuLiveLinkLayout::UIConfigure()
 {
@@ -124,11 +132,8 @@ void MobuLiveLinkLayout::UIConfigure()
 	StreamSpread.Caption = "Object Root";
 	//StreamSpread.GetColumn(-1).Width = 0;
 	StreamSpread.MultiSelect = true;
-	StreamSpread.ColumnAdd("Subject Name", 0);
-	StreamSpread.ColumnAdd("Stream Type", 1);
-	StreamSpread.GetColumn(1).Style = kFBCellStyleMenu;
-	StreamSpread.ColumnAdd("Status", 2);
-	StreamSpread.GetColumn(2).Style = kFBCellStyle2StatesButton;
+
+	CreateSpreadColumns();
 
 	StreamSpread.OnCellChange.Add(this, (FBCallback)&MobuLiveLinkLayout::EventStreamSpreadCellChange);
 }
@@ -141,6 +146,9 @@ void MobuLiveLinkLayout::UIRefresh()
 
 void MobuLiveLinkLayout::UIReset()
 {
+	FBTrace("UI Reset!\n");
+	StreamSpread.Clear();
+	CreateSpreadColumns();
 	for (const auto MapPair : LiveLinkDevice->StreamObjects)
 	{
 		AddSpreadRowFromStreamObject(MapPair.Value);
@@ -156,6 +164,11 @@ void MobuLiveLinkLayout::EventDeviceStatusChange(HISender Sender, HKEvent Event)
 
 void MobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 {
+	if (LiveLinkDevice->IsDirty())
+	{
+		LiveLinkDevice->UpdateStreamObjects();
+		UIReset();
+	}
 	if (LiveLinkDevice->Online)
 	{
 		UIRefresh();
@@ -168,8 +181,10 @@ void MobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
 
 	StreamSpread.SetCell((kReference)Object->RootModel, 0, FStringToChar(Object->GetSubjectName().ToString()));
 	StreamSpread.SetCell((kReference)Object->RootModel, 1, FStringToChar(Object->GetStreamOptions()));
-	StreamSpread.SetCell((kReference)Object->RootModel, 2, true);
-	StreamSpread.SetCell((kReference)Object->RootModel, 2, "Active");
+	StreamSpread.SetCell((kReference)Object->RootModel, 1, Object->GetStreamingMode());
+	bool bIsActive = Object->GetActiveStatus();
+	StreamSpread.SetCell((kReference)Object->RootModel, 2, bIsActive);
+	StreamSpread.SetCell((kReference)Object->RootModel, 2, BoolToActiveText(bIsActive));
 }
 
 
@@ -181,13 +196,21 @@ FORCEINLINE bool IsModelInDeviceStream(const MobuLiveLink* MobuDevice, const FBM
 
 void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 {
+	TArray<FBModel*> ParentsToIgnore;
+	ParentsToIgnore.Reserve(ObjectSelection.GetCount());
+
 	for (int CharIndex = 0; CharIndex < ObjectSelection.GetCount(); ++CharIndex)
 	{
 		FBModel* Model = (FBModel*)ObjectSelection.GetAt(CharIndex);
 
-		/* TODO: Ignore the root scene object*/
-
-		if (!IsModelInDeviceStream(LiveLinkDevice, Model))
+		// Only grab root items
+		// Temp solution. Not a huge fan. 
+		// perhaps have creation functions contain a list of models to exclude?
+		if (ParentsToIgnore.Contains(Model->Parent))
+		{
+			ParentsToIgnore.Emplace(Model);
+		}
+		else if (!IsModelInDeviceStream(LiveLinkDevice, Model))
 		{
 			ModelStoreFunctionType* StoreFunction = ModelStoreFunctions.Find(Model->GetTypeId());
 			if (StoreFunction != nullptr)
@@ -197,6 +220,8 @@ void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 				LiveLinkDevice->StreamObjects.Emplace((kReference)Model, StoreObject);
 				AddSpreadRowFromStreamObject(StoreObject);
 				FBTrace("Added New Object to StreamObject\n");
+
+				ParentsToIgnore.Emplace(Model);
 			}
 
 		}
@@ -206,12 +231,34 @@ void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 
 void MobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 {
-	
+	int SelectedCount = 0;
+	TArray<kReference> DeletionObjects;
+	DeletionObjects.Reserve(LiveLinkDevice->StreamObjects.Num());
+	for (const auto& MapPair : LiveLinkDevice->StreamObjects)
+	{
+		kReference RowKey = (kReference)MapPair.Value->RootModel;
+		bool bRowSelected = StreamSpread.GetRow(RowKey).RowSelected;
+		if (bRowSelected)
+		{
+			DeletionObjects.Emplace(RowKey);
+			SelectedCount++;
+		}
+	}
+	for (const auto& DeletionKey : DeletionObjects)
+	{
+		LiveLinkDevice->StreamObjects.Remove(DeletionKey);
+	}
+	if (SelectedCount > 0)
+	{
+		UIReset();
+	}
+	FBTrace("%d items in selection!\n", SelectedCount);
 }
 
 void MobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent Event)
 {
 	FBEventSpread SpreadEvent = Event;
+
 	auto ObjectPtr = LiveLinkDevice->StreamObjects.Find(SpreadEvent.Row);
 	if (ObjectPtr == nullptr)
 	{
@@ -238,7 +285,7 @@ void MobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent Ev
 	{
 		int bIsActive;
 		StreamSpread.GetCell(SpreadEvent.Row, SpreadEvent.Column, bIsActive);
-		StreamSpread.SetCell(SpreadEvent.Row, SpreadEvent.Column, (bIsActive > 0 ? "Active" : "Inactive"));
+		StreamSpread.SetCell(SpreadEvent.Row, SpreadEvent.Column, BoolToActiveText(bIsActive > 0));
 		(*ObjectPtr)->UpdateActiveStatus(bIsActive > 0);
 		break;
 	}

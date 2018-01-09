@@ -52,17 +52,29 @@ public:
 	bool FbxStore(FBFbxObject* FbxObject, kFbxObjectStore StoreWhat) override;	//!< Store in FBX file.
 	bool FbxRetrieve(FBFbxObject* FbxObject, kFbxObjectStore StoreWhat) override;	//!< Retrieve from FBX file.
 
+	//--- Events
+	void EventSceneChange(HISender Sender, HKEvent Event);
+
 public:
 	const FString mProviderName = TEXT("Mobu Live Link");
 	TMap<kReference, TSharedPtr<StreamObject>> StreamObjects;
 	
 	TSharedPtr<ILiveLinkProvider> LiveLinkProvider;
 
+	void UpdateStreamObjects();
+
+	void SetDirty(bool bNewDirty) { bIsDirty = bNewDirty; };
+	bool IsDirty() const { return bIsDirty; };
+
 private:
+
+	bool bIsDirty;
 
 	double SamplingRate;
 	FBDeviceSamplingMode SamplingType;
 	FBFastLock mCleanUpLock;
+
+	TMap<FBSceneChangeType, const char *> SceneChangeNameMap;
 
 	
 

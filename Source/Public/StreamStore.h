@@ -64,7 +64,10 @@ public:
 	const TSharedPtr<ILiveLinkProvider> Provider; 
 	const TArray<FString> ConnectionOptions;
 
-	virtual ~StreamObject() {};
+	virtual ~StreamObject() 
+	{
+		Provider->ClearSubject(SubjectName);
+	};
 
 	virtual FString GetStreamOptions()
 	{
@@ -84,10 +87,20 @@ public:
 		UpdateFromModel();
 	};
 
+	virtual int GetStreamingMode() const
+	{
+		return StreamingMode;
+	};
+
 	virtual void UpdateActiveStatus(bool bIsNowActive)
 	{
 		bIsActive = bIsNowActive;
 		UpdateFromModel();
+	};
+
+	virtual bool GetActiveStatus() const
+	{
+		return bIsActive;
 	};
 
 	virtual void UpdateFromModel() = 0;
@@ -109,8 +122,14 @@ protected:
 	int StreamingMode;
 	bool bIsActive;
 
-	StreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, std::initializer_list<FString> Options) 
-		: RootModel(ModelPointer), Provider(StreamProvider), ConnectionOptions(Options), SubjectName(ModelPointer->LongName), bIsActive(true), StreamingMode(0) {};
+	StreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, std::initializer_list<FString> Options)
+		: RootModel(ModelPointer), Provider(StreamProvider), ConnectionOptions(Options), bIsActive(true), StreamingMode(0)
+	{
+		FString ModelLongName(ANSI_TO_TCHAR(RootModel->LongName));
+		FString RightString;
+		ModelLongName.Split(TEXT(":"), &ModelLongName, &RightString);
+		SubjectName = FName(*ModelLongName);
+	};
 };
 
 
