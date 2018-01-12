@@ -49,10 +49,6 @@ public class MobuLiveLinkPlugin : ModuleRules
                     );
                 }
             }
-			else
-            {
-                throw new BuildException("Couldn't find Autodesk MotionBuilder " + MobuVersionString + " in folder '" + MobuInstallFolder + "'.  This version of MotionBuilder must be installed for us to find the MotionBuilder SDK files.");
-            }
 		}
 	}
 }

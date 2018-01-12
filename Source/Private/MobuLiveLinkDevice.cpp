@@ -264,7 +264,6 @@ void MobuLiveLink::StartLiveLink()
 	LiveLinkProvider = ILiveLinkProvider::CreateLiveLinkProvider(mProviderName);
 	
 	FBTrace("Live Link Started!\n");
-	FBTrace(LiveLinkProvider->IsEndpointValid() ? "Endpoint Valid\n" : "Endpoint Invalid\n");
 }
 
 
