@@ -14,8 +14,6 @@ FBRegisterDeviceLayout(MOBULIVELINK__LAYOUT,
 
 //MobuLiveLinkLayout* MobuLiveLinkQtFrame::CreatingLayout = nullptr;
 
-#define IntToChar(input) std::to_string(input).c_str()
-#define FStringToChar(input) ((std::string)TCHAR_TO_UTF8(*input)).c_str()
 #define BoolToActiveText(input) (input ? "Active" : "Inactive")
 
 bool MobuLiveLinkLayout::FBCreate()
@@ -130,19 +128,12 @@ void MobuLiveLinkLayout::UIConfigure()
 	RemoveFromStreamButton.OnClick.Add(this, (FBCallback)&MobuLiveLinkLayout::EventRemoveFromStream);
 
 	StreamSpread.Caption = "Object Root";
-	//StreamSpread.GetColumn(-1).Width = 0;
 	StreamSpread.MultiSelect = true;
 
 	CreateSpreadColumns();
 
 	StreamSpread.OnCellChange.Add(this, (FBCallback)&MobuLiveLinkLayout::EventStreamSpreadCellChange);
 }
-
-
-void MobuLiveLinkLayout::UIRefresh()
-{
-}
-
 
 void MobuLiveLinkLayout::UIReset()
 {
@@ -153,6 +144,7 @@ void MobuLiveLinkLayout::UIReset()
 	{
 		AddSpreadRowFromStreamObject(MapPair.Value);
 	}
+	LiveLinkDevice->SetRefreshUI(false);
 }
 
 
@@ -167,11 +159,10 @@ void MobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 	if (LiveLinkDevice->IsDirty())
 	{
 		LiveLinkDevice->UpdateStreamObjects();
-		UIReset();
 	}
-	if (LiveLinkDevice->Online)
+	if (LiveLinkDevice->ShouldRefreshUI())
 	{
-		UIRefresh();
+		UIReset();
 	}
 }
 

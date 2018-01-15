@@ -22,6 +22,9 @@
 #define MOBULIVELINK__CLASSNAME		MobuLiveLink
 #define MOBULIVELINK__CLASSSTR		"MobuLiveLink"
 
+#define IntToChar(input) std::to_string(input).c_str()
+#define FStringToChar(input) ((std::string)TCHAR_TO_UTF8(*input)).c_str()
+
 //! Simple input device.
 class MobuLiveLink : public FBDevice
 {
@@ -66,9 +69,13 @@ public:
 	void SetDirty(bool bNewDirty) { bIsDirty = bNewDirty; };
 	bool IsDirty() const { return bIsDirty; };
 
+	void SetRefreshUI(bool bNewRefreshUI) { bShouldRefreshUI = bNewRefreshUI; };
+	bool ShouldRefreshUI() const { return bShouldRefreshUI; };
+
 private:
 
 	bool bIsDirty;
+	bool bShouldRefreshUI;
 
 	double SamplingRate;
 	FBDeviceSamplingMode SamplingType;

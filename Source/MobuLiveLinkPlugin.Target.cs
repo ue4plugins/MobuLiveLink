@@ -6,6 +6,22 @@ using System.IO;
 
 public class MobuLiveLinkPluginTarget : TargetRules
 {
+    public string ModuleDirectory
+    {
+        get
+        {
+            return Path.GetDirectoryName(RulesCompiler.GetFileNameFromType(GetType()));
+        }
+    }
+
+	public string BinariesDirectory
+    {
+		get
+        { 
+		return Path.GetFullPath(Path.Combine("../Binaries", "Win64/MotionBuilder"));
+        }
+    }
+
     public MobuLiveLinkPluginTarget(TargetInfo Target) : base(Target)
     {
         Type = TargetType.Program;
@@ -25,5 +41,8 @@ public class MobuLiveLinkPluginTarget : TargetRules
         bCompileICU = false;
         bHasExports = false;
 
+        string ResourcesFolder = Path.GetFullPath(Path.Combine(ModuleDirectory, "../Resources"));
+        PostBuildSteps.Add("echo \"" + UEBuildTarget.OutputPath + "\"");
+        PostBuildSteps.Add("copy /a /y \"" + ResourcesFolder + "\\*.*\" \"" + BinariesDirectory + "\"");
     }
 }

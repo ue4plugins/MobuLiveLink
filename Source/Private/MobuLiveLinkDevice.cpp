@@ -1,6 +1,23 @@
 ﻿//--- Class declaration
 #include "MobuLiveLinkDevice.h"
 
+//--- For getting the dll location on disk
+#include "Windows.h"
+#include <string>
+#include "Paths.h"
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+
+FString GetDeviceIconPath()
+{
+	char   DllPath[MAX_PATH] = { 0 };
+	GetModuleFileNameA((HINSTANCE)&__ImageBase, DllPath, _countof(DllPath));
+
+	FString BasePath = FPaths::GetPath(FString(DllPath));
+	FString FinalPath = FPaths::Combine(BasePath, FString("UE_128.png"));
+	FBTrace("%s\n", FStringToChar(FinalPath));
+
+	return FinalPath;
+};
 
 //--- Device strings
 #define MOBULIVELINK__CLASS	MOBULIVELINK__CLASSNAME
@@ -15,7 +32,7 @@ FBRegisterDevice		(	MOBULIVELINK__NAME,
 							MOBULIVELINK__CLASS,
 							MOBULIVELINK__LABEL,
 							MOBULIVELINK__DESC,
-							"C:/Users/david.hibbitts/Pictures/UE_128.png"		);	// Icon filename (default=Open Reality icon)
+							FStringToChar(GetDeviceIconPath()));
 
 struct ScopedFastLock
 {
@@ -292,6 +309,10 @@ void MobuLiveLink::EventSceneChange(HISender Sender, HKEvent Event)
 	case kFBSceneChangeTransactionBegin:
 	case kFBSceneChangeTransactionEnd:
 		return;
+	case kFBSceneChangeLoadBegin:
+		// Crashes if you try and stream while loading a new file
+		DeviceOperation(FBDevice::kOpStop);
+		return;
 	default:
 		SetDirty(true);
 		break;
@@ -314,4 +335,5 @@ void MobuLiveLink::UpdateStreamObjects()
 		}	
 	}
 	SetDirty(false);
+	SetRefreshUI(true);
 }

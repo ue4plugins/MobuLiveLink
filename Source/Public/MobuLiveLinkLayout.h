@@ -17,7 +17,6 @@ public:
 	void UICreate();
 	void UIConfigure();
 	void UIReset();
-	void UIRefresh();
 	void CreateSpreadColumns();
 
 	// Main Layout: Events
