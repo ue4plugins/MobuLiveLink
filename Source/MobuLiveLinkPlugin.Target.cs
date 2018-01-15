@@ -42,7 +42,6 @@ public class MobuLiveLinkPluginTarget : TargetRules
         bHasExports = false;
 
         string ResourcesFolder = Path.GetFullPath(Path.Combine(ModuleDirectory, "../Resources"));
-        PostBuildSteps.Add("echo \"" + UEBuildTarget.OutputPath + "\"");
-        PostBuildSteps.Add("copy /a /y \"" + ResourcesFolder + "\\*.*\" \"" + BinariesDirectory + "\"");
+        PostBuildSteps.Add("copy /a /b /y /v \"" + ResourcesFolder + "\\*.*\" \"" + BinariesDirectory + "\"");
     }
 }
