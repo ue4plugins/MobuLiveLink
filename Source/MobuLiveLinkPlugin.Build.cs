@@ -41,7 +41,7 @@ public class MobuLiveLinkPlugin : ModuleRules
                 {
                     PublicLibraryPaths.Add(Path.Combine(MobuInstallFolder, "OpenRealitySDK/lib/x64"));
 
-                    // Mobu and Qt libraries we're depending on
+                    // Mobu library we're depending on
                     PublicAdditionalLibraries.AddRange(new string[]
                         {
                             "fbsdk.lib",

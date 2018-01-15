@@ -57,7 +57,7 @@ public:
 
 public:
 	const FString mProviderName = TEXT("Mobu Live Link");
-	TMap<kReference, TSharedPtr<StreamObject>> StreamObjects;
+	TMap<kReference, TSharedPtr<StreamObjectBase>> StreamObjects;
 	
 	TSharedPtr<ILiveLinkProvider> LiveLinkProvider;
 
