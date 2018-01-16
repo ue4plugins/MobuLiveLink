@@ -92,7 +92,11 @@ FTransform StreamObjectBase::MobuTransformToUnreal(FBMatrix& MobuTransfrom)
 			MobuTransformUnrealSpace(j, 3) = MobuTransfrom(j, 3);
 		}
 	}
-	FBMatrixToTQS(TVector, Quat, SVector, MobuTransformUnrealSpace);
+
+	FBMatrixToTranslation(TVector, MobuTransformUnrealSpace);
+	FBMatrixToQuaternion(Quat, MobuTransformUnrealSpace);
+	FBMatrixToScaling(SVector, MobuTransformUnrealSpace);
+
 	FTransform UnrealTransform;
 	UnrealTransform.SetRotation(FQuat(Quat[0], Quat[1], Quat[2], Quat[3]));
 	UnrealTransform.SetTranslation(FVector(TVector[0], TVector[1], TVector[2]));
