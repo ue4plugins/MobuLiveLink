@@ -10,9 +10,6 @@ FBRegisterDeviceLayout(MOBULIVELINK__LAYOUT,
 	MOBULIVELINK__CLASSSTR,
 	FB_DEFAULT_SDK_ICON);
 
-//#pragma optimize("", off)
-
-//MobuLiveLinkLayout* MobuLiveLinkQtFrame::CreatingLayout = nullptr;
 
 #define BoolToActiveText(input) (input ? "Active" : "Inactive")
 

@@ -46,47 +46,8 @@ struct ScopedFastLock
  ************************************************/
 bool MobuLiveLink::FBCreate()
 {
-
-	SceneChangeNameMap.Emplace(kFBSceneChangeNone,					"Unknown event");
-	SceneChangeNameMap.Emplace(kFBSceneChangeDestroy,				"Object destroyed");
-	SceneChangeNameMap.Emplace(kFBSceneChangeAttach,				"Object attached");
-	SceneChangeNameMap.Emplace(kFBSceneChangeDetach,				"Object detached");
-	SceneChangeNameMap.Emplace(kFBSceneChangeAddChild,				"Child added");
-	SceneChangeNameMap.Emplace(kFBSceneChangeRemoveChild,			"Child removed");
-	SceneChangeNameMap.Emplace(kFBSceneChangeSelect,				"Object selection");
-	SceneChangeNameMap.Emplace(kFBSceneChangeUnselect,				"Object deselection");
-	SceneChangeNameMap.Emplace(kFBSceneChangeRename,				"Before object rename");
-	SceneChangeNameMap.Emplace(kFBSceneChangeRenamePrefix,			"Before object rename prefix");
-	SceneChangeNameMap.Emplace(kFBSceneChangeRenameUnique,			"Before object rename unique");
-	SceneChangeNameMap.Emplace(kFBSceneChangeRenameUniquePrefix,	"Before object rename unique prefix");
-	SceneChangeNameMap.Emplace(kFBSceneChangeRenamed,				"After object rename");
-	SceneChangeNameMap.Emplace(kFBSceneChangeRenamedPrefix,			"After object rename prefix");
-	SceneChangeNameMap.Emplace(kFBSceneChangeRenamedUnique,			"After object rename unique");
-	SceneChangeNameMap.Emplace(kFBSceneChangeRenamedUniquePrefix,	"After object rename unique prefix");
-	SceneChangeNameMap.Emplace(kFBSceneChangeSoftSelect,			"Soft selection");
-	SceneChangeNameMap.Emplace(kFBSceneChangeSoftUnselect,			"Soft deselection");
-	SceneChangeNameMap.Emplace(kFBSceneChangeHardSelect,			"Hard selection");
-	SceneChangeNameMap.Emplace(kFBSceneChangeActivate,				"Activate");
-	SceneChangeNameMap.Emplace(kFBSceneChangeDeactivate,			"Deactivate");
-	SceneChangeNameMap.Emplace(kFBSceneChangeLoadBegin,				"Begin loading file");
-	SceneChangeNameMap.Emplace(kFBSceneChangeLoadEnd,				"End loading file");
-	SceneChangeNameMap.Emplace(kFBSceneChangeClearBegin,			"Begin clearing file (file new)");
-	SceneChangeNameMap.Emplace(kFBSceneChangeClearEnd,				"End clearing file (file new)");
-	SceneChangeNameMap.Emplace(kFBSceneChangeTransactionBegin,		"Begin transaction");
-	SceneChangeNameMap.Emplace(kFBSceneChangeTransactionEnd,		"End transaction");
-	SceneChangeNameMap.Emplace(kFBSceneChangeMergeTransactionBegin, "Begin merge transaction");
-	SceneChangeNameMap.Emplace(kFBSceneChangeMergeTransactionEnd,	"End merge transaction");
-	SceneChangeNameMap.Emplace(kFBSceneChangeReSelect,				"Re-selection");
-	SceneChangeNameMap.Emplace(kFBSceneChangeChangeName,			"Object change name");
-	SceneChangeNameMap.Emplace(kFBSceneChangeChangedName,			"Object changed name");
-	SceneChangeNameMap.Emplace(kFBSceneChangePreParent,				"Before object parenting");
-	SceneChangeNameMap.Emplace(kFBSceneChangePreUnparent,			"Before object unparenting");
-	SceneChangeNameMap.Emplace(kFBSceneChangeFocus,					"Object have focus");
-	SceneChangeNameMap.Emplace(kFBSceneChangeChangedParent,			"Object changed parent");
-	SceneChangeNameMap.Emplace(kFBSceneChangeReorder,				"Object reorder");
-	SceneChangeNameMap.Emplace(kFBSceneChangeReordered,				"Object reordered");
-
 	// Set sampling rate to 60 Hz
+	// Fixed for now but will be getting a dropdown UI soon
 	FBTime	lPeriod;
 	lPeriod.SetSecondDouble(1.0/60.0);
 	SamplingPeriod	= lPeriod;
@@ -192,15 +153,6 @@ bool MobuLiveLink::Reset()
     return Start();
 }
 
-
-/************************************************
- *	Real-Time Engine Evaluation.
- ************************************************/
-//bool MobuLiveLink::AnimationNodeNotify(FBAnimationNode* pAnimationNode ,FBEvaluateInfo* pEvaluateInfo)
-//{
-//    return true;
-//}
-
 /************************************************
  *	Device Evaluation Notify.
  ************************************************/
@@ -296,6 +248,8 @@ void MobuLiveLink::StopLiveLink()
 
 void MobuLiveLink::EventSceneChange(HISender Sender, HKEvent Event)
 {
+	// todo: Possibly other events I need to handle
+
 	FBEventSceneChange SceneChangeEvent = Event;
 	switch (SceneChangeEvent.Type)
 	{
