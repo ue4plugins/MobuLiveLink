@@ -13,8 +13,6 @@
 class StreamObjectBase
 {
 public:
-	const FBModel* RootModel;
-
 	virtual ~StreamObjectBase();
 
 	// Optional Interface for modifying class parameters
@@ -33,6 +31,10 @@ public:
 
 	virtual void UpdateActiveStatus(bool bIsNowActive);
 
+	virtual const FBModel* GetRootModel();
+
+	virtual bool IsValid();
+
 	// Required Interface for object streaming
 
 	virtual void UpdateFromModel() = 0;
@@ -45,8 +47,11 @@ public:
 
 	static FTransform MobuTransformToUnreal(FBMatrix& MobuTransfrom);
 	static FTransform UnrealTransformFromModel(FBModel* MobuModel, bool bIsGlobal = true);
+	static FTransform UnrealTransformFromCamera(FBCamera* CameraModel);
 
 protected:
+
+	const FBModel* RootModel;
 
 	const TSharedPtr<ILiveLinkProvider> Provider;
 	const TArray<FString> ConnectionOptions;
@@ -57,8 +62,11 @@ protected:
 	int StreamingMode;
 	bool bIsActive;
 
+	
 	StreamObjectBase(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, std::initializer_list<FString> Options);
 
+	// model-less constructor
+	StreamObjectBase(const FName InSubjectName, const TSharedPtr<ILiveLinkProvider> StreamProvider);
 };
 
 // Generic object that only supports a single transform (Nulls, Cubes, etc.)
@@ -99,6 +107,19 @@ class SkeletonHeirarchyStreamObject : public StreamObjectBase
 
 public:
 	SkeletonHeirarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
+
+	void UpdateFromModel() override;
+	void GetStreamData() override;
+};
+
+
+// Streams the Active Editor Camera wrapper
+class EditorActiveCameraStreamObject : public StreamObjectBase
+{
+public:
+	EditorActiveCameraStreamObject(const TSharedPtr<ILiveLinkProvider> StreamProvider);
+
+	bool IsValid() override;
 
 	void UpdateFromModel() override;
 	void GetStreamData() override;

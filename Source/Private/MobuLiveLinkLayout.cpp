@@ -165,14 +165,17 @@ void MobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 
 void MobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
 {
-	StreamSpread.RowAdd(Object->RootModel->LongName, (kReference)Object->RootModel);
+	const FBModel* RootModel = Object->GetRootModel();
+	if (RootModel == nullptr) return;
 
-	StreamSpread.SetCell((kReference)Object->RootModel, 0, FStringToChar(Object->GetSubjectName().ToString()));
-	StreamSpread.SetCell((kReference)Object->RootModel, 1, FStringToChar(Object->GetStreamOptions()));
-	StreamSpread.SetCell((kReference)Object->RootModel, 1, Object->GetStreamingMode());
+	StreamSpread.RowAdd(RootModel->LongName, (kReference)RootModel);
+
+	StreamSpread.SetCell((kReference)RootModel, 0, FStringToChar(Object->GetSubjectName().ToString()));
+	StreamSpread.SetCell((kReference)RootModel, 1, FStringToChar(Object->GetStreamOptions()));
+	StreamSpread.SetCell((kReference)RootModel, 1, Object->GetStreamingMode());
 	bool bIsActive = Object->GetActiveStatus();
-	StreamSpread.SetCell((kReference)Object->RootModel, 2, bIsActive);
-	StreamSpread.SetCell((kReference)Object->RootModel, 2, BoolToActiveText(bIsActive));
+	StreamSpread.SetCell((kReference)RootModel, 2, bIsActive);
+	StreamSpread.SetCell((kReference)RootModel, 2, BoolToActiveText(bIsActive));
 }
 
 
@@ -224,7 +227,7 @@ void MobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 	DeletionObjects.Reserve(LiveLinkDevice->StreamObjects.Num());
 	for (const auto& MapPair : LiveLinkDevice->StreamObjects)
 	{
-		kReference RowKey = (kReference)MapPair.Value->RootModel;
+		kReference RowKey = (kReference)MapPair.Value->GetRootModel();
 		bool bRowSelected = StreamSpread.GetRow(RowKey).RowSelected;
 		if (bRowSelected)
 		{

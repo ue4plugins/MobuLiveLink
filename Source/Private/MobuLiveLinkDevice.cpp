@@ -57,6 +57,9 @@ bool MobuLiveLink::FBCreate()
 
 	SetDirty(false);
 
+	TSharedPtr<StreamObjectBase> EditorCamera((StreamObjectBase*)(new EditorActiveCameraStreamObject(LiveLinkProvider)));
+	StreamObjects.Emplace((kReference)nullptr, EditorCamera);
+
 	return true;
 }
 
@@ -278,8 +281,7 @@ void MobuLiveLink::UpdateStreamObjects()
 {
 	for (auto MapPair : StreamObjects)
 	{
-		bool bInScene = FBSystem().Scene->Components.Find((FBComponent*)MapPair.Value->RootModel) >= 0;
-		if (bInScene)
+		if (MapPair.Value->IsValid())
 		{
 			MapPair.Value->UpdateFromModel();
 		}

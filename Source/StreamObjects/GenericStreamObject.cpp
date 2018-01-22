@@ -8,8 +8,10 @@ GenericStreamObject::GenericStreamObject(const FBModel* ModelPointer, const TSha
 
 void GenericStreamObject::UpdateFromModel()
 {
-	BoneNames.Emplace(FName("Bone01"));
-	BoneParents.Emplace(0);
+	BoneNames.SetNum(1);
+	BoneNames[0] = FName("Bone01");
+	BoneParents.SetNum(1);
+	BoneParents[0] = -1;
 
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 };

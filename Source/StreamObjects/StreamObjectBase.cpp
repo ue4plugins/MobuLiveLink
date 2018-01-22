@@ -11,6 +11,12 @@ StreamObjectBase::StreamObjectBase(const FBModel* ModelPointer, const TSharedPtr
 	SubjectName = FName(*ModelLongName);
 };
 
+// Model-less constructor
+StreamObjectBase::StreamObjectBase(const FName InSubjectName, const TSharedPtr<ILiveLinkProvider> StreamProvider)
+	: RootModel(nullptr), SubjectName(InSubjectName), Provider(StreamProvider), bIsActive(true), StreamingMode(0)
+{
+};
+
 StreamObjectBase::~StreamObjectBase()
 {
 	Provider->ClearSubject(SubjectName);
@@ -59,10 +65,22 @@ void StreamObjectBase::UpdateActiveStatus(bool bIsNowActive)
 	UpdateFromModel();
 };
 
+const FBModel* StreamObjectBase::GetRootModel()
+{
+	return RootModel;
+};
+
+bool StreamObjectBase::IsValid()
+{
+	// By Default an object is valid if the root model is in the scene
+	return FBSystem().Scene->Components.Find((FBComponent*)GetRootModel()) >= 0;
+};
+
 
 // Equality comparison
 
-bool StreamObjectBase::operator==(const StreamObjectBase &other) const {
+bool StreamObjectBase::operator==(const StreamObjectBase &other) const 
+{
 	return (this->RootModel == other.RootModel);
 };
 
@@ -119,6 +137,35 @@ FTransform StreamObjectBase::UnrealTransformFromModel(FBModel* MobuModel, bool b
 
 	return MobuTransformToUnreal(MobuTransform);
 };
+
+FTransform StreamObjectBase::UnrealTransformFromCamera(FBCamera* CameraModel)
+{
+	// MotionBuilder suggests that GetMatrix is deprecated for Cameras and to 
+	// reconstruct from the Camera Matrices explicitly
+
+	FBMatrix ModelView;
+	FBMatrix MatOffset;
+
+	CameraModel->GetCameraMatrix(ModelView, FBCameraMatrixType::kFBModelView, nullptr);
+	FBMatrix InvModelView = ModelView.Inverse();
+
+	// Y-Up Correction
+	FBRVector RotOffset(90, 0, 0);
+	FBRotationToMatrix(MatOffset, RotOffset);
+	FBMatrixMult(ModelView, MatOffset, ModelView);
+
+	// Camera is now in Unreal Space
+	FTransform CameraTransform = MobuTransformToUnreal(ModelView);
+
+	// Mobu Cameras look down a different axis so flip them here
+	// TODO: Consolidate with MobuTransformToUnreal so we're not repeating work
+	FQuat CameraRotation = CameraTransform.GetRotation();
+	FQuat LensRotation;
+	LensRotation.MakeFromEuler(FVector(-90, -90, 0));
+	CameraTransform.SetRotation(CameraRotation * LensRotation);
+
+	return CameraTransform;
+}
 
 
 
