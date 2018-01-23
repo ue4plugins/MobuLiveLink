@@ -164,11 +164,10 @@ void MobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 
 void MobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
 {
+	// Check whether the Object should be shown
+	if (!Object->ShouldShowInUI()) return;
+
 	const kReference ObjectReference = Object->GetReference();
-
-	// Do not add the EditorActiveCamera to the spread
-	if (ObjectReference == (kReference)nullptr) return; 
-
 	const FString RootName = Object->GetRootName();
 
 	StreamSpread.RowAdd(FStringToChar(RootName), ObjectReference);

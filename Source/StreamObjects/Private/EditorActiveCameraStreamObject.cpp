@@ -12,6 +12,11 @@ EditorActiveCameraStreamObject::~EditorActiveCameraStreamObject()
 	Provider->ClearSubject(SubjectName);
 }
 
+const bool EditorActiveCameraStreamObject::ShouldShowInUI() const
+{
+	return false;
+}
+
 const FString EditorActiveCameraStreamObject::GetStreamOptions() const
 {
 	// Stream options are not valid on Editor camera

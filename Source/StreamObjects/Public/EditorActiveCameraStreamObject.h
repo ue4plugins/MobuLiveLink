@@ -11,6 +11,8 @@ public:
 
 	// IStreamObject Interface
 
+	const bool ShouldShowInUI() const final;
+
 	const FString GetStreamOptions() const final;
 
 	FName GetSubjectName() const final;

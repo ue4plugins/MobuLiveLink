@@ -15,6 +15,8 @@ public:
 
 	// IStreamObject Interface
 
+	virtual const bool ShouldShowInUI() const override;
+
 	virtual const FString GetStreamOptions() const override;
 
 	virtual FName GetSubjectName() const override;

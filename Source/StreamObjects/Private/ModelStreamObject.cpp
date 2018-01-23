@@ -25,6 +25,11 @@ ModelStreamObject::~ModelStreamObject()
 
 // Stream Object Interface
 
+const bool ModelStreamObject::ShouldShowInUI() const
+{
+	return true;
+};
+
 const FString ModelStreamObject::GetStreamOptions() const
 {
 	return FString::Join(ConnectionOptions, _T("~"));

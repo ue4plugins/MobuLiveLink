@@ -10,6 +10,8 @@ class IStreamObject
 public:
 	// Interface for modifying and accessing stream parameters
 
+	virtual const bool ShouldShowInUI() const = 0;
+
 	virtual const FString GetStreamOptions() const = 0;
 
 	virtual FName GetSubjectName() const = 0;
