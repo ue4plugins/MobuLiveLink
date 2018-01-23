@@ -16,36 +16,40 @@ void SkeletonHeirarchyStreamObject::UpdateFromModel()
 	BoneParents.Emplace(-1);
 	BoneModels.Emplace(RootModel);
 
-	TArray<TPair<int, FBModel*>> SearchList;
-	TArray<TPair<int, FBModel*>> SearchListNext;
-
-	SearchList.Emplace(0, (FBModel*)RootModel);
-
+	// If Streaming as Hierarchy
 	if (StreamingMode == 0)
 	{
-		while (SearchList.Num() > 0)
+		TArray<TPair<int, FBModel*>> SearchList;
+		TArray<TPair<int, FBModel*>> SearchListNext;
+
+		SearchList.Emplace(0, (FBModel*)RootModel);
+
+		if (StreamingMode == 0)
 		{
-			for (const auto& SearchPair : SearchList)
+			while (SearchList.Num() > 0)
 			{
-				int ParentIdx = SearchPair.Key;
-				FBModel* SearchModel = SearchPair.Value;
-				int ChildCount = SearchModel->Children.GetCount(); // Yuck
-
-				for (int ChildIdx = 0; ChildIdx < ChildCount; ++ChildIdx)
+				for (const auto& SearchPair : SearchList)
 				{
-					FBModel* ChildModel = SearchModel->Children[ChildIdx];
+					int ParentIdx = SearchPair.Key;
+					FBModel* SearchModel = SearchPair.Value;
+					int ChildCount = SearchModel->Children.GetCount(); // Yuck
 
-					if (ChildModel->GetTypeId() != FBModelSkeleton::TypeInfo) continue; // Only want joints
+					for (int ChildIdx = 0; ChildIdx < ChildCount; ++ChildIdx)
+					{
+						FBModel* ChildModel = SearchModel->Children[ChildIdx];
 
-					BoneNames.Emplace(ChildModel->Name);
-					BoneParents.Emplace(ParentIdx);
-					BoneModels.Emplace(ChildModel);
+						if (ChildModel->GetTypeId() != FBModelSkeleton::TypeInfo) continue; // Only want joints
 
-					SearchListNext.Emplace(BoneModels.Num() - 1, ChildModel);
+						BoneNames.Emplace(ChildModel->Name);
+						BoneParents.Emplace(ParentIdx);
+						BoneModels.Emplace(ChildModel);
+
+						SearchListNext.Emplace(BoneModels.Num() - 1, ChildModel);
+					}
 				}
+				SearchList = SearchListNext;
+				SearchListNext.Empty();
 			}
-			SearchList = SearchListNext;
-			SearchListNext.Empty();
 		}
 	}
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
@@ -74,8 +78,8 @@ void SkeletonHeirarchyStreamObject::GetStreamData()
 	}
 
 
-	// Generic Models have no special properties
-	TArray<FLiveLinkCurveElement> CurveData;
+	// Stream all properties on the root bone
+	TArray<FLiveLinkCurveElement> CurveData = GetAllAnimatableCurves((FBModel*)BoneModels[0]);
 
 	FBTime LocalTime = FBSystem().LocalTime;
 	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble(), LocalTime.GetFrame());

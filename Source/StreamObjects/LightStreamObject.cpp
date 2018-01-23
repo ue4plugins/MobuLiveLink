@@ -30,7 +30,8 @@ void LightStreamObject::GetStreamData()
 	// If Streaming as Light then get the Light Properties
 	if (StreamingMode == 0)
 	{
-		// TODO: Get Light Properties here
+		// TODO: Add any additional Light logic here. For now stream everything we can
+		CurveData = GetAllAnimatableCurves(LightModel);
 	}
 
 	FBTime LocalTime = FBSystem().LocalTime;

@@ -167,6 +167,80 @@ FTransform StreamObjectBase::UnrealTransformFromCamera(FBCamera* CameraModel)
 	return CameraTransform;
 }
 
+// Get all properties on a given model that are both Animatable and are of a Type we can stream
+TArray<FLiveLinkCurveElement> StreamObjectBase::GetAllAnimatableCurves(FBModel* MobuModel)
+{
+	int PropertyCount = MobuModel->PropertyList.GetCount();
+
+	TArray<FLiveLinkCurveElement> LiveLinkCurves;
+	// Reserve enough memory for worst case
+	LiveLinkCurves.Reserve(PropertyCount); 
+
+	float PropertyValue;
+	FName PropertyName;
+	for (int i = 0; i < PropertyCount; ++i)
+	{
+		FBProperty* Property = MobuModel->PropertyList[i];
+		if (Property->IsAnimatable())
+		{
+			switch (Property->GetPropertyType())
+			{
+			case kFBPT_bool:
+			{
+				bool bValue;
+				Property->GetData(&bValue, sizeof(bValue), nullptr);
+				PropertyValue = bValue ? 1.0f : 0.0f;
+				break;
+			}
+			case kFBPT_double:
+			{
+				double Value;
+				Property->GetData(&Value, sizeof(Value), nullptr);
+				PropertyValue = (float)Value;
+				break;
+			}
+			case kFBPT_float:
+			{
+				// PropertyValue is a float so retrieve it directly
+				Property->GetData(&PropertyValue, sizeof(PropertyValue), nullptr);
+				break;
+			}
+			case kFBPT_enum: // Enums are assumed to be ints. THIS MAY NOT BE A VALID ASSUMPTION
+			case kFBPT_int:
+			{
+				int Value;
+				Property->GetData(&Value, sizeof(Value), nullptr);
+				PropertyValue = (float)Value;
+				break;
+			}
+			case kFBPT_int64:
+			{
+				int64 Value;
+				Property->GetData(&Value, sizeof(Value), nullptr);
+				PropertyValue = (float)Value;
+				break;
+			}
+			case kFBPT_uint64:
+			{
+				uint64 Value;
+				Property->GetData(&Value, sizeof(Value), nullptr);
+				PropertyValue = (float)Value;
+				break;
+			}
+			default:
+				continue;
+			}
+
+			FLiveLinkCurveElement NewCurveElement;
+			NewCurveElement.CurveName = FName(Property->GetName());;
+			NewCurveElement.CurveValue = PropertyValue;
+
+			LiveLinkCurves.Emplace(NewCurveElement);
+		}
+	}
+	return LiveLinkCurves;
+}
+
 
 
 
