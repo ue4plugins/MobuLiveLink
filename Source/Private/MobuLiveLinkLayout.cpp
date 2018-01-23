@@ -164,17 +164,21 @@ void MobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 
 void MobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
 {
-	const FBModel* RootModel = Object->GetRootModel();
-	if (RootModel == nullptr) return;
+	const kReference ObjectReference = Object->GetReference();
 
-	StreamSpread.RowAdd(RootModel->LongName, (kReference)RootModel);
+	// Do not add the EditorActiveCamera to the spread
+	if (ObjectReference == (kReference)nullptr) return; 
 
-	StreamSpread.SetCell((kReference)RootModel, 0, FStringToChar(Object->GetSubjectName().ToString()));
-	StreamSpread.SetCell((kReference)RootModel, 1, FStringToChar(Object->GetStreamOptions()));
-	StreamSpread.SetCell((kReference)RootModel, 1, Object->GetStreamingMode());
+	const FString RootName = Object->GetRootName();
+
+	StreamSpread.RowAdd(FStringToChar(RootName), ObjectReference);
+
+	StreamSpread.SetCell(ObjectReference, 0, FStringToChar(Object->GetSubjectName().ToString()));
+	StreamSpread.SetCell(ObjectReference, 1, FStringToChar(Object->GetStreamOptions()));
+	StreamSpread.SetCell(ObjectReference, 1, Object->GetStreamingMode());
 	bool bIsActive = Object->GetActiveStatus();
-	StreamSpread.SetCell((kReference)RootModel, 2, bIsActive);
-	StreamSpread.SetCell((kReference)RootModel, 2, BoolToActiveText(bIsActive));
+	StreamSpread.SetCell(ObjectReference, 2, bIsActive);
+	StreamSpread.SetCell(ObjectReference, 2, BoolToActiveText(bIsActive));
 }
 
 
@@ -230,7 +234,7 @@ void MobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 	DeletionObjects.Reserve(LiveLinkDevice->StreamObjects.Num());
 	for (const auto& MapPair : LiveLinkDevice->StreamObjects)
 	{
-		kReference RowKey = (kReference)MapPair.Value->GetRootModel();
+		kReference RowKey = MapPair.Value->GetReference();
 		bool bRowSelected = StreamSpread.GetRow(RowKey).RowSelected;
 		if (bRowSelected)
 		{
@@ -309,7 +313,7 @@ MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreGeneric(const FBMod
 {
 	FBTrace("%s is an Unknown Type! - %s\n", Model->LongName, ((FBModel*)Model)->ClassName());
 
-	StreamObjectPtr GenericStore(new GenericStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
+	StreamObjectPtr GenericStore(new ModelStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
 	return GenericStore;
 }
 
@@ -317,6 +321,6 @@ MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreSkeleton(const FBMo
 {
 	FBTrace("%s is a Skeleton!\n", Model->LongName);
 
-	StreamObjectPtr SkeletonStore(new SkeletonHeirarchyStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
+	StreamObjectPtr SkeletonStore(new SkeletonHierarchyStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
 	return SkeletonStore;
 }

@@ -2,21 +2,16 @@
 
 #pragma once
 
-#include "StreamStore.h"
+#include "MobuLiveLinkCommon.h"
+
+#include "IStreamObject.h"
 #include "CommandLine.h"
 #include "TaskGraphInterfaces.h"
 #include "ModuleManager.h"
 #include "Object.h"
 #include "ConfigCacheIni.h"
 
-#include "LiveLinkProvider.h"
-#include "LiveLinkRefSkeleton.h"
 #include "OutputDevice.h"
-
-#pragma warning(push)
-#pragma warning(disable:4263 4264)
-#include <fbsdk/fbsdk.h>
-#pragma warning(pop)
 
 //--- Registration defines
 #define MOBULIVELINK__CLASSNAME		MobuLiveLink
@@ -60,7 +55,7 @@ public:
 
 public:
 	const FString mProviderName = TEXT("Mobu Live Link");
-	TMap<kReference, TSharedPtr<StreamObjectBase>> StreamObjects;
+	TMap<kReference, TSharedPtr<IStreamObject>> StreamObjects;
 	
 	TSharedPtr<ILiveLinkProvider> LiveLinkProvider;
 

@@ -1,93 +1,6 @@
-﻿#include "StreamStore.h"
+﻿#include "MobuLiveLinkUtilities.h"
 
-// Creation / Destruction
-
-StreamObjectBase::StreamObjectBase(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, std::initializer_list<FString> Options)
-	: RootModel(ModelPointer), Provider(StreamProvider), ConnectionOptions(Options), bIsActive(true), StreamingMode(0)
-{
-	FString ModelLongName(ANSI_TO_TCHAR(RootModel->LongName));
-	FString RightString;
-	ModelLongName.Split(TEXT(":"), &ModelLongName, &RightString);
-	SubjectName = FName(*ModelLongName);
-};
-
-// Model-less constructor
-StreamObjectBase::StreamObjectBase(const FName InSubjectName, const TSharedPtr<ILiveLinkProvider> StreamProvider)
-	: RootModel(nullptr), SubjectName(InSubjectName), Provider(StreamProvider), bIsActive(true), StreamingMode(0)
-{
-};
-
-StreamObjectBase::~StreamObjectBase()
-{
-	Provider->ClearSubject(SubjectName);
-};
-
-// Stream Object Interface
-
-FString StreamObjectBase::GetStreamOptions()
-{
-	return FString::Join(ConnectionOptions, _T("~"));
-};
-
-FName StreamObjectBase::GetSubjectName() const 
-{ 
-	return SubjectName; 
-};
-
-void StreamObjectBase::UpdateSubjectName(FName NewSubjectName)
-{
-	Provider->ClearSubject(SubjectName);
-	SubjectName = NewSubjectName;
-	UpdateFromModel();
-};
-
-
-int StreamObjectBase::GetStreamingMode() const
-{
-	return StreamingMode;
-};
-
-void StreamObjectBase::UpdateStreamingMode(int NewStreamingMode)
-{
-	StreamingMode = NewStreamingMode;
-	UpdateFromModel();
-};
-
-
-bool StreamObjectBase::GetActiveStatus() const
-{
-	return bIsActive;
-};
-
-void StreamObjectBase::UpdateActiveStatus(bool bIsNowActive)
-{
-	bIsActive = bIsNowActive;
-	UpdateFromModel();
-};
-
-const FBModel* StreamObjectBase::GetRootModel()
-{
-	return RootModel;
-};
-
-bool StreamObjectBase::IsValid()
-{
-	// By Default an object is valid if the root model is in the scene
-	return FBSystem().Scene->Components.Find((FBComponent*)GetRootModel()) >= 0;
-};
-
-
-// Equality comparison
-
-bool StreamObjectBase::operator==(const StreamObjectBase &other) const 
-{
-	return (this->RootModel == other.RootModel);
-};
-
-
-// Utility Functions
-
-FTransform StreamObjectBase::MobuTransformToUnreal(FBMatrix& MobuTransfrom)
+FTransform MobuTransformToUnreal(FBMatrix& MobuTransfrom)
 {
 	FBMatrix MobuTransformUnrealSpace;
 	FBTVector TVector;
@@ -123,7 +36,7 @@ FTransform StreamObjectBase::MobuTransformToUnreal(FBMatrix& MobuTransfrom)
 	return UnrealTransform;
 };
 
-FTransform StreamObjectBase::UnrealTransformFromModel(FBModel* MobuModel, bool bIsGlobal)
+FTransform UnrealTransformFromModel(FBModel* MobuModel, bool bIsGlobal)
 {
 	FBMatrix MobuTransform;
 	FBMatrix MatOffset;
@@ -138,7 +51,7 @@ FTransform StreamObjectBase::UnrealTransformFromModel(FBModel* MobuModel, bool b
 	return MobuTransformToUnreal(MobuTransform);
 };
 
-FTransform StreamObjectBase::UnrealTransformFromCamera(FBCamera* CameraModel)
+FTransform UnrealTransformFromCamera(FBCamera* CameraModel)
 {
 	// MotionBuilder suggests that GetMatrix is deprecated for Cameras and to 
 	// reconstruct from the Camera Matrices explicitly
@@ -168,13 +81,13 @@ FTransform StreamObjectBase::UnrealTransformFromCamera(FBCamera* CameraModel)
 }
 
 // Get all properties on a given model that are both Animatable and are of a Type we can stream
-TArray<FLiveLinkCurveElement> StreamObjectBase::GetAllAnimatableCurves(FBModel* MobuModel)
+TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel)
 {
 	int PropertyCount = MobuModel->PropertyList.GetCount();
 
 	TArray<FLiveLinkCurveElement> LiveLinkCurves;
 	// Reserve enough memory for worst case
-	LiveLinkCurves.Reserve(PropertyCount); 
+	LiveLinkCurves.Reserve(PropertyCount);
 
 	float PropertyValue;
 	FName PropertyName;
@@ -240,7 +153,3 @@ TArray<FLiveLinkCurveElement> StreamObjectBase::GetAllAnimatableCurves(FBModel* 
 	}
 	return LiveLinkCurves;
 }
-
-
-
-

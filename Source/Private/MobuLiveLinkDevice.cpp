@@ -1,6 +1,9 @@
 ﻿//--- Class declaration
 #include "MobuLiveLinkDevice.h"
 
+//--- Stream object for the Editor camera
+#include "MobuLiveLinkStreamObjects.h"
+
 //--- For getting the dll location on disk
 #include "Windows.h"
 #include <string>
@@ -57,7 +60,7 @@ bool MobuLiveLink::FBCreate()
 
 	SetDirty(false);
 
-	TSharedPtr<StreamObjectBase> EditorCamera((StreamObjectBase*)(new EditorActiveCameraStreamObject(LiveLinkProvider)));
+	TSharedPtr<IStreamObject> EditorCamera((IStreamObject*)(new EditorActiveCameraStreamObject(LiveLinkProvider)));
 	StreamObjects.Emplace((kReference)nullptr, EditorCamera);
 
 	return true;
@@ -168,7 +171,8 @@ bool MobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo* 
 	}
 	for (auto MapPair : StreamObjects)
 	{
-		MapPair.Value->GetStreamData();
+		const auto& StreamObject = MapPair.Value;
+		StreamObject->UpdateSubjectFrame();
 	}
 	return true;
 }
@@ -281,9 +285,10 @@ void MobuLiveLink::UpdateStreamObjects()
 {
 	for (auto MapPair : StreamObjects)
 	{
-		if (MapPair.Value->IsValid())
+		const auto& StreamObject = MapPair.Value;
+		if (StreamObject->IsValid())
 		{
-			MapPair.Value->UpdateFromModel();
+			StreamObject->Refresh();
 		}
 		else
 		{

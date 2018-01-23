@@ -1,12 +1,13 @@
-﻿#include "StreamStore.h"
+﻿#include "SkeletonHierarchyStreamObject.h"
+#include "MobuLiveLinkUtilities.h"
 
-SkeletonHeirarchyStreamObject::SkeletonHeirarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	StreamObjectBase(ModelPointer, StreamProvider, { TEXT("Full Heirarchy"), TEXT("Root Only") })
+SkeletonHierarchyStreamObject::SkeletonHierarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
+	ModelStreamObject(ModelPointer, StreamProvider, { TEXT("Full Hierarchy"), TEXT("Root Only") })
 {
-	UpdateFromModel();
+	Refresh();
 };
 
-void SkeletonHeirarchyStreamObject::UpdateFromModel() 
+void SkeletonHierarchyStreamObject::Refresh() 
 {
 	BoneNames.Empty();
 	BoneParents.Empty();
@@ -55,7 +56,7 @@ void SkeletonHeirarchyStreamObject::UpdateFromModel()
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 };
 
-void SkeletonHeirarchyStreamObject::GetStreamData() 
+void SkeletonHierarchyStreamObject::UpdateSubjectFrame() 
 {
 	if (!bIsActive) return;
 

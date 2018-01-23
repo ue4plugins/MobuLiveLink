@@ -1,12 +1,13 @@
-﻿#include "StreamStore.h"
+﻿#include "LightStreamObject.h"
+#include "MobuLiveLinkUtilities.h"
 
 LightStreamObject::LightStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	StreamObjectBase(ModelPointer, StreamProvider, { TEXT("Light"), TEXT("Root Only") })
+	ModelStreamObject(ModelPointer, StreamProvider, { TEXT("Light"), TEXT("Root Only") })
 {
-	UpdateFromModel();
+	Refresh();
 };
 
-void LightStreamObject::UpdateFromModel()
+void LightStreamObject::Refresh()
 {
 	BoneNames.SetNum(1);
 	BoneNames[0] = FName("Bone01");
@@ -16,7 +17,7 @@ void LightStreamObject::UpdateFromModel()
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 };
 
-void LightStreamObject::GetStreamData()
+void LightStreamObject::UpdateSubjectFrame()
 {
 	if (!bIsActive) return;
 

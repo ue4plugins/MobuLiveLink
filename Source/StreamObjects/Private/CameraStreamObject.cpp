@@ -1,12 +1,13 @@
-﻿#include "StreamStore.h"
+﻿#include "CameraStreamObject.h"
+#include "MobuLiveLinkUtilities.h"
 
 CameraStreamObject::CameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	StreamObjectBase(ModelPointer, StreamProvider, { TEXT("Camera"), TEXT("Root Only") })
+	ModelStreamObject(ModelPointer, StreamProvider, { TEXT("Camera"), TEXT("Root Only") })
 {
-	UpdateFromModel();
+	Refresh();
 }
 
-void CameraStreamObject::UpdateFromModel() 
+void CameraStreamObject::Refresh() 
 {
 	BoneNames.SetNum(1);
 	BoneNames[0] = FName("Bone01");
@@ -16,7 +17,7 @@ void CameraStreamObject::UpdateFromModel()
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 }
 
-void CameraStreamObject::GetStreamData() 
+void CameraStreamObject::UpdateSubjectFrame() 
 {
 	if (!bIsActive) return;
 

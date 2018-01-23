@@ -1,18 +1,11 @@
 ﻿
 
 #include "RequiredProgramMainCPPInclude.h"
+#include "MobuLiveLinkCommon.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBlankMoBuPlugin, Log, All);
 
 IMPLEMENT_APPLICATION(MobuLiveLinkPlugin, "MobuLiveLinkPlugin");
-
-
-//--- SDK include
-#pragma warning(push)
-#include <fbsdk/fbsdk.h>
-#pragma warning(pop)
-
-
 
 
 

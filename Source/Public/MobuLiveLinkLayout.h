@@ -37,7 +37,7 @@ public:
 
 private:
 
-	typedef TSharedPtr<StreamObjectBase> StreamObjectPtr;
+	typedef TSharedPtr<IStreamObject> StreamObjectPtr;
 	typedef StreamObjectPtr (MobuLiveLinkLayout::*ModelStoreFunctionType)(FBModel* CameraModel);
 
 	StreamObjectPtr StoreCamera(const FBModel* CameraModel);

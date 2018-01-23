@@ -10,7 +10,12 @@ public class MobuLiveLinkPlugin : ModuleRules
         bEnforceIWYU = false;
 
         // For LaunchEngineLoop.cpp include.  You shouldn't need to add anything else to this line.
-        PrivateIncludePaths.AddRange( new string[] { "Runtime/Launch/Public", "Runtime/Launch/Private" }  );
+        PrivateIncludePaths.AddRange( new string[] 
+		{
+            "Runtime/Launch/Public",
+            "Runtime/Launch/Private",
+			Path.Combine(ModuleDirectory, "StreamObjects/Public")
+        }  );
 
 		// Unreal dependency modules
 		PrivateDependencyModuleNames.AddRange( new string[] 
