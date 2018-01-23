@@ -1,7 +1,7 @@
 ﻿#include "StreamStore.h"
 
 CameraStreamObject::CameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	StreamObjectBase(ModelPointer, StreamProvider, { TEXT("As Camera"), TEXT("As Transform") })
+	StreamObjectBase(ModelPointer, StreamProvider, { TEXT("Camera"), TEXT("Root Only") })
 {
 	UpdateFromModel();
 }

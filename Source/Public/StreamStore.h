@@ -8,6 +8,11 @@
 #include <fbsdk/fbsdk.h>
 #pragma warning(pop)
 
+// TODO: StreamObjectBase should not rely on FBModel, instead it should just have some virtual accessors for data like Root Name
+// There would then be a ModelStreamObject which works with FBModels and then all specific cases of FBModel inherit from that
+// i.e. StreamObjectBase -> ModelStreamObject -> LightStreamObject
+// This would fix the hacks I had to do to support EditorActiveCameraStreamObject
+
 // Abstract class. Inherit from this to support streaming.
 // Wraps an FBModel* to get the required data for streaming.
 class StreamObjectBase
@@ -66,7 +71,7 @@ protected:
 	
 	StreamObjectBase(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, std::initializer_list<FString> Options);
 
-	// model-less constructor
+	// model-less constructor to support EditorActiveCameraStreamObject
 	StreamObjectBase(const FName InSubjectName, const TSharedPtr<ILiveLinkProvider> StreamProvider);
 };
 

@@ -1,7 +1,7 @@
 ﻿#include "StreamStore.h"
 
 LightStreamObject::LightStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	StreamObjectBase(ModelPointer, StreamProvider, { TEXT("As Light"), TEXT("As Transform") })
+	StreamObjectBase(ModelPointer, StreamProvider, { TEXT("Light"), TEXT("Root Only") })
 {
 	UpdateFromModel();
 };

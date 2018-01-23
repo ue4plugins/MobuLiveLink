@@ -1,7 +1,7 @@
 ﻿#include "StreamStore.h"
 
 SkeletonHeirarchyStreamObject::SkeletonHeirarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	StreamObjectBase(ModelPointer, StreamProvider, { TEXT("As Heirarchy"), TEXT("As Transform") })
+	StreamObjectBase(ModelPointer, StreamProvider, { TEXT("Full Heirarchy"), TEXT("Root Only") })
 {
 	UpdateFromModel();
 };

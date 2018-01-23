@@ -21,7 +21,6 @@ bool MobuLiveLinkLayout::FBCreate()
 	ModelStoreFunctions.Emplace(FBLight::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreLight);
 	ModelStoreFunctions.Emplace(FBModelSkeleton::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreSkeleton);
 	ModelStoreFunctions.Emplace(FBModelRoot::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreSkeleton);
-	ModelStoreFunctions.Emplace(FBModelNull::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreGeneric);
 
 	// Get a handle on the device.
 	LiveLinkDevice = ((MobuLiveLink *)(FBDevice *)Device);
@@ -73,21 +72,21 @@ void MobuLiveLinkLayout::UICreate()
 	StreamLayout.AddRegion("ObjectSelector", "ObjectSelector",
 		S, kFBAttachLeft, "", 1.00,
 		S, kFBAttachTop, "", 1.00,
-		2 * W, kFBAttachNone, NULL, 1.00,
-		H, kFBAttachNone, NULL, 1.00);
+		2 * W, kFBAttachNone, nullptr, 1.00,
+		H, kFBAttachNone, nullptr, 1.00);
 
 	StreamLayout.AddRegion("AddToStreamButton", "AddToStreamButton",
 		S, kFBAttachRight, "ObjectSelector", 1.00,
 		0, kFBAttachTop, "ObjectSelector", 1.00,
-		W, kFBAttachNone, NULL, 1.00,
-		H, kFBAttachNone, NULL, 1.00);
+		W, kFBAttachNone, nullptr, 1.00,
+		H, kFBAttachNone, nullptr, 1.00);
 
 
 	StreamLayout.AddRegion("RemoveFromStreamButton", "RemoveFromStreamButton",
 		S, kFBAttachRight, "AddToStreamButton", 1.00,
 		0, kFBAttachTop, "AddToStreamButton", 1.00,
-		W, kFBAttachNone, NULL, 1.00,
-		H, kFBAttachNone, NULL, 1.00);
+		W, kFBAttachNone, nullptr, 1.00,
+		H, kFBAttachNone, nullptr, 1.00);
 
 	StreamLayout.AddRegion("StreamSpread", "StreamSpread",
 		S, kFBAttachLeft, "", 1.00,
@@ -204,17 +203,21 @@ void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 		else if (!IsModelInDeviceStream(LiveLinkDevice, Model))
 		{
 			ModelStoreFunctionType* StoreFunction = ModelStoreFunctions.Find(Model->GetTypeId());
+			StreamObjectPtr StoreObject;
 			if (StoreFunction != nullptr)
 			{
-				StreamObjectPtr StoreObject = (this->*(*StoreFunction))(Model);
-
-				LiveLinkDevice->StreamObjects.Emplace((kReference)Model, StoreObject);
-				AddSpreadRowFromStreamObject(StoreObject);
-				FBTrace("Added New Object to StreamObject\n");
-
-				ParentsToIgnore.Emplace(Model);
+				StoreObject = (this->*(*StoreFunction))(Model);
 			}
+			else
+			{
+				StoreObject = StoreGeneric(Model);
+			}
+			LiveLinkDevice->StreamObjects.Emplace((kReference)Model, StoreObject);
+			AddSpreadRowFromStreamObject(StoreObject);
+			FBTrace("Added New Object to StreamObject\n");
 
+			ParentsToIgnore.Emplace(Model);
+			
 		}
 	}
 	ObjectSelection.Clear();

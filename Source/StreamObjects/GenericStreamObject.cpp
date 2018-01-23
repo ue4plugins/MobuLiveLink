@@ -1,7 +1,7 @@
 ﻿#include "StreamStore.h"
 
 GenericStreamObject::GenericStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	StreamObjectBase(ModelPointer, StreamProvider, { TEXT("As Transform") })
+	StreamObjectBase(ModelPointer, StreamProvider, { TEXT("Root Only") })
 {
 	UpdateFromModel();
 };
@@ -26,7 +26,7 @@ void GenericStreamObject::GetStreamData()
 	BoneTransforms.Emplace(UnrealTransformFromModel((FBModel*)RootModel));
 
 	// Generic Models have no special properties
-	TArray<FLiveLinkCurveElement> CurveData;
+	TArray<FLiveLinkCurveElement> CurveData = GetAllAnimatableCurves((FBModel*)RootModel);
 
 	FBTime LocalTime = FBSystem().LocalTime;
 	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble(), LocalTime.GetFrame());
