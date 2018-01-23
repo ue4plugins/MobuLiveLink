@@ -14,7 +14,7 @@ FString GetDeviceIconPath()
 
 	FString BasePath = FPaths::GetPath(FString(DllPath));
 	FString FinalPath = FPaths::Combine(BasePath, FString("UE_128.png"));
-	FBTrace("%s\n", FStringToChar(FinalPath));
+	FBTrace("Device Icon Path - %s\n", FStringToChar(FinalPath));
 
 	return FinalPath;
 };

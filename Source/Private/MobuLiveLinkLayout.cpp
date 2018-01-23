@@ -291,8 +291,7 @@ void MobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent Ev
 
 MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreCamera(const FBModel* Model)
 {
-	FBTrace(Model->LongName);
-	FBTrace(" is a Camera!\n");
+	FBTrace("%s is a Camera!\n", Model->LongName);
 
 	StreamObjectPtr CameraStore(new CameraStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
 	return CameraStore;
@@ -300,8 +299,7 @@ MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreCamera(const FBMode
 
 MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreLight(const FBModel* Model)
 {
-	FBTrace(Model->LongName);
-	FBTrace(" is a Light!\n");
+	FBTrace("%s is a Light!\n", Model->LongName);
 
 	StreamObjectPtr LightStore(new LightStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
 	return LightStore;
@@ -309,10 +307,7 @@ MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreLight(const FBModel
 
 MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreGeneric(const FBModel* Model)
 {
-	FBTrace(Model->LongName);
-	FBTrace(" is an Unknown Type! - ");
-	FBTrace(((FBModel*)Model)->ClassName());
-	FBTrace("\n");
+	FBTrace("%s is an Unknown Type! - %s\n", Model->LongName, ((FBModel*)Model)->ClassName());
 
 	StreamObjectPtr GenericStore(new GenericStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
 	return GenericStore;
@@ -320,8 +315,7 @@ MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreGeneric(const FBMod
 
 MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreSkeleton(const FBModel* Model)
 {
-	FBTrace(Model->LongName);
-	FBTrace(" is a Skeleton!\n");
+	FBTrace("%s is a Skeleton!\n", Model->LongName);
 
 	StreamObjectPtr SkeletonStore(new SkeletonHeirarchyStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
 	return SkeletonStore;
