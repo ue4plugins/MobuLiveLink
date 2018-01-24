@@ -2,18 +2,18 @@
 #include "MobuLiveLinkUtilities.h"
 
 CameraStreamObject::CameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	ModelStreamObject(ModelPointer, StreamProvider, { TEXT("Camera"), TEXT("Root Only") })
+	ModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy"), TEXT("Camera") })
 {
+	StreamingMode = 2;
+
+	BoneNames.Emplace(FName("Bone01"));
+	BoneParents.Emplace(-1);
+
 	Refresh();
 }
 
 void CameraStreamObject::Refresh() 
 {
-	BoneNames.SetNum(1);
-	BoneNames[0] = FName("Bone01");
-	BoneParents.SetNum(1);
-	BoneParents[0] = -1;
-
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 }
 
@@ -30,7 +30,7 @@ void CameraStreamObject::UpdateSubjectFrame()
 	TArray<FLiveLinkCurveElement> CurveData;
 
 	// If Streaming as Camera then get the Camera Properties
-	if (StreamingMode == 0)
+	if (StreamingMode == 2)
 	{
 		CurveData = GetAllAnimatableCurves(CameraModel);
 	}

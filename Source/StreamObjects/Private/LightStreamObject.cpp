@@ -2,18 +2,18 @@
 #include "MobuLiveLinkUtilities.h"
 
 LightStreamObject::LightStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	ModelStreamObject(ModelPointer, StreamProvider, { TEXT("Light"), TEXT("Root Only") })
+	ModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy"), TEXT("Light") })
 {
+	StreamingMode = 2;
+
+	BoneNames.Emplace(FName("Bone01"));
+	BoneParents.Emplace(-1);
+
 	Refresh();
 };
 
 void LightStreamObject::Refresh()
 {
-	BoneNames.SetNum(1);
-	BoneNames[0] = FName("Bone01");
-	BoneParents.SetNum(1);
-	BoneParents[0] = -1;
-
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 };
 
@@ -29,7 +29,7 @@ void LightStreamObject::UpdateSubjectFrame()
 
 	TArray<FLiveLinkCurveElement> CurveData;
 	// If Streaming as Light then get the Light Properties
-	if (StreamingMode == 0)
+	if (StreamingMode == 2)
 	{
 		// TODO: Add any additional Light logic here. For now stream everything we can
 		CurveData = GetAllAnimatableCurves(LightModel);

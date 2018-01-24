@@ -184,7 +184,6 @@ void MobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
 FORCEINLINE bool IsModelInDeviceStream(const MobuLiveLink* MobuDevice, const FBModel* Model)
 {
 	return MobuDevice->StreamObjects.Contains((kReference)Model);
-	//return Device->StreamObjects.ContainsByPredicate([Model](const TSharedPtr<StreamObject> Storage) { return Storage->RootModel == Model; });
 }
 
 void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
@@ -192,9 +191,16 @@ void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 	TArray<FBModel*> ParentsToIgnore;
 	ParentsToIgnore.Reserve(ObjectSelection.GetCount());
 
+	FBModel* SceneRoot = FBSystem().Scene->RootModel;
 	for (int CharIndex = 0; CharIndex < ObjectSelection.GetCount(); ++CharIndex)
 	{
 		FBModel* Model = (FBModel*)ObjectSelection.GetAt(CharIndex);
+
+		// Ignore the SceneRoot
+		if (Model == SceneRoot)
+		{
+			continue;
+		}
 
 		// Only grab root items
 		// Temp solution. Not a huge fan. 

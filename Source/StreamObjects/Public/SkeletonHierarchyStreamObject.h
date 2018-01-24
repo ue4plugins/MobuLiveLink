@@ -5,11 +5,11 @@
 // FBModelSkeleton and FBModelRoot wrapper
 class SkeletonHierarchyStreamObject : public ModelStreamObject
 {
-	TArray<const FBModel*> BoneModels;
-
 public:
 	SkeletonHierarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
 
+	// Override Refresh to only add Skeletal Children to the stream Hierarchy
 	void Refresh() override;
-	void UpdateSubjectFrame() override;
+	
+	// Use ModelStreamObject's UpdateSubjectFrame
 };

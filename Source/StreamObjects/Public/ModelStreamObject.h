@@ -52,6 +52,8 @@ protected:
 	FName SubjectName;
 	TArray<FName> BoneNames;
 	TArray<int32> BoneParents;
+	TArray<const FBModel*> BoneModels;
 	int StreamingMode;
 	bool bIsActive;
+
 };
