@@ -106,7 +106,6 @@ void ModelStreamObject::UpdateSubjectFrame()
 	// Single Bone
 	BoneTransforms.Emplace(UnrealTransformFromModel((FBModel*)RootModel));
 
-	// Generic Models have no special properties
 	TArray<FLiveLinkCurveElement> CurveData = GetAllAnimatableCurves((FBModel*)RootModel);
 
 	FBTime LocalTime = FBSystem().LocalTime;

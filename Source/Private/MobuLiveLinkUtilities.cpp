@@ -81,7 +81,7 @@ FTransform UnrealTransformFromCamera(FBCamera* CameraModel)
 }
 
 // Get all properties on a given model that are both Animatable and are of a Type we can stream
-TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel)
+TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel, const FString Prefix)
 {
 	int PropertyCount = MobuModel->PropertyList.GetCount();
 
@@ -145,7 +145,12 @@ TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel)
 			}
 
 			FLiveLinkCurveElement NewCurveElement;
-			NewCurveElement.CurveName = FName(Property->GetName());;
+			FString CurveName(Property->GetName());
+			if (!Prefix.IsEmpty())
+			{
+				CurveName = Prefix + FString(":") + CurveName;
+			}
+			NewCurveElement.CurveName = FName(*CurveName);;
 			NewCurveElement.CurveValue = PropertyValue;
 
 			LiveLinkCurves.Emplace(NewCurveElement);

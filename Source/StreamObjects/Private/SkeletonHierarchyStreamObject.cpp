@@ -67,6 +67,8 @@ void SkeletonHierarchyStreamObject::UpdateSubjectFrame()
 	TArray<FTransform> ParentInverseTransforms;
 	ParentInverseTransforms.SetNum(BoneCount);
 
+	TArray<FLiveLinkCurveElement> CurveData;
+
 	// loop through children here
 	for (int BoneIndex = 0; BoneIndex < BoneModels.Num(); ++BoneIndex)
 	{
@@ -76,11 +78,12 @@ void SkeletonHierarchyStreamObject::UpdateSubjectFrame()
 		{
 			BoneTransforms[BoneIndex] = BoneTransforms[BoneIndex] * ParentInverseTransforms[BoneParents[BoneIndex]];
 		}
+
+		// Stream all parameters of all bones as "<BoneName>:<ParameterName>"
+		CurveData.Append( GetAllAnimatableCurves((FBModel*)BoneModels[BoneIndex], BoneNames[BoneIndex].ToString()) );
 	}
 
 
-	// Stream all properties on the root bone
-	TArray<FLiveLinkCurveElement> CurveData = GetAllAnimatableCurves((FBModel*)BoneModels[0]);
 
 	FBTime LocalTime = FBSystem().LocalTime;
 	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble(), LocalTime.GetFrame());
