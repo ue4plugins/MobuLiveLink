@@ -33,6 +33,8 @@ void CameraStreamObject::UpdateSubjectFrame()
 	if (StreamingMode == 2)
 	{
 		CurveData = GetAllAnimatableCurves(CameraModel);
+
+		AppendFilmbackSettings(CameraModel, CurveData);
 	}
 
 	FBTime LocalTime = FBSystem().LocalTime;

@@ -1,5 +1,7 @@
 ﻿#include "MobuLiveLinkUtilities.h"
 
+#define INCHES_TO_MILLIMETERS 25.4
+
 FTransform MobuTransformToUnreal(FBMatrix& MobuTransfrom)
 {
 	FBMatrix MobuTransformUnrealSpace;
@@ -94,6 +96,7 @@ TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel, const F
 	for (int i = 0; i < PropertyCount; ++i)
 	{
 		FBProperty* Property = MobuModel->PropertyList[i];
+		FString CurveName(Property->GetName());
 		if (Property->IsAnimatable())
 		{
 			switch (Property->GetPropertyType())
@@ -145,7 +148,6 @@ TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel, const F
 			}
 
 			FLiveLinkCurveElement NewCurveElement;
-			FString CurveName(Property->GetName());
 			if (!Prefix.IsEmpty())
 			{
 				CurveName = Prefix + FString(":") + CurveName;
@@ -157,4 +159,24 @@ TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel, const F
 		}
 	}
 	return LiveLinkCurves;
+}
+
+void AppendFilmbackSettings(FBCamera* CameraModel, TArray<FLiveLinkCurveElement>& CurveElements)
+{
+	// Film size isn't an animatable property so does not come through by default
+	int NewItemIndex;
+	double FilmSizeHeight, FilmSizeWidth, FilmAspectRatio;
+	CameraModel->FilmSizeHeight.GetData(&FilmSizeHeight, sizeof(FilmSizeHeight), nullptr);
+	CameraModel->FilmSizeWidth.GetData(&FilmSizeWidth, sizeof(FilmSizeWidth), nullptr);
+	CameraModel->FilmAspectRatio.GetData(&FilmAspectRatio, sizeof(FilmAspectRatio), nullptr);
+
+	NewItemIndex = CurveElements.AddDefaulted();
+	CurveElements[NewItemIndex].CurveName = FName("FilmSizeHeight");
+	CurveElements[NewItemIndex].CurveValue = FilmSizeHeight * INCHES_TO_MILLIMETERS;
+	NewItemIndex = CurveElements.AddDefaulted();
+	CurveElements[NewItemIndex].CurveName = FName("FilmSizeWidth");
+	CurveElements[NewItemIndex].CurveValue = FilmSizeWidth * INCHES_TO_MILLIMETERS;
+	NewItemIndex = CurveElements.AddDefaulted();
+	CurveElements[NewItemIndex].CurveName = FName("FilmAspectRatio");
+	CurveElements[NewItemIndex].CurveValue = FilmAspectRatio * INCHES_TO_MILLIMETERS;
 }

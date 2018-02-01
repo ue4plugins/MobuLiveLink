@@ -91,6 +91,8 @@ void EditorActiveCameraStreamObject::UpdateSubjectFrame()
 
 	TArray<FLiveLinkCurveElement> CurveData = GetAllAnimatableCurves(CameraModel);
 
+	AppendFilmbackSettings(CameraModel, CurveData);
+
 	FBTime LocalTime = FBSystem().LocalTime;
 	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble(), LocalTime.GetFrame());
 }
