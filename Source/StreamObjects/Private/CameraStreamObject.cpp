@@ -38,5 +38,5 @@ void CameraStreamObject::UpdateSubjectFrame()
 	}
 
 	FBTime LocalTime = FBSystem().LocalTime;
-	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble(), LocalTime.GetFrame());
+	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble());
 }

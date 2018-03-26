@@ -94,5 +94,5 @@ void EditorActiveCameraStreamObject::UpdateSubjectFrame()
 	AppendFilmbackSettings(CameraModel, CurveData);
 
 	FBTime LocalTime = FBSystem().LocalTime;
-	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble(), LocalTime.GetFrame());
+	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble());
 }
