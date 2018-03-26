@@ -206,29 +206,102 @@ void MobuLiveLink::DeviceIONotify( kDeviceIOs  pAction,FBDeviceNotifyInfo &pDevi
 
 //--- FBX load/save tags
 #define FBX_TAG_SECTION		MOBULIVELINK__CLASSSTR
-#define FBX_TAG_SERIALPORT	"SerialPort"
+#define MOBULIVELINK_FBX_DATA	"MobuLiveLinkFBXData"
+#define MOBULIVELINK_NUMBER_OF_COLUMNS	4
 
 /************************************************
- *	Store data in FBX.
- ************************************************/
-bool MobuLiveLink::FbxStore(FBFbxObject* pFbxObject,kFbxObjectStore pStoreWhat)
+*	Store data in FBX.
+************************************************/
+bool MobuLiveLink::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
 {
 	if (pStoreWhat & kAttributes)
 	{
-		// serial port
+		pFbxObject->FieldWriteBegin(MOBULIVELINK_FBX_DATA);
+		{
+			for (auto MapPair : StreamObjects)
+			{
+				const FString StreamObjectRootName = MapPair.Value->GetRootName();
+				const FName StreamObjectSubjectName = MapPair.Value->GetSubjectName();
+				const int32 StreamObjectStreamingMode = MapPair.Value->GetStreamingMode();
+				const int32 StreamObjectActive = MapPair.Value->GetActiveStatus();
+
+				if (StreamObjectRootName.Len() > 0)
+				{
+					pFbxObject->FieldWriteC(TCHAR_TO_UTF8(*StreamObjectRootName));
+					pFbxObject->FieldWriteC(TCHAR_TO_UTF8(*StreamObjectSubjectName.ToString()));
+					pFbxObject->FieldWriteI(StreamObjectStreamingMode);
+					pFbxObject->FieldWriteI(StreamObjectActive);
+				}
+			}
+			pFbxObject->FieldWriteEnd();
+		}
 	}
 	return true;
 }
 
-
 /************************************************
- *	Retrieve data from FBX.
- ************************************************/
-bool MobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject,kFbxObjectStore pStoreWhat)
+*	Retrieve data from FBX.
+************************************************/
+bool MobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
 {
 	if (pStoreWhat & kAttributes)
 	{
-		// serial port
+		if (pFbxObject->FieldReadBegin(MOBULIVELINK_FBX_DATA))
+		{
+			int32 MapPairCounter = 0;
+
+			for (int32 i = 0; i < pFbxObject->FieldReadGetCount(); i += MOBULIVELINK_NUMBER_OF_COLUMNS)
+			{
+				FBComponentList FoundModels = NULL;
+				FString StreamObjectRootName(pFbxObject->FieldReadC());
+				FBFindObjectsByName(TCHAR_TO_UTF8(*StreamObjectRootName), FoundModels, true, false);
+
+				if (sizeof(FoundModels) > 0)
+				{
+					const char *ModelClass = FoundModels[0]->ClassName();
+
+					if (strcmp(ModelClass, "FBModel") == 0)
+					{
+						StreamObjects.Emplace((kReference)(FBModel*)FoundModels[0], new ModelStreamObject((FBModel*)FoundModels[0], LiveLinkProvider));
+					}
+					if (strcmp(ModelClass, "FBModelRoot") == 0)
+					{
+						StreamObjects.Emplace((kReference)(FBModel*)FoundModels[0], new SkeletonHierarchyStreamObject((FBModel*)FoundModels[0], LiveLinkProvider));
+					}
+					else if (strcmp(ModelClass, "FBCamera") == 0)
+					{
+						StreamObjects.Emplace((kReference)(FBCamera*)FoundModels[0], new CameraStreamObject((FBModel*)FoundModels[0], LiveLinkProvider));
+					}
+					else if (strcmp(ModelClass, "FBLight") == 0)
+					{
+						StreamObjects.Emplace((kReference)(FBLight*)FoundModels[0], new LightStreamObject((FBModel*)FoundModels[0], LiveLinkProvider));
+					}
+
+					FName SubjectName(pFbxObject->FieldReadC());
+					int32 StreamingMode = pFbxObject->FieldReadI();
+					bool ObjectActive = true;
+
+					if (pFbxObject->FieldReadI() == 0)
+					{
+						ObjectActive = false;
+					}
+
+					int32 LocalMapPairCounter = 0;
+					for (auto MapPair : StreamObjects)
+					{
+						if (MapPairCounter == LocalMapPairCounter)
+						{
+							MapPair.Value->UpdateSubjectName(SubjectName);
+							MapPair.Value->UpdateStreamingMode(StreamingMode);
+							MapPair.Value->UpdateActiveStatus(ObjectActive);
+							MapPairCounter += 1;
+						}
+						LocalMapPairCounter += 1;
+					}
+				}
+			}
+			pFbxObject->FieldReadEnd();
+		}
 	}
 	return true;
 }
