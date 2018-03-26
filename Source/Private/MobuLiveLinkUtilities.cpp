@@ -178,5 +178,5 @@ void AppendFilmbackSettings(FBCamera* CameraModel, TArray<FLiveLinkCurveElement>
 	CurveElements[NewItemIndex].CurveValue = FilmSizeWidth * INCHES_TO_MILLIMETERS;
 	NewItemIndex = CurveElements.AddDefaulted();
 	CurveElements[NewItemIndex].CurveName = FName("FilmAspectRatio");
-	CurveElements[NewItemIndex].CurveValue = FilmAspectRatio * INCHES_TO_MILLIMETERS;
+	CurveElements[NewItemIndex].CurveValue = FilmAspectRatio;
 }
