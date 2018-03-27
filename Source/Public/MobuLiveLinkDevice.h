@@ -78,8 +78,9 @@ private:
 
 	TMap<FBSceneChangeType, const char *> SceneChangeNameMap;
 
-	
+	double LastEvaluationTime;
 
 	void SetDeviceInformation(const char* NewDeviceInformation);
+	void TickCoreTicker();
 };
 

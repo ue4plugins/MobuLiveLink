@@ -68,6 +68,8 @@ bool FMobuLiveLink::FBCreate()
 	TSharedPtr<IStreamObject> EditorCamera = MakeShared<FEditorActiveCameraStreamObject>(LiveLinkProvider);
 	StreamObjects.Emplace((kReference)nullptr, EditorCamera);
 
+	LastEvaluationTime = FPlatformTime::Seconds();
+
 	FBTrace("Creating Editor Camera\n");
 	return true;
 }
@@ -173,6 +175,9 @@ bool FMobuLiveLink::Reset()
 bool FMobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo* pEvaluateInfo)
 {
 	ScopedFastLock scoped_lock(mCleanUpLock);
+
+	TickCoreTicker();
+
 	if (IsDirty())
 	{
 		UpdateStreamObjects();
@@ -311,7 +316,7 @@ void FMobuLiveLink::StartLiveLink()
 
 void FMobuLiveLink::StopLiveLink()
 {
-	FTicker::GetCoreTicker().Tick(1.f);
+	TickCoreTicker();
 	if (LiveLinkProvider.IsValid())
 	{
 		FBTrace("Provider References: %d\n", LiveLinkProvider.GetSharedReferenceCount());
@@ -365,4 +370,11 @@ void FMobuLiveLink::UpdateStreamObjects()
 	}
 	SetDirty(false);
 	SetRefreshUI(true);
+}
+
+FORCEINLINE void FMobuLiveLink::TickCoreTicker()
+{
+	double CurrentTime = FPlatformTime::Seconds();
+	FTicker::GetCoreTicker().Tick(CurrentTime - LastEvaluationTime);
+	LastEvaluationTime = CurrentTime;
 }
