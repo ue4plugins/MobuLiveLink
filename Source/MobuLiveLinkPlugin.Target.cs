@@ -18,7 +18,7 @@ public class MobuLiveLinkPluginTarget : TargetRules
     {
 		get
         { 
-		return Path.GetFullPath(Path.Combine("../Binaries", "Win64/MotionBuilder"));
+			return Path.GetFullPath(Path.Combine("../Binaries", "Win64/MotionBuilder"));
         }
     }
 
