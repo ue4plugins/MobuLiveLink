@@ -10,6 +10,7 @@ EditorActiveCameraStreamObject::EditorActiveCameraStreamObject(const TSharedPtr<
 EditorActiveCameraStreamObject::~EditorActiveCameraStreamObject()
 {
 	Provider->ClearSubject(SubjectName);
+	FBTrace("Destroying Editor Camera\n");
 }
 
 const bool EditorActiveCameraStreamObject::ShouldShowInUI() const

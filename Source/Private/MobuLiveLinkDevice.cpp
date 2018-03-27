@@ -4,6 +4,9 @@
 //--- Stream object for the Editor camera
 #include "MobuLiveLinkStreamObjects.h"
 
+//--- Allow ticking of the engine
+#include "Containers/Ticker.h"
+
 //--- For getting the dll location on disk
 #include "Windows.h"
 #include <string>
@@ -60,9 +63,10 @@ bool MobuLiveLink::FBCreate()
 
 	SetDirty(false);
 
-	TSharedPtr<IStreamObject> EditorCamera((IStreamObject*)(new EditorActiveCameraStreamObject(LiveLinkProvider)));
+	TSharedPtr<IStreamObject> EditorCamera = MakeShared<EditorActiveCameraStreamObject>(LiveLinkProvider);
 	StreamObjects.Emplace((kReference)nullptr, EditorCamera);
 
+	FBTrace("Creating Editor Camera\n");
 	return true;
 }
 
@@ -73,6 +77,8 @@ bool MobuLiveLink::FBCreate()
 void MobuLiveLink::FBDestroy()
 {
 	FBSystem().Scene->OnChange.Remove(this, (FBCallback)&MobuLiveLink::EventSceneChange);
+
+	StreamObjects.Empty();
 	StopLiveLink();
 }
 
@@ -303,8 +309,10 @@ void MobuLiveLink::StartLiveLink()
 
 void MobuLiveLink::StopLiveLink()
 {
+	FTicker::GetCoreTicker().Tick(1.f);
 	if (LiveLinkProvider.IsValid())
 	{
+		FBTrace("Provider References: %d\n", LiveLinkProvider.GetSharedReferenceCount());
 		LiveLinkProvider = nullptr;
 		FBTrace("Deleting Live Link\n");
 	}
