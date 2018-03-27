@@ -91,6 +91,8 @@ bool FModelStreamObject::IsValid() const
 
 void FModelStreamObject::Refresh()
 {
+	BaseMetadata.Add(FName("Type"), ConnectionOptions[StreamingMode]);
+
 	BoneNames.Empty();
 	BoneParents.Empty();
 	BoneModels.Empty();
@@ -160,8 +162,9 @@ void FModelStreamObject::UpdateSubjectFrame()
 		CurveData.Append(MobuUtilities::GetAllAnimatableCurves((FBModel*)BoneModels[BoneIndex], BoneNames[BoneIndex].ToString()));
 	}
 
+	FLiveLinkMetaData FrameMetadata;
+	FrameMetadata.StringMetaData = BaseMetadata;
+	MobuUtilities::GetSceneTimecode(FrameMetadata.SceneTime);
 
-
-	FBTime LocalTime = FBSystem().LocalTime;
-	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble());
+	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, FrameMetadata, FPlatformTime::Seconds());
 };

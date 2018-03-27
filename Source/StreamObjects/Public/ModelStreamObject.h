@@ -58,4 +58,6 @@ protected:
 	int StreamingMode;
 	bool bIsActive;
 
+	TMap<FName, FString> BaseMetadata;
+
 };

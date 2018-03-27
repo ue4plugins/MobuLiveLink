@@ -11,4 +11,7 @@ namespace MobuUtilities
 	FTransform UnrealTransformFromCamera(FBCamera* CameraModel);
 	TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel, const FString Prefix = FString());
 	void AppendFilmbackSettings(FBCamera* CameraModel, TArray<FLiveLinkCurveElement>& CurveElements);
+
+	FLiveLinkFrameRate TimeModeToFrameRate(FBTimeMode TimeMode);
+	void GetSceneTimecode(FLiveLinkTimeCode& SceneTimecode);
 }
