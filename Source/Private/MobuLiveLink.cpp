@@ -31,10 +31,10 @@ private:
 
 
 //--- Library declaration
-FBLibraryDeclare( MobuLiveLink )
+FBLibraryDeclare( FMobuLiveLink )
 {
-	FBLibraryRegister( MobuLiveLink		);
-	FBLibraryRegister( MobuLiveLinkLayout	);
+	FBLibraryRegister( FMobuLiveLink		);
+	FBLibraryRegister( FMobuLiveLinkLayout	);
 }
 FBLibraryDeclareEnd;
 

@@ -3,86 +3,86 @@
 #include "EditorActiveCameraStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
 
-EditorActiveCameraStreamObject::EditorActiveCameraStreamObject(const TSharedPtr<ILiveLinkProvider> StreamProvider)
+FEditorActiveCameraStreamObject::FEditorActiveCameraStreamObject(const TSharedPtr<ILiveLinkProvider> StreamProvider)
 	: Provider(StreamProvider), SubjectName("EditorActiveCamera"), BoneNames({FName("root")}), BoneParents({-1})
 {
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 }
 
-EditorActiveCameraStreamObject::~EditorActiveCameraStreamObject()
+FEditorActiveCameraStreamObject::~FEditorActiveCameraStreamObject()
 {
 	Provider->ClearSubject(SubjectName);
 	FBTrace("Destroying Editor Camera\n");
 }
 
-const bool EditorActiveCameraStreamObject::ShouldShowInUI() const
+const bool FEditorActiveCameraStreamObject::ShouldShowInUI() const
 {
 	return false;
 }
 
-const FString EditorActiveCameraStreamObject::GetStreamOptions() const
+const FString FEditorActiveCameraStreamObject::GetStreamOptions() const
 {
 	// Stream options are not valid on Editor camera
 	return FString();
 };
 
-FName EditorActiveCameraStreamObject::GetSubjectName() const
+FName FEditorActiveCameraStreamObject::GetSubjectName() const
 {
 	return SubjectName;
 };
 
-void EditorActiveCameraStreamObject::UpdateSubjectName(FName NewSubjectName)
+void FEditorActiveCameraStreamObject::UpdateSubjectName(FName NewSubjectName)
 {
 	// Subject name is not changeable on the Editor camera
 };
 
 
-int EditorActiveCameraStreamObject::GetStreamingMode() const
+int FEditorActiveCameraStreamObject::GetStreamingMode() const
 {
 	return 0;
 };
 
-void EditorActiveCameraStreamObject::UpdateStreamingMode(int NewStreamingMode)
+void FEditorActiveCameraStreamObject::UpdateStreamingMode(int NewStreamingMode)
 {
 	// Streaming mode is not changeable on the Editor camera
 };
 
 
-bool EditorActiveCameraStreamObject::GetActiveStatus() const
+bool FEditorActiveCameraStreamObject::GetActiveStatus() const
 {
 	// Editor camera is always active
 	return true;
 };
 
-void EditorActiveCameraStreamObject::UpdateActiveStatus(bool bIsNowActive)
+void FEditorActiveCameraStreamObject::UpdateActiveStatus(bool bIsNowActive)
 {
 	// Active Status is not changeable on the Editor camera
 };
 
-const kReference EditorActiveCameraStreamObject::GetReference() const
+const kReference FEditorActiveCameraStreamObject::GetReference() const
 {
 	return (kReference)nullptr;
 };
 
-const FString EditorActiveCameraStreamObject::GetRootName() const
+const FString FEditorActiveCameraStreamObject::GetRootName() const
 {
 	// Root Name is not valid on Editor camera
 	return FString();
 }
 
 
-bool EditorActiveCameraStreamObject::IsValid() const
+bool FEditorActiveCameraStreamObject::IsValid() const
 {
 	// Editor camera is always valid
 	return true;
 }
 
-void EditorActiveCameraStreamObject::Refresh()
+void FEditorActiveCameraStreamObject::Refresh()
 {
 	// Refresh is not a valid operation
 }
 
-void EditorActiveCameraStreamObject::UpdateSubjectFrame()
+void FEditorActiveCameraStreamObject::UpdateSubjectFrame()
 {
 	FBSystem System;
 	FBCamera* CameraModel = System.Scene->Renderer->CurrentCamera;
@@ -90,11 +90,11 @@ void EditorActiveCameraStreamObject::UpdateSubjectFrame()
 	TArray<FTransform> BoneTransforms;
 
 	// Single Bone
-	BoneTransforms.Emplace(UnrealTransformFromCamera(CameraModel));
+	BoneTransforms.Emplace(MobuUtilities::UnrealTransformFromCamera(CameraModel));
 
-	TArray<FLiveLinkCurveElement> CurveData = GetAllAnimatableCurves(CameraModel);
+	TArray<FLiveLinkCurveElement> CurveData = MobuUtilities::GetAllAnimatableCurves(CameraModel);
 
-	AppendFilmbackSettings(CameraModel, CurveData);
+	MobuUtilities::AppendFilmbackSettings(CameraModel, CurveData);
 
 	FBTime LocalTime = FBSystem().LocalTime;
 	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble());

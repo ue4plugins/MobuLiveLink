@@ -3,8 +3,8 @@
 #include "LightStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
 
-LightStreamObject::LightStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	ModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy"), TEXT("Light") })
+FLightStreamObject::FLightStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
+	FModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy"), TEXT("Light") })
 {
 	StreamingMode = 2;
 
@@ -14,12 +14,12 @@ LightStreamObject::LightStreamObject(const FBModel* ModelPointer, const TSharedP
 	Refresh();
 };
 
-void LightStreamObject::Refresh()
+void FLightStreamObject::Refresh()
 {
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 };
 
-void LightStreamObject::UpdateSubjectFrame()
+void FLightStreamObject::UpdateSubjectFrame()
 {
 	if (!bIsActive) return;
 
@@ -27,14 +27,14 @@ void LightStreamObject::UpdateSubjectFrame()
 
 	FBCamera* LightModel = (FBCamera*)RootModel;
 	// Single Bone
-	BoneTransforms.Emplace(UnrealTransformFromModel(LightModel));
+	BoneTransforms.Emplace(MobuUtilities::UnrealTransformFromModel(LightModel));
 
 	TArray<FLiveLinkCurveElement> CurveData;
 	// If Streaming as Light then get the Light Properties
 	if (StreamingMode == 2)
 	{
 		// TODO: Add any additional Light logic here. For now stream everything we can
-		CurveData = GetAllAnimatableCurves(LightModel);
+		CurveData = MobuUtilities::GetAllAnimatableCurves(LightModel);
 	}
 
 	FBTime LocalTime = FBSystem().LocalTime;

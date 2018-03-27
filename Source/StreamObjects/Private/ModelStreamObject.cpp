@@ -3,15 +3,15 @@
 #include "ModelStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
 
-ModelStreamObject::ModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	ModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy") })
+FModelStreamObject::FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
+	FModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy") })
 {
 	Refresh();
 };
 
 //// Creation / Destruction
 
-ModelStreamObject::ModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, std::initializer_list<FString> Options)
+FModelStreamObject::FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, std::initializer_list<FString> Options)
 	: RootModel(ModelPointer), Provider(StreamProvider), ConnectionOptions(Options), bIsActive(true), StreamingMode(0)
 {
 	FString ModelLongName(ANSI_TO_TCHAR(RootModel->LongName));
@@ -20,29 +20,29 @@ ModelStreamObject::ModelStreamObject(const FBModel* ModelPointer, const TSharedP
 	SubjectName = FName(*ModelLongName);
 };
 
-ModelStreamObject::~ModelStreamObject()
+FModelStreamObject::~FModelStreamObject()
 {
 	Provider->ClearSubject(SubjectName);
 };
 
 // Stream Object Interface
 
-const bool ModelStreamObject::ShouldShowInUI() const
+const bool FModelStreamObject::ShouldShowInUI() const
 {
 	return true;
 };
 
-const FString ModelStreamObject::GetStreamOptions() const
+const FString FModelStreamObject::GetStreamOptions() const
 {
 	return FString::Join(ConnectionOptions, _T("~"));
 };
 
-FName ModelStreamObject::GetSubjectName() const
+FName FModelStreamObject::GetSubjectName() const
 {
 	return SubjectName;
 };
 
-void ModelStreamObject::UpdateSubjectName(FName NewSubjectName)
+void FModelStreamObject::UpdateSubjectName(FName NewSubjectName)
 {
 	Provider->ClearSubject(SubjectName);
 	SubjectName = NewSubjectName;
@@ -50,46 +50,46 @@ void ModelStreamObject::UpdateSubjectName(FName NewSubjectName)
 };
 
 
-int ModelStreamObject::GetStreamingMode() const
+int FModelStreamObject::GetStreamingMode() const
 {
 	return StreamingMode;
 };
 
-void ModelStreamObject::UpdateStreamingMode(int NewStreamingMode)
+void FModelStreamObject::UpdateStreamingMode(int NewStreamingMode)
 {
 	StreamingMode = NewStreamingMode;
 	Refresh();
 };
 
 
-bool ModelStreamObject::GetActiveStatus() const
+bool FModelStreamObject::GetActiveStatus() const
 {
 	return bIsActive;
 };
 
-void ModelStreamObject::UpdateActiveStatus(bool bIsNowActive)
+void FModelStreamObject::UpdateActiveStatus(bool bIsNowActive)
 {
 	bIsActive = bIsNowActive;
 	Refresh();
 };
 
-const kReference ModelStreamObject::GetReference() const
+const kReference FModelStreamObject::GetReference() const
 {
 	return (kReference)RootModel;
 };
 
-const FString ModelStreamObject::GetRootName() const
+const FString FModelStreamObject::GetRootName() const
 {
 	return FString(ANSI_TO_TCHAR(RootModel->LongName));
 }
 
-bool ModelStreamObject::IsValid() const
+bool FModelStreamObject::IsValid() const
 {
 	// By Default an object is valid if the root model is in the scene
 	return FBSystem().Scene->Components.Find((FBComponent*)RootModel) >= 0;
 };
 
-void ModelStreamObject::Refresh()
+void FModelStreamObject::Refresh()
 {
 	BoneNames.Empty();
 	BoneParents.Empty();
@@ -133,7 +133,7 @@ void ModelStreamObject::Refresh()
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 };
 
-void ModelStreamObject::UpdateSubjectFrame()
+void FModelStreamObject::UpdateSubjectFrame()
 {
 	if (!bIsActive) return;
 
@@ -149,7 +149,7 @@ void ModelStreamObject::UpdateSubjectFrame()
 	// loop through children here
 	for (int BoneIndex = 0; BoneIndex < BoneModels.Num(); ++BoneIndex)
 	{
-		BoneTransforms[BoneIndex] = UnrealTransformFromModel((FBModel*)BoneModels[BoneIndex]);
+		BoneTransforms[BoneIndex] = MobuUtilities::UnrealTransformFromModel((FBModel*)BoneModels[BoneIndex]);
 		ParentInverseTransforms[BoneIndex] = BoneTransforms[BoneIndex].Inverse();
 		if (BoneParents[BoneIndex] != -1)
 		{
@@ -157,7 +157,7 @@ void ModelStreamObject::UpdateSubjectFrame()
 		}
 
 		// Stream all parameters of all bones as "<BoneName>:<ParameterName>"
-		CurveData.Append(GetAllAnimatableCurves((FBModel*)BoneModels[BoneIndex], BoneNames[BoneIndex].ToString()));
+		CurveData.Append(MobuUtilities::GetAllAnimatableCurves((FBModel*)BoneModels[BoneIndex], BoneNames[BoneIndex].ToString()));
 	}
 
 

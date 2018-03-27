@@ -5,10 +5,10 @@
 #include "ModelStreamObject.h"
 
 // FBCamera wrapper
-class CameraStreamObject : public ModelStreamObject
+class FCameraStreamObject : public FModelStreamObject
 {
 public:
-	CameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
+	FCameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
 
 	void Refresh() override;
 	void UpdateSubjectFrame() override;

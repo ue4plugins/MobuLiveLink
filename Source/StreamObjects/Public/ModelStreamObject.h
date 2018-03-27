@@ -7,13 +7,13 @@
 // Generic object that supports FBModels
 // Either used for simple objects where no more specific class exists (Nulls, etc.)
 // or used as a base class for StreamObjects who's Root object derives from FBModel
-class ModelStreamObject : public IStreamObject
+class FModelStreamObject : public IStreamObject
 {
 public:
 	// Construct from a FBModel*
-	ModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
+	FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
 
-	virtual ~ModelStreamObject();
+	virtual ~FModelStreamObject();
 
 	// IStreamObject Interface
 
@@ -42,7 +42,7 @@ public:
 protected:
 
 	// Constructor for Child Classes
-	ModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, std::initializer_list<FString> Options);
+	FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, std::initializer_list<FString> Options);
 
 	// Stream Variables
 

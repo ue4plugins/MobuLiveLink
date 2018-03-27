@@ -3,14 +3,14 @@
 #include "SkeletonHierarchyStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
 
-SkeletonHierarchyStreamObject::SkeletonHierarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	ModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy"), TEXT("Skeleton Hierarchy") })
+FSkeletonHierarchyStreamObject::FSkeletonHierarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
+	FModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy"), TEXT("Skeleton Hierarchy") })
 {
 	StreamingMode = 2;
 	Refresh();
 };
 
-void SkeletonHierarchyStreamObject::Refresh() 
+void FSkeletonHierarchyStreamObject::Refresh() 
 {
 	BoneNames.Empty();
 	BoneParents.Empty();

@@ -2,7 +2,7 @@
 
 #include "MobuLiveLinkStreamObjects.h"
 
-TSharedPtr<IStreamObject> StreamObjectManager::FBModelToStreamObject(FBModel* SourceModel, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
+TSharedPtr<IStreamObject> StreamObjectManagement::FBModelToStreamObject(FBModel* SourceModel, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
 {
 
 	const int SourceType = SourceModel->GetTypeId();
@@ -25,7 +25,7 @@ TSharedPtr<IStreamObject> StreamObjectManager::FBModelToStreamObject(FBModel* So
 	}
 };
 
-TSharedPtr<IStreamObject> StreamObjectManager::StoreCamera(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
+TSharedPtr<IStreamObject> StreamObjectManagement::StoreCamera(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
 {
 	FBTrace("%s is a Camera!\n", Model->LongName);
 
@@ -33,7 +33,7 @@ TSharedPtr<IStreamObject> StreamObjectManager::StoreCamera(const FBModel* Model,
 	return CameraStore;
 }
 
-TSharedPtr<IStreamObject> StreamObjectManager::StoreLight(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
+TSharedPtr<IStreamObject> StreamObjectManagement::StoreLight(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
 {
 	FBTrace("%s is a Light!\n", Model->LongName);
 
@@ -41,7 +41,7 @@ TSharedPtr<IStreamObject> StreamObjectManager::StoreLight(const FBModel* Model, 
 	return LightStore;
 }
 
-TSharedPtr<IStreamObject> StreamObjectManager::StoreSkeleton(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
+TSharedPtr<IStreamObject> StreamObjectManagement::StoreSkeleton(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
 {
 	FBTrace("%s is a Skeleton!\n", Model->LongName);
 
@@ -49,7 +49,7 @@ TSharedPtr<IStreamObject> StreamObjectManager::StoreSkeleton(const FBModel* Mode
 	return SkeletonStore;
 }
 
-TSharedPtr<IStreamObject> StreamObjectManager::StoreGeneric(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
+TSharedPtr<IStreamObject> StreamObjectManagement::StoreGeneric(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
 {
 	FBTrace("%s is an Unknown Type! - %s\n", Model->LongName, ((FBModel*)Model)->ClassName());
 

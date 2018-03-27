@@ -5,9 +5,9 @@
 #include "MobuLiveLinkDevice.h"
 
 
-class MobuLiveLinkLayout : public FBDeviceLayout
+class FMobuLiveLinkLayout : public FBDeviceLayout
 {
-	FBDeviceLayoutDeclare(MobuLiveLinkLayout, FBDeviceLayout);
+	FBDeviceLayoutDeclare(FMobuLiveLinkLayout, FBDeviceLayout);
 	
 public:
 	bool FBCreate() override;
@@ -42,7 +42,7 @@ private:
 	void AddSpreadRowFromStreamObject(StreamObjectPtr Object);
 
 	FBSystem				System;
-	MobuLiveLink*			LiveLinkDevice;
+	FMobuLiveLink*			LiveLinkDevice;
 
 	FBPropertyListObject ObjectSelection;
 };

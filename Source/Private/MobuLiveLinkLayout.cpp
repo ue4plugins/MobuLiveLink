@@ -4,7 +4,7 @@
 #include "MobuLiveLinkStreamObjects.h"
 #include <string>
 
-#define MOBULIVELINK__LAYOUT	MobuLiveLinkLayout
+#define MOBULIVELINK__LAYOUT	FMobuLiveLinkLayout
 
 FBDeviceLayoutImplementation(MOBULIVELINK__LAYOUT);
 FBRegisterDeviceLayout(MOBULIVELINK__LAYOUT,
@@ -14,10 +14,10 @@ FBRegisterDeviceLayout(MOBULIVELINK__LAYOUT,
 
 #define BoolToActiveText(input) (input ? "Active" : "Inactive")
 
-bool MobuLiveLinkLayout::FBCreate()
+bool FMobuLiveLinkLayout::FBCreate()
 {
 	// Get a handle on the device.
-	LiveLinkDevice = ((MobuLiveLink *)(FBDevice *)Device);
+	LiveLinkDevice = ((FMobuLiveLink *)(FBDevice *)Device);
 
 	FBPropertyPublish(this, ObjectSelection, "ObjectSelection", NULL, NULL);
 	ObjectSelection.SetFilter(FBModel::GetInternalClassId());
@@ -27,22 +27,22 @@ bool MobuLiveLinkLayout::FBCreate()
 	UIConfigure();
 	UIReset();
 
-	LiveLinkDevice->OnStatusChange.Add(this, (FBCallback)&MobuLiveLinkLayout::EventDeviceStatusChange);
-	System.OnUIIdle.Add(this, (FBCallback)&MobuLiveLinkLayout::EventUIIdle);
+	LiveLinkDevice->OnStatusChange.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventDeviceStatusChange);
+	System.OnUIIdle.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventUIIdle);
 	return true;
 }
 
 
-void MobuLiveLinkLayout::FBDestroy()
+void FMobuLiveLinkLayout::FBDestroy()
 {
 	// Remove device & system callbacks
 	FBTrace("Destroying\n");
 
-	System.OnUIIdle.Remove(this, (FBCallback)&MobuLiveLinkLayout::EventUIIdle);
-	LiveLinkDevice->OnStatusChange.Remove(this, (FBCallback)&MobuLiveLinkLayout::EventDeviceStatusChange);
+	System.OnUIIdle.Remove(this, (FBCallback)&FMobuLiveLinkLayout::EventUIIdle);
+	LiveLinkDevice->OnStatusChange.Remove(this, (FBCallback)&FMobuLiveLinkLayout::EventDeviceStatusChange);
 }
 
-void MobuLiveLinkLayout::UICreate()
+void FMobuLiveLinkLayout::UICreate()
 {
 	int S, W, H;		// space, height
 	S = 4;
@@ -94,7 +94,7 @@ void MobuLiveLinkLayout::UICreate()
 	StreamLayout.SetControl("StreamSpread", StreamSpread);
 }
 
-void MobuLiveLinkLayout::CreateSpreadColumns()
+void FMobuLiveLinkLayout::CreateSpreadColumns()
 {
 	StreamSpread.ColumnAdd("Subject Name", 0);
 	StreamSpread.ColumnAdd("Stream Type", 1);
@@ -103,7 +103,7 @@ void MobuLiveLinkLayout::CreateSpreadColumns()
 	StreamSpread.GetColumn(2).Style = kFBCellStyle2StatesButton;
 }
 
-void MobuLiveLinkLayout::UIConfigure()
+void FMobuLiveLinkLayout::UIConfigure()
 {
 	SetBorder("MainLayout", kFBStandardBorder, false, true, 1, 0, 90, 0);
 
@@ -111,21 +111,21 @@ void MobuLiveLinkLayout::UIConfigure()
 
 	AddToStreamButton.Caption = "Add";
 	AddToStreamButton.Justify = kFBTextJustifyCenter;
-	AddToStreamButton.OnClick.Add(this, (FBCallback)&MobuLiveLinkLayout::EventAddToStream);
+	AddToStreamButton.OnClick.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventAddToStream);
 
 	RemoveFromStreamButton.Caption = "Remove";
 	RemoveFromStreamButton.Justify = kFBTextJustifyCenter;
-	RemoveFromStreamButton.OnClick.Add(this, (FBCallback)&MobuLiveLinkLayout::EventRemoveFromStream);
+	RemoveFromStreamButton.OnClick.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventRemoveFromStream);
 
 	StreamSpread.Caption = "Object Root";
 	StreamSpread.MultiSelect = true;
 
 	CreateSpreadColumns();
 
-	StreamSpread.OnCellChange.Add(this, (FBCallback)&MobuLiveLinkLayout::EventStreamSpreadCellChange);
+	StreamSpread.OnCellChange.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventStreamSpreadCellChange);
 }
 
-void MobuLiveLinkLayout::UIReset()
+void FMobuLiveLinkLayout::UIReset()
 {
 	FBTrace("UI Reset!\n");
 	StreamSpread.Clear();
@@ -138,13 +138,13 @@ void MobuLiveLinkLayout::UIReset()
 }
 
 
-void MobuLiveLinkLayout::EventDeviceStatusChange(HISender Sender, HKEvent Event)
+void FMobuLiveLinkLayout::EventDeviceStatusChange(HISender Sender, HKEvent Event)
 {
 	// UIReset();
 }
 
 
-void MobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
+void FMobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 {
 	if (LiveLinkDevice->IsDirty())
 	{
@@ -156,7 +156,7 @@ void MobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 	}
 }
 
-void MobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
+void FMobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
 {
 	// Check whether the Object should be shown
 	if (!Object->ShouldShowInUI()) return;
@@ -175,12 +175,12 @@ void MobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
 }
 
 
-FORCEINLINE bool IsModelInDeviceStream(const MobuLiveLink* MobuDevice, const FBModel* Model)
+FORCEINLINE bool IsModelInDeviceStream(const FMobuLiveLink* MobuDevice, const FBModel* Model)
 {
 	return MobuDevice->StreamObjects.Contains((kReference)Model);
 }
 
-void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
+void FMobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 {
 	TArray<FBModel*> ParentsToIgnore;
 	ParentsToIgnore.Reserve(ObjectSelection.GetCount());
@@ -205,7 +205,7 @@ void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 		}
 		else if (!IsModelInDeviceStream(LiveLinkDevice, Model))
 		{
-			StreamObjectPtr StoreObject = StreamObjectManager::FBModelToStreamObject(Model, LiveLinkDevice->LiveLinkProvider);
+			StreamObjectPtr StoreObject = StreamObjectManagement::FBModelToStreamObject(Model, LiveLinkDevice->LiveLinkProvider);
 			LiveLinkDevice->StreamObjects.Emplace((kReference)Model, StoreObject);
 			AddSpreadRowFromStreamObject(StoreObject);
 			FBTrace("Added New Object to StreamObject\n");
@@ -217,7 +217,7 @@ void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 	ObjectSelection.Clear();
 }
 
-void MobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
+void FMobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 {
 	int SelectedCount = 0;
 	TArray<kReference> DeletionObjects;
@@ -243,7 +243,7 @@ void MobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 	FBTrace("%d items in selection!\n", SelectedCount);
 }
 
-void MobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent Event)
+void FMobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent Event)
 {
 	FBEventSpread SpreadEvent = Event;
 

@@ -5,10 +5,10 @@
 #include "ModelStreamObject.h"
 
 // FBModelSkeleton and FBModelRoot wrapper
-class SkeletonHierarchyStreamObject : public ModelStreamObject
+class FSkeletonHierarchyStreamObject : public FModelStreamObject
 {
 public:
-	SkeletonHierarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
+	FSkeletonHierarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
 
 	// Override Refresh to only add Skeletal Children to the stream Hierarchy
 	void Refresh() override;

@@ -3,8 +3,8 @@
 #include "CameraStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
 
-CameraStreamObject::CameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	ModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy"), TEXT("Camera") })
+FCameraStreamObject::FCameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
+	FModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy"), TEXT("Camera") })
 {
 	StreamingMode = 2;
 
@@ -14,12 +14,12 @@ CameraStreamObject::CameraStreamObject(const FBModel* ModelPointer, const TShare
 	Refresh();
 }
 
-void CameraStreamObject::Refresh() 
+void FCameraStreamObject::Refresh() 
 {
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 }
 
-void CameraStreamObject::UpdateSubjectFrame() 
+void FCameraStreamObject::UpdateSubjectFrame() 
 {
 	if (!bIsActive) return;
 
@@ -27,16 +27,16 @@ void CameraStreamObject::UpdateSubjectFrame()
 
 	FBCamera* CameraModel = (FBCamera*)RootModel;
 	// Single Bone
-	BoneTransforms.Emplace(UnrealTransformFromCamera(CameraModel));
+	BoneTransforms.Emplace(MobuUtilities::UnrealTransformFromCamera(CameraModel));
 
 	TArray<FLiveLinkCurveElement> CurveData;
 
 	// If Streaming as Camera then get the Camera Properties
 	if (StreamingMode == 2)
 	{
-		CurveData = GetAllAnimatableCurves(CameraModel);
+		CurveData = MobuUtilities::GetAllAnimatableCurves(CameraModel);
 
-		AppendFilmbackSettings(CameraModel, CurveData);
+		MobuUtilities::AppendFilmbackSettings(CameraModel, CurveData);
 	}
 
 	FBTime LocalTime = FBSystem().LocalTime;

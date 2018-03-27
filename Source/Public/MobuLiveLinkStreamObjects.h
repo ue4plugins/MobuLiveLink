@@ -11,7 +11,7 @@
 #include "EditorActiveCameraStreamObject.h"
 
 // Static Class providing easy creation of Stream Objects
-namespace StreamObjectManager
+namespace StreamObjectManagement
 {
 	static TSharedPtr<IStreamObject> FBModelToStreamObject(FBModel* SourceModel, TSharedPtr<ILiveLinkProvider> LiveLinkProvider);
 

@@ -14,17 +14,17 @@
 #include "OutputDevice.h"
 
 //--- Registration defines
-#define MOBULIVELINK__CLASSNAME		MobuLiveLink
+#define MOBULIVELINK__CLASSNAME		FMobuLiveLink
 #define MOBULIVELINK__CLASSSTR		"MobuLiveLink"
 
 #define IntToChar(input) std::to_string(input).c_str()
 #define FStringToChar(input) ((std::string)TCHAR_TO_UTF8(*input)).c_str()
 
 //! Simple input device.
-class MobuLiveLink : public FBDevice
+class FMobuLiveLink : public FBDevice
 {
 	//--- FiLMBOX declaration
-	FBDeviceDeclare(MobuLiveLink, FBDevice);
+	FBDeviceDeclare(FMobuLiveLink, FBDevice);
 public:
 	void StartLiveLink();
 	void StopLiveLink();

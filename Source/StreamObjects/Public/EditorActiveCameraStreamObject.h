@@ -5,11 +5,11 @@
 #include "IStreamObject.h"
 
 // Wrapper for Streaming the Active Editor Camera 
-class EditorActiveCameraStreamObject : public IStreamObject
+class FEditorActiveCameraStreamObject : public IStreamObject
 {
 public:
-	EditorActiveCameraStreamObject(const TSharedPtr<ILiveLinkProvider> StreamProvider);
-	virtual ~EditorActiveCameraStreamObject();
+	FEditorActiveCameraStreamObject(const TSharedPtr<ILiveLinkProvider> StreamProvider);
+	virtual ~FEditorActiveCameraStreamObject();
 
 	// IStreamObject Interface
 

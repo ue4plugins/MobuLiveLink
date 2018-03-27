@@ -4,7 +4,7 @@
 
 #define INCHES_TO_MILLIMETERS 25.4
 
-FTransform MobuTransformToUnreal(FBMatrix& MobuTransfrom)
+FTransform MobuUtilities::MobuTransformToUnreal(FBMatrix& MobuTransfrom)
 {
 	FBMatrix MobuTransformUnrealSpace;
 	FBTVector TVector;
@@ -40,7 +40,7 @@ FTransform MobuTransformToUnreal(FBMatrix& MobuTransfrom)
 	return UnrealTransform;
 };
 
-FTransform UnrealTransformFromModel(FBModel* MobuModel, bool bIsGlobal)
+FTransform MobuUtilities::UnrealTransformFromModel(FBModel* MobuModel, bool bIsGlobal)
 {
 	FBMatrix MobuTransform;
 	FBMatrix MatOffset;
@@ -55,7 +55,7 @@ FTransform UnrealTransformFromModel(FBModel* MobuModel, bool bIsGlobal)
 	return MobuTransformToUnreal(MobuTransform);
 };
 
-FTransform UnrealTransformFromCamera(FBCamera* CameraModel)
+FTransform MobuUtilities::UnrealTransformFromCamera(FBCamera* CameraModel)
 {
 	// MotionBuilder suggests that GetMatrix is deprecated for Cameras and to 
 	// reconstruct from the Camera Matrices explicitly
@@ -85,7 +85,7 @@ FTransform UnrealTransformFromCamera(FBCamera* CameraModel)
 }
 
 // Get all properties on a given model that are both Animatable and are of a Type we can stream
-TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel, const FString Prefix)
+TArray<FLiveLinkCurveElement> MobuUtilities::GetAllAnimatableCurves(FBModel* MobuModel, const FString Prefix)
 {
 	int PropertyCount = MobuModel->PropertyList.GetCount();
 
@@ -163,7 +163,7 @@ TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel, const F
 	return LiveLinkCurves;
 }
 
-void AppendFilmbackSettings(FBCamera* CameraModel, TArray<FLiveLinkCurveElement>& CurveElements)
+void MobuUtilities::AppendFilmbackSettings(FBCamera* CameraModel, TArray<FLiveLinkCurveElement>& CurveElements)
 {
 	// Film size isn't an animatable property so does not come through by default
 	int NewItemIndex;

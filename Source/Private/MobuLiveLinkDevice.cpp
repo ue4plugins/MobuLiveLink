@@ -52,7 +52,7 @@ struct ScopedFastLock
 /************************************************
  *	FiLMBOX Constructor.
  ************************************************/
-bool MobuLiveLink::FBCreate()
+bool FMobuLiveLink::FBCreate()
 {
 	// Set sampling rate to 60 Hz
 	// Fixed for now but will be getting a dropdown UI soon
@@ -61,11 +61,11 @@ bool MobuLiveLink::FBCreate()
 	SamplingPeriod	= lPeriod;
 
 	StartLiveLink();
-	FBSystem().Scene->OnChange.Add(this, (FBCallback)&MobuLiveLink::EventSceneChange);
+	FBSystem().Scene->OnChange.Add(this, (FBCallback)&FMobuLiveLink::EventSceneChange);
 
 	SetDirty(false);
 
-	TSharedPtr<IStreamObject> EditorCamera = MakeShared<EditorActiveCameraStreamObject>(LiveLinkProvider);
+	TSharedPtr<IStreamObject> EditorCamera = MakeShared<FEditorActiveCameraStreamObject>(LiveLinkProvider);
 	StreamObjects.Emplace((kReference)nullptr, EditorCamera);
 
 	FBTrace("Creating Editor Camera\n");
@@ -76,9 +76,9 @@ bool MobuLiveLink::FBCreate()
 /************************************************
  *	FiLMBOX Destructor.
  ************************************************/
-void MobuLiveLink::FBDestroy()
+void FMobuLiveLink::FBDestroy()
 {
-	FBSystem().Scene->OnChange.Remove(this, (FBCallback)&MobuLiveLink::EventSceneChange);
+	FBSystem().Scene->OnChange.Remove(this, (FBCallback)&FMobuLiveLink::EventSceneChange);
 
 	StreamObjects.Empty();
 	StopLiveLink();
@@ -88,7 +88,7 @@ void MobuLiveLink::FBDestroy()
 /************************************************
  *	Device operation.
  ************************************************/
-bool MobuLiveLink::DeviceOperation( kDeviceOperations pOperation )
+bool FMobuLiveLink::DeviceOperation( kDeviceOperations pOperation )
 {
 	switch (pOperation)
 	{
@@ -101,7 +101,7 @@ bool MobuLiveLink::DeviceOperation( kDeviceOperations pOperation )
 	return FBDevice::DeviceOperation( pOperation );
 }
 
-void MobuLiveLink::SetDeviceInformation(const char* NewDeviceInformation)
+void FMobuLiveLink::SetDeviceInformation(const char* NewDeviceInformation)
 {
 	HardwareVersionInfo.SetString("Version 0.1");
 	Information.SetString(NewDeviceInformation);
@@ -112,7 +112,7 @@ void MobuLiveLink::SetDeviceInformation(const char* NewDeviceInformation)
 /************************************************
  *	Initialization of device.
  ************************************************/
-bool MobuLiveLink::Init()
+bool FMobuLiveLink::Init()
 {
 	SetDeviceInformation("Status: Offline");
 	return true;
@@ -123,7 +123,7 @@ bool MobuLiveLink::Init()
  *	Device is put online.
  ************************************************/
 
-bool MobuLiveLink::Start()
+bool FMobuLiveLink::Start()
 {
 	FBProgress	lProgress;
 	lProgress.Caption	= "Setting up device";
@@ -138,7 +138,7 @@ bool MobuLiveLink::Start()
 /************************************************
  *	Device is stopped (offline).
  ************************************************/
-bool MobuLiveLink::Stop()
+bool FMobuLiveLink::Stop()
 {
 	FBProgress	lProgress;
 	lProgress.Caption	= "Shutting down device";
@@ -152,7 +152,7 @@ bool MobuLiveLink::Stop()
 /************************************************
  *	Removal of device.
  ************************************************/
-bool MobuLiveLink::Done()
+bool FMobuLiveLink::Done()
 {
 	return false;
 }
@@ -161,7 +161,7 @@ bool MobuLiveLink::Done()
 /************************************************
  *	Reset of device.
  ************************************************/
-bool MobuLiveLink::Reset()
+bool FMobuLiveLink::Reset()
 {
     Stop();
     return Start();
@@ -170,7 +170,7 @@ bool MobuLiveLink::Reset()
 /************************************************
  *	Device Evaluation Notify.
  ************************************************/
-bool MobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo* pEvaluateInfo)
+bool FMobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo* pEvaluateInfo)
 {
 	ScopedFastLock scoped_lock(mCleanUpLock);
 	if (IsDirty())
@@ -189,7 +189,7 @@ bool MobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo* 
 /************************************************
  *	Real-Time Synchronous Device IO.
  ************************************************/
-void MobuLiveLink::DeviceIONotify( kDeviceIOs  pAction,FBDeviceNotifyInfo &pDeviceNotifyInfo)
+void FMobuLiveLink::DeviceIONotify( kDeviceIOs  pAction,FBDeviceNotifyInfo &pDeviceNotifyInfo)
 {
 	FBTime lEvalTime;
     switch (pAction)
@@ -220,7 +220,7 @@ void MobuLiveLink::DeviceIONotify( kDeviceIOs  pAction,FBDeviceNotifyInfo &pDevi
 /************************************************
 *	Store data in FBX.
 ************************************************/
-bool MobuLiveLink::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
+bool FMobuLiveLink::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
 {
 	if (pStoreWhat & kAttributes)
 	{
@@ -250,7 +250,7 @@ bool MobuLiveLink::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
 /************************************************
 *	Retrieve data from FBX.
 ************************************************/
-bool MobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
+bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
 {
 	if (pStoreWhat & kAttributes)
 	{
@@ -267,7 +267,7 @@ bool MobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWh
 				if (sizeof(FoundModels) > 0)
 				{
 					FBModel* FoundFBModel = (FBModel*)FoundModels[0];
-					TSharedPtr<IStreamObject> FoundStreamObject = StreamObjectManager::FBModelToStreamObject(FoundFBModel, LiveLinkProvider);
+					TSharedPtr<IStreamObject> FoundStreamObject = StreamObjectManagement::FBModelToStreamObject(FoundFBModel, LiveLinkProvider);
 					StreamObjects.Emplace((kReference)FoundFBModel, FoundStreamObject);
 
 					FName SubjectName(pFbxObject->FieldReadC());
@@ -300,7 +300,7 @@ bool MobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWh
 }
 
 
-void MobuLiveLink::StartLiveLink()
+void FMobuLiveLink::StartLiveLink()
 {
 	StopLiveLink();
 	LiveLinkProvider = ILiveLinkProvider::CreateLiveLinkProvider(mProviderName);
@@ -309,7 +309,7 @@ void MobuLiveLink::StartLiveLink()
 }
 
 
-void MobuLiveLink::StopLiveLink()
+void FMobuLiveLink::StopLiveLink()
 {
 	FTicker::GetCoreTicker().Tick(1.f);
 	if (LiveLinkProvider.IsValid())
@@ -321,7 +321,7 @@ void MobuLiveLink::StopLiveLink()
 	FBTrace("Live Link Stopped!\n");
 }
 
-void MobuLiveLink::EventSceneChange(HISender Sender, HKEvent Event)
+void FMobuLiveLink::EventSceneChange(HISender Sender, HKEvent Event)
 {
 	// todo: Possibly other events I need to handle
 
@@ -349,7 +349,7 @@ void MobuLiveLink::EventSceneChange(HISender Sender, HKEvent Event)
 
 }
 
-void MobuLiveLink::UpdateStreamObjects()
+void FMobuLiveLink::UpdateStreamObjects()
 {
 	for (auto MapPair : StreamObjects)
 	{
