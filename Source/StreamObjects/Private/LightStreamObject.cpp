@@ -16,6 +16,7 @@ FLightStreamObject::FLightStreamObject(const FBModel* ModelPointer, const TShare
 
 void FLightStreamObject::Refresh()
 {
+	BaseMetadata.Add(FName("Stream Type"), ConnectionOptions[StreamingMode]);
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 };
 
@@ -37,6 +38,9 @@ void FLightStreamObject::UpdateSubjectFrame()
 		CurveData = MobuUtilities::GetAllAnimatableCurves(LightModel);
 	}
 
-	FBTime LocalTime = FBSystem().LocalTime;
-	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble());
+	FLiveLinkMetaData FrameMetadata;
+	FrameMetadata.StringMetaData = BaseMetadata;
+	MobuUtilities::GetSceneTimecode(FrameMetadata.SceneTime);
+
+	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, FrameMetadata, FPlatformTime::Seconds());
 };

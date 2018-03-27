@@ -6,6 +6,7 @@
 FEditorActiveCameraStreamObject::FEditorActiveCameraStreamObject(const TSharedPtr<ILiveLinkProvider> StreamProvider)
 	: Provider(StreamProvider), SubjectName("EditorActiveCamera"), BoneNames({FName("root")}), BoneParents({-1})
 {
+	BaseMetadata.Add(FName("Stream Type"), SubjectName.ToString());
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 }
 
@@ -96,6 +97,9 @@ void FEditorActiveCameraStreamObject::UpdateSubjectFrame()
 
 	MobuUtilities::AppendFilmbackSettings(CameraModel, CurveData);
 
-	FBTime LocalTime = FBSystem().LocalTime;
-	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble());
+	FLiveLinkMetaData FrameMetadata;
+	FrameMetadata.StringMetaData = BaseMetadata;
+	MobuUtilities::GetSceneTimecode(FrameMetadata.SceneTime);
+
+	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, FrameMetadata, FPlatformTime::Seconds());
 }

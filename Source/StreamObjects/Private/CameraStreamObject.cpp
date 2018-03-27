@@ -16,6 +16,7 @@ FCameraStreamObject::FCameraStreamObject(const FBModel* ModelPointer, const TSha
 
 void FCameraStreamObject::Refresh() 
 {
+	BaseMetadata.Add(FName("Stream Type"), ConnectionOptions[StreamingMode]);
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 }
 
@@ -39,6 +40,9 @@ void FCameraStreamObject::UpdateSubjectFrame()
 		MobuUtilities::AppendFilmbackSettings(CameraModel, CurveData);
 	}
 
-	FBTime LocalTime = FBSystem().LocalTime;
-	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, LocalTime.GetSecondDouble());
+	FLiveLinkMetaData FrameMetadata;
+	FrameMetadata.StringMetaData = BaseMetadata;
+	MobuUtilities::GetSceneTimecode(FrameMetadata.SceneTime);
+
+	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, FrameMetadata, FPlatformTime::Seconds());
 }

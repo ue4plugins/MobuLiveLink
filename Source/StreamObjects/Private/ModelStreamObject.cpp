@@ -91,7 +91,7 @@ bool FModelStreamObject::IsValid() const
 
 void FModelStreamObject::Refresh()
 {
-	BaseMetadata.Add(FName("Type"), ConnectionOptions[StreamingMode]);
+	BaseMetadata.Add(FName("Stream Type"), ConnectionOptions[StreamingMode]);
 
 	BoneNames.Empty();
 	BoneParents.Empty();

@@ -12,6 +12,8 @@ FSkeletonHierarchyStreamObject::FSkeletonHierarchyStreamObject(const FBModel* Mo
 
 void FSkeletonHierarchyStreamObject::Refresh() 
 {
+	BaseMetadata.Add(FName("Stream Type"), ConnectionOptions[StreamingMode]);
+
 	BoneNames.Empty();
 	BoneParents.Empty();
 	BoneModels.Empty();

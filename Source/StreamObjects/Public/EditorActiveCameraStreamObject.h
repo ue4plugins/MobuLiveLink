@@ -42,4 +42,6 @@ private:
 	const FName SubjectName;
 	const TArray<FName> BoneNames;
 	const TArray<int32> BoneParents;
+
+	TMap<FName, FString> BaseMetadata;
 };
