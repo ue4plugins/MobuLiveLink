@@ -1,6 +1,7 @@
 ﻿// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "MobuLiveLinkLayout.h"
+#include "MobuLiveLinkStreamObjects.h"
 #include <string>
 
 #define MOBULIVELINK__LAYOUT	MobuLiveLinkLayout
@@ -15,13 +16,6 @@ FBRegisterDeviceLayout(MOBULIVELINK__LAYOUT,
 
 bool MobuLiveLinkLayout::FBCreate()
 {
-	// Set up Storage Functions
-
-	ModelStoreFunctions.Emplace(FBCamera::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreCamera);
-	ModelStoreFunctions.Emplace(FBLight::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreLight);
-	ModelStoreFunctions.Emplace(FBModelSkeleton::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreSkeleton);
-	ModelStoreFunctions.Emplace(FBModelRoot::TypeInfo, (ModelStoreFunctionType)&MobuLiveLinkLayout::StoreSkeleton);
-
 	// Get a handle on the device.
 	LiveLinkDevice = ((MobuLiveLink *)(FBDevice *)Device);
 
@@ -211,16 +205,7 @@ void MobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 		}
 		else if (!IsModelInDeviceStream(LiveLinkDevice, Model))
 		{
-			ModelStoreFunctionType* StoreFunction = ModelStoreFunctions.Find(Model->GetTypeId());
-			StreamObjectPtr StoreObject;
-			if (StoreFunction != nullptr)
-			{
-				StoreObject = (this->*(*StoreFunction))(Model);
-			}
-			else
-			{
-				StoreObject = StoreGeneric(Model);
-			}
+			StreamObjectPtr StoreObject = StreamObjectManager::FBModelToStreamObject(Model, LiveLinkDevice->LiveLinkProvider);
 			LiveLinkDevice->StreamObjects.Emplace((kReference)Model, StoreObject);
 			AddSpreadRowFromStreamObject(StoreObject);
 			FBTrace("Added New Object to StreamObject\n");
@@ -295,37 +280,4 @@ void MobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent Ev
 	default:
 		break;
 	}
-}
-
-
-MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreCamera(const FBModel* Model)
-{
-	FBTrace("%s is a Camera!\n", Model->LongName);
-
-	StreamObjectPtr CameraStore(new CameraStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
-	return CameraStore;
-}
-
-MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreLight(const FBModel* Model)
-{
-	FBTrace("%s is a Light!\n", Model->LongName);
-
-	StreamObjectPtr LightStore(new LightStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
-	return LightStore;
-}
-
-MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreGeneric(const FBModel* Model)
-{
-	FBTrace("%s is an Unknown Type! - %s\n", Model->LongName, ((FBModel*)Model)->ClassName());
-
-	StreamObjectPtr GenericStore(new ModelStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
-	return GenericStore;
-}
-
-MobuLiveLinkLayout::StreamObjectPtr MobuLiveLinkLayout::StoreSkeleton(const FBModel* Model)
-{
-	FBTrace("%s is a Skeleton!\n", Model->LongName);
-
-	StreamObjectPtr SkeletonStore(new SkeletonHierarchyStreamObject(Model, LiveLinkDevice->LiveLinkProvider));
-	return SkeletonStore;
 }

@@ -258,24 +258,9 @@ bool MobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWh
 
 				if (sizeof(FoundModels) > 0)
 				{
-					const char *ModelClass = FoundModels[0]->ClassName();
-
-					if (strcmp(ModelClass, "FBModel") == 0)
-					{
-						StreamObjects.Emplace((kReference)(FBModel*)FoundModels[0], new ModelStreamObject((FBModel*)FoundModels[0], LiveLinkProvider));
-					}
-					if (strcmp(ModelClass, "FBModelRoot") == 0)
-					{
-						StreamObjects.Emplace((kReference)(FBModel*)FoundModels[0], new SkeletonHierarchyStreamObject((FBModel*)FoundModels[0], LiveLinkProvider));
-					}
-					else if (strcmp(ModelClass, "FBCamera") == 0)
-					{
-						StreamObjects.Emplace((kReference)(FBCamera*)FoundModels[0], new CameraStreamObject((FBModel*)FoundModels[0], LiveLinkProvider));
-					}
-					else if (strcmp(ModelClass, "FBLight") == 0)
-					{
-						StreamObjects.Emplace((kReference)(FBLight*)FoundModels[0], new LightStreamObject((FBModel*)FoundModels[0], LiveLinkProvider));
-					}
+					FBModel* FoundFBModel = (FBModel*)FoundModels[0];
+					TSharedPtr<IStreamObject> FoundStreamObject = StreamObjectManager::FBModelToStreamObject(FoundFBModel, LiveLinkProvider);
+					StreamObjects.Emplace((kReference)FoundFBModel, FoundStreamObject);
 
 					FName SubjectName(pFbxObject->FieldReadC());
 					int32 StreamingMode = pFbxObject->FieldReadI();

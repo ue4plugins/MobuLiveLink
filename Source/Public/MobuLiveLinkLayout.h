@@ -38,14 +38,6 @@ public:
 private:
 
 	typedef TSharedPtr<IStreamObject> StreamObjectPtr;
-	typedef StreamObjectPtr (MobuLiveLinkLayout::*ModelStoreFunctionType)(FBModel* CameraModel);
-
-	StreamObjectPtr StoreCamera(const FBModel* CameraModel);
-	StreamObjectPtr StoreLight(const FBModel* LightModel);
-	StreamObjectPtr StoreGeneric(const FBModel* Model);
-	StreamObjectPtr StoreSkeleton(const FBModel* SkeletonModel);
-
-	TMap<int, ModelStoreFunctionType> ModelStoreFunctions;
 
 	void AddSpreadRowFromStreamObject(StreamObjectPtr Object);
 
