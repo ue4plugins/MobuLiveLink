@@ -1,4 +1,6 @@
-﻿#include "ModelStreamObject.h"
+﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+
+#include "ModelStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
 
 ModelStreamObject::ModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :

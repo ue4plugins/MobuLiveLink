@@ -1,4 +1,6 @@
-﻿#include "SkeletonHierarchyStreamObject.h"
+﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+
+#include "SkeletonHierarchyStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
 
 SkeletonHierarchyStreamObject::SkeletonHierarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :

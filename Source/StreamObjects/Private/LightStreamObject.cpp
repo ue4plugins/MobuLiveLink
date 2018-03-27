@@ -1,4 +1,6 @@
-﻿#include "LightStreamObject.h"
+﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+
+#include "LightStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
 
 LightStreamObject::LightStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :

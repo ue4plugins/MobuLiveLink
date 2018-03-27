@@ -1,4 +1,6 @@
-﻿#include "CameraStreamObject.h"
+﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+
+#include "CameraStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
 
 CameraStreamObject::CameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :

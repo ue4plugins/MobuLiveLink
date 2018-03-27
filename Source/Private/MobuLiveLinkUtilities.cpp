@@ -1,4 +1,6 @@
-﻿#include "MobuLiveLinkUtilities.h"
+﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+
+#include "MobuLiveLinkUtilities.h"
 
 #define INCHES_TO_MILLIMETERS 25.4
 

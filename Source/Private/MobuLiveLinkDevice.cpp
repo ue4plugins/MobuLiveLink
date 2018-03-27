@@ -1,4 +1,6 @@
-﻿//--- Class declaration
+﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+
+//--- Class declaration
 #include "MobuLiveLinkDevice.h"
 
 //--- Stream object for the Editor camera

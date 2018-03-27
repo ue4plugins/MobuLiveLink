@@ -1,4 +1,6 @@
-﻿#include "MobuLiveLinkStreamObjects.h"
+﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+
+#include "MobuLiveLinkStreamObjects.h"
 
 TSharedPtr<IStreamObject> StreamObjectManager::FBModelToStreamObject(FBModel* SourceModel, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
 {
