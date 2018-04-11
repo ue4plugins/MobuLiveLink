@@ -2,6 +2,7 @@
 
 #include "MobuLiveLinkLayout.h"
 #include "MobuLiveLinkStreamObjects.h"
+#include "MobuLiveLinkUtilities.h"
 #include <string>
 
 #define MOBULIVELINK__LAYOUT	FMobuLiveLinkLayout
@@ -17,9 +18,9 @@ FBRegisterDeviceLayout(MOBULIVELINK__LAYOUT,
 bool FMobuLiveLinkLayout::FBCreate()
 {
 	// Get a handle on the device.
-	LiveLinkDevice = ((FMobuLiveLink *)(FBDevice *)Device);
+	LiveLinkDevice = (FMobuLiveLink*)(FBDevice*)Device;
 
-	FBPropertyPublish(this, ObjectSelection, "ObjectSelection", NULL, NULL);
+	FBPropertyPublish(this, ObjectSelection, "ObjectSelection", nullptr, nullptr);
 	ObjectSelection.SetFilter(FBModel::GetInternalClassId());
 	ObjectSelection.SetSingleConnect(false);
 
@@ -27,7 +28,6 @@ bool FMobuLiveLinkLayout::FBCreate()
 	UIConfigure();
 	UIReset();
 
-	LiveLinkDevice->OnStatusChange.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventDeviceStatusChange);
 	System.OnUIIdle.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventUIIdle);
 	return true;
 }
@@ -39,7 +39,6 @@ void FMobuLiveLinkLayout::FBDestroy()
 	FBTrace("Destroying\n");
 
 	System.OnUIIdle.Remove(this, (FBCallback)&FMobuLiveLinkLayout::EventUIIdle);
-	LiveLinkDevice->OnStatusChange.Remove(this, (FBCallback)&FMobuLiveLinkLayout::EventDeviceStatusChange);
 }
 
 void FMobuLiveLinkLayout::UICreate()
@@ -48,50 +47,64 @@ void FMobuLiveLinkLayout::UICreate()
 	S = 4;
 	H = 25;
 
+	const char MainLayoutName[] = "MainLayout";
+	const char ObjectSelectorName[] = "ObjectSelector";
+	const char AddToStreamButtonName[] = "AddToStreamButton";
+	const char RemoveFromStreamButtonName[] = "RemoveFromStreamButton";
+	const char SampleRateListName[] = "SampleRateList";
+	const char StreamSpreadName[] = "StreamSpread";
+
 	// Create regions
-	AddRegion("MainLayout", "MainLayout", 
+	AddRegion(MainLayoutName, MainLayoutName,
 		S, kFBAttachLeft, "", 1.00,
 		S, kFBAttachTop, "", 1.00,
 		-S, kFBAttachRight, "", 1.00,
 		-S, kFBAttachBottom, "", 1.00);
 
 	// Assign regions
-	SetControl("MainLayout", StreamLayout);
+	SetControl(MainLayoutName, StreamLayout);
 
 	W = 110;
 	H = 18;
 
 	// Add regions
 
-	StreamLayout.AddRegion("ObjectSelector", "ObjectSelector",
+	StreamLayout.AddRegion(ObjectSelectorName, ObjectSelectorName,
 		S, kFBAttachLeft, "", 1.00,
 		S, kFBAttachTop, "", 1.00,
 		2 * W, kFBAttachNone, nullptr, 1.00,
 		H, kFBAttachNone, nullptr, 1.00);
 
-	StreamLayout.AddRegion("AddToStreamButton", "AddToStreamButton",
-		S, kFBAttachRight, "ObjectSelector", 1.00,
-		0, kFBAttachTop, "ObjectSelector", 1.00,
+	StreamLayout.AddRegion(AddToStreamButtonName, AddToStreamButtonName,
+		S, kFBAttachRight, ObjectSelectorName, 1.00,
+		0, kFBAttachTop, ObjectSelectorName, 1.00,
 		W, kFBAttachNone, nullptr, 1.00,
 		H, kFBAttachNone, nullptr, 1.00);
 
 
-	StreamLayout.AddRegion("RemoveFromStreamButton", "RemoveFromStreamButton",
-		S, kFBAttachRight, "AddToStreamButton", 1.00,
-		0, kFBAttachTop, "AddToStreamButton", 1.00,
+	StreamLayout.AddRegion(RemoveFromStreamButtonName, RemoveFromStreamButtonName,
+		S, kFBAttachRight, AddToStreamButtonName, 1.00,
+		0, kFBAttachTop, AddToStreamButtonName, 1.00,
 		W, kFBAttachNone, nullptr, 1.00,
 		H, kFBAttachNone, nullptr, 1.00);
 
-	StreamLayout.AddRegion("StreamSpread", "StreamSpread",
+	StreamLayout.AddRegion(SampleRateListName, SampleRateListName,
+		S, kFBAttachRight, RemoveFromStreamButtonName, 1.00,
+		0, kFBAttachTop, RemoveFromStreamButtonName, 1.00,
+		-S, kFBAttachRight, "", 1.00,
+		H, kFBAttachNone, nullptr, 1.00);
+
+	StreamLayout.AddRegion(StreamSpreadName, StreamSpreadName,
 		S, kFBAttachLeft, "", 1.00,
-		S, kFBAttachBottom, "ObjectSelector", 1.00,
+		S, kFBAttachBottom, ObjectSelectorName, 1.00,
 		-S, kFBAttachRight, "", 1.00,
 		-S, kFBAttachBottom, "", 1.00);
 
-	StreamLayout.SetControl("ObjectSelector", ObjectSelector);
-	StreamLayout.SetControl("AddToStreamButton", AddToStreamButton);
-	StreamLayout.SetControl("RemoveFromStreamButton", RemoveFromStreamButton);
-	StreamLayout.SetControl("StreamSpread", StreamSpread);
+	StreamLayout.SetControl(ObjectSelectorName, ObjectSelector);
+	StreamLayout.SetControl(AddToStreamButtonName, AddToStreamButton);
+	StreamLayout.SetControl(RemoveFromStreamButtonName, RemoveFromStreamButton);
+	StreamLayout.SetControl(SampleRateListName, SampleRateList);
+	StreamLayout.SetControl(StreamSpreadName, StreamSpread);
 }
 
 void FMobuLiveLinkLayout::CreateSpreadColumns()
@@ -123,6 +136,20 @@ void FMobuLiveLinkLayout::UIConfigure()
 	CreateSpreadColumns();
 
 	StreamSpread.OnCellChange.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventStreamSpreadCellChange);
+
+	int CurrentSampleIndex = 0;
+	for (int SampleOptionIdx=0; SampleOptionIdx < LiveLinkDevice->SampleOptions.Num(); ++SampleOptionIdx)
+	{
+		const TPair<FString, FLiveLinkFrameRate>& SampleOption = LiveLinkDevice->SampleOptions[SampleOptionIdx];
+		SampleRateList.Items.Add(FStringToChar(SampleOption.Key));
+		if (MobuUtilities::AreEqual(SampleOption.Value, LiveLinkDevice->CurrentSampleRate))
+		{
+			CurrentSampleIndex = SampleOptionIdx;
+		}
+	}
+	SampleRateList.ItemIndex = CurrentSampleIndex;
+
+	SampleRateList.OnChange.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventSampleRateChange);
 }
 
 void FMobuLiveLinkLayout::UIReset()
@@ -130,19 +157,12 @@ void FMobuLiveLinkLayout::UIReset()
 	FBTrace("UI Reset!\n");
 	StreamSpread.Clear();
 	CreateSpreadColumns();
-	for (const auto MapPair : LiveLinkDevice->StreamObjects)
+	for (const TPair<kReference, StreamObjectPtr>& MapPair : LiveLinkDevice->StreamObjects)
 	{
 		AddSpreadRowFromStreamObject(MapPair.Value);
 	}
 	LiveLinkDevice->SetRefreshUI(false);
 }
-
-
-void FMobuLiveLinkLayout::EventDeviceStatusChange(HISender Sender, HKEvent Event)
-{
-	// UIReset();
-}
-
 
 void FMobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 {
@@ -175,7 +195,7 @@ void FMobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
 }
 
 
-FORCEINLINE bool IsModelInDeviceStream(const FMobuLiveLink* MobuDevice, const FBModel* Model)
+bool IsModelInDeviceStream(const FMobuLiveLink* MobuDevice, const FBModel* Model)
 {
 	return MobuDevice->StreamObjects.Contains((kReference)Model);
 }
@@ -197,8 +217,6 @@ void FMobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 		}
 
 		// Only grab root items
-		// Temp solution. Not a huge fan. 
-		// perhaps have creation functions contain a list of models to exclude?
 		if (ParentsToIgnore.Contains(Model->Parent))
 		{
 			ParentsToIgnore.Emplace(Model);
@@ -222,7 +240,7 @@ void FMobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 	int SelectedCount = 0;
 	TArray<kReference> DeletionObjects;
 	DeletionObjects.Reserve(LiveLinkDevice->StreamObjects.Num());
-	for (const auto& MapPair : LiveLinkDevice->StreamObjects)
+	for (const TPair<kReference, StreamObjectPtr>& MapPair : LiveLinkDevice->StreamObjects)
 	{
 		kReference RowKey = MapPair.Value->GetReference();
 		bool bRowSelected = StreamSpread.GetRow(RowKey).RowSelected;
@@ -232,7 +250,7 @@ void FMobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 			SelectedCount++;
 		}
 	}
-	for (const auto& DeletionKey : DeletionObjects)
+	for (const kReference& DeletionKey : DeletionObjects)
 	{
 		LiveLinkDevice->StreamObjects.Remove(DeletionKey);
 	}
@@ -247,8 +265,8 @@ void FMobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent E
 {
 	FBEventSpread SpreadEvent = Event;
 
-	auto ObjectPtr = LiveLinkDevice->StreamObjects.Find(SpreadEvent.Row);
-	if (ObjectPtr == nullptr)
+	StreamObjectPtr* ObjectPtr = LiveLinkDevice->StreamObjects.Find(SpreadEvent.Row);
+	if (ObjectPtr == nullptr && ObjectPtr->IsValid())
 	{
 		FBTrace("No object exists for this Row!");
 		return;
@@ -279,5 +297,15 @@ void FMobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent E
 	}
 	default:
 		break;
+	}
+}
+
+void FMobuLiveLinkLayout::EventSampleRateChange(HISender Sender, HKEvent Event)
+{
+	const FLiveLinkFrameRate& NewSampleRate = LiveLinkDevice->SampleOptions[SampleRateList.ItemIndex].Value;
+	if (!MobuUtilities::AreEqual(NewSampleRate, LiveLinkDevice->CurrentSampleRate))
+	{
+		LiveLinkDevice->CurrentSampleRate = NewSampleRate;
+		LiveLinkDevice->UpdateSampleRate();
 	}
 }

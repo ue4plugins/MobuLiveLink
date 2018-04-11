@@ -4,15 +4,20 @@
 #include "MobuLiveLinkUtilities.h"
 
 FSkeletonHierarchyStreamObject::FSkeletonHierarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	FModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy"), TEXT("Skeleton Hierarchy") })
+	FModelStreamObject(ModelPointer, StreamProvider, false)
 {
-	StreamingMode = 2;
+	StreamingMode = FSkeletonStreamMode::SkeletonHierarchy;
 	Refresh();
+};
+
+const FString FSkeletonHierarchyStreamObject::GetStreamOptions() const
+{
+	return FString::Join(SkeletonStreamOptions, _T("~"));
 };
 
 void FSkeletonHierarchyStreamObject::Refresh() 
 {
-	BaseMetadata.Add(FName("Stream Type"), ConnectionOptions[StreamingMode]);
+	BaseMetadata.Add(FName("Stream Type"), SkeletonStreamOptions[StreamingMode]);
 
 	BoneNames.Empty();
 	BoneParents.Empty();
@@ -23,7 +28,7 @@ void FSkeletonHierarchyStreamObject::Refresh()
 	BoneModels.Emplace(RootModel);
 
 	// If Streaming as Hierarchy
-	if (StreamingMode > 0)
+	if (StreamingMode != FSkeletonStreamMode::RootOnly)
 	{
 		TArray<TPair<int, FBModel*>> SearchList;
 		TArray<TPair<int, FBModel*>> SearchListNext;
@@ -32,7 +37,7 @@ void FSkeletonHierarchyStreamObject::Refresh()
 
 		while (SearchList.Num() > 0)
 		{
-			for (const auto& SearchPair : SearchList)
+			for (const TPair<int, FBModel*>& SearchPair : SearchList)
 			{
 				int ParentIdx = SearchPair.Key;
 				FBModel* SearchModel = SearchPair.Value;
@@ -42,7 +47,7 @@ void FSkeletonHierarchyStreamObject::Refresh()
 				{
 					FBModel* ChildModel = SearchModel->Children[ChildIdx];
 
-					if (StreamingMode == 2)
+					if (StreamingMode == FSkeletonStreamMode::SkeletonHierarchy)
 					{
 						// Only want joints when streaming Skeletal Hierarchy
 						int ChildModelType = ChildModel->GetTypeId();

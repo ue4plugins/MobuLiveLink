@@ -4,7 +4,10 @@
 #include "MobuLiveLinkUtilities.h"
 
 FEditorActiveCameraStreamObject::FEditorActiveCameraStreamObject(const TSharedPtr<ILiveLinkProvider> StreamProvider)
-	: Provider(StreamProvider), SubjectName("EditorActiveCamera"), BoneNames({FName("root")}), BoneParents({-1})
+	: Provider(StreamProvider), 
+	SubjectName("EditorActiveCamera"), 
+	BoneNames({FName("root")}), 
+	BoneParents({-1})
 {
 	BaseMetadata.Add(FName("Stream Type"), SubjectName.ToString());
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);

@@ -4,9 +4,9 @@
 #include "MobuLiveLinkUtilities.h"
 
 FLightStreamObject::FLightStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	FModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy"), TEXT("Light") })
+	FModelStreamObject(ModelPointer, StreamProvider, false)
 {
-	StreamingMode = 2;
+	StreamingMode = FLightStreamMode::Light;
 
 	BoneNames.Emplace(FName("Bone01"));
 	BoneParents.Emplace(-1);
@@ -14,15 +14,23 @@ FLightStreamObject::FLightStreamObject(const FBModel* ModelPointer, const TShare
 	Refresh();
 };
 
+const FString FLightStreamObject::GetStreamOptions() const
+{
+	return FString::Join(LightStreamOptions, _T("~"));
+};
+
 void FLightStreamObject::Refresh()
 {
-	BaseMetadata.Add(FName("Stream Type"), ConnectionOptions[StreamingMode]);
+	BaseMetadata.Add(FName("Stream Type"), LightStreamOptions[StreamingMode]);
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 };
 
 void FLightStreamObject::UpdateSubjectFrame()
 {
-	if (!bIsActive) return;
+	if (!bIsActive)
+	{
+		return;
+	}
 
 	TArray<FTransform> BoneTransforms;
 
@@ -32,9 +40,9 @@ void FLightStreamObject::UpdateSubjectFrame()
 
 	TArray<FLiveLinkCurveElement> CurveData;
 	// If Streaming as Light then get the Light Properties
-	if (StreamingMode == 2)
+	if (StreamingMode == FLightStreamMode::Light)
 	{
-		// TODO: Add any additional Light logic here. For now stream everything we can
+		// Stream all animatable properties on the Light
 		CurveData = MobuUtilities::GetAllAnimatableCurves(LightModel);
 	}
 

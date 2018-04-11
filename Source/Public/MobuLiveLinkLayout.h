@@ -20,11 +20,11 @@ public:
 	void CreateSpreadColumns();
 
 	// Main Layout: Events
-	void EventDeviceStatusChange(HISender Sender, HKEvent Event);
 	void EventUIIdle(HISender Sender, HKEvent Event);
 	void EventAddToStream(HISender Sender, HKEvent Event);
 	void EventRemoveFromStream(HISender Sender, HKEvent Event);
 	void EventStreamSpreadCellChange(HISender Sender, HKEvent Event);
+	void EventSampleRateChange(HISender Sender, HKEvent Event);
 
 public:
 
@@ -33,6 +33,7 @@ public:
 	FBPropertyConnectionEditor	ObjectSelector;
 	FBButton					AddToStreamButton;
 	FBButton					RemoveFromStreamButton;
+	FBList						SampleRateList;
 	FBSpread					StreamSpread;
 
 private:

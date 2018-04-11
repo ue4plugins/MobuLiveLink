@@ -4,14 +4,17 @@
 
 #include "MobuLiveLinkCommon.h"
 
-namespace MobuUtilities
+class MobuUtilities
 {
-	FTransform MobuTransformToUnreal(FBMatrix& MobuTransfrom);
-	FTransform UnrealTransformFromModel(FBModel* MobuModel, bool bIsGlobal = true);
-	FTransform UnrealTransformFromCamera(FBCamera* CameraModel);
-	TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel, const FString Prefix = FString());
-	void AppendFilmbackSettings(FBCamera* CameraModel, TArray<FLiveLinkCurveElement>& CurveElements);
+public:
+	static FTransform MobuTransformToUnreal(FBMatrix& MobuTransfrom);
+	static FTransform UnrealTransformFromModel(FBModel* MobuModel, bool bIsGlobal = true);
+	static FTransform UnrealTransformFromCamera(FBCamera* CameraModel);
+	static TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel, const FString& Prefix = FString());
+	static void AppendFilmbackSettings(FBCamera* CameraModel, TArray<FLiveLinkCurveElement>& CurveElements);
 
-	FLiveLinkFrameRate TimeModeToFrameRate(FBTimeMode TimeMode);
-	void GetSceneTimecode(FLiveLinkTimeCode& SceneTimecode);
-}
+	static FLiveLinkFrameRate TimeModeToFrameRate(FBTimeMode TimeMode);
+	static void GetSceneTimecode(FLiveLinkTimeCode& SceneTimecode);
+
+	static bool AreEqual(const FLiveLinkFrameRate& A, const FLiveLinkFrameRate& B);
+};

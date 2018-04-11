@@ -75,7 +75,6 @@ FTransform MobuUtilities::UnrealTransformFromCamera(FBCamera* CameraModel)
 	FTransform CameraTransform = MobuTransformToUnreal(ModelView);
 
 	// Mobu Cameras look down a different axis so flip them here
-	// TODO: Consolidate with MobuTransformToUnreal so we're not repeating work
 	FQuat CameraRotation = CameraTransform.GetRotation();
 	FQuat LensRotation;
 	LensRotation.MakeFromEuler(FVector(-90, -90, 0));
@@ -85,7 +84,7 @@ FTransform MobuUtilities::UnrealTransformFromCamera(FBCamera* CameraModel)
 }
 
 // Get all properties on a given model that are both Animatable and are of a Type we can stream
-TArray<FLiveLinkCurveElement> MobuUtilities::GetAllAnimatableCurves(FBModel* MobuModel, const FString Prefix)
+TArray<FLiveLinkCurveElement> MobuUtilities::GetAllAnimatableCurves(FBModel* MobuModel, const FString& Prefix)
 {
 	int PropertyCount = MobuModel->PropertyList.GetCount();
 
@@ -123,7 +122,7 @@ TArray<FLiveLinkCurveElement> MobuUtilities::GetAllAnimatableCurves(FBModel* Mob
 				Property->GetData(&PropertyValue, sizeof(PropertyValue), nullptr);
 				break;
 			}
-			case kFBPT_enum: // Enums are assumed to be ints. THIS MAY NOT BE A VALID ASSUMPTION
+			case kFBPT_enum: // Enums are assumed to be ints
 			case kFBPT_int:
 			{
 				int Value;
@@ -154,7 +153,7 @@ TArray<FLiveLinkCurveElement> MobuUtilities::GetAllAnimatableCurves(FBModel* Mob
 			{
 				CurveName = Prefix + FString(":") + CurveName;
 			}
-			NewCurveElement.CurveName = FName(*CurveName);;
+			NewCurveElement.CurveName = FName(*CurveName);
 			NewCurveElement.CurveValue = PropertyValue;
 
 			LiveLinkCurves.Emplace(NewCurveElement);
@@ -231,4 +230,9 @@ void MobuUtilities::GetSceneTimecode(FLiveLinkTimeCode& SceneTimecode)
 	SceneTimecode.FrameRate = TimeModeToFrameRate(FBPlayerControl().GetTransportFps());
 	SceneTimecode.Seconds = FMath::FloorToInt(LocalTime.GetSecondDouble());
 	SceneTimecode.Frames = LocalTime.GetFrame() %  FMath::CeilToInt((double)SceneTimecode.FrameRate.Numerator / (double)SceneTimecode.FrameRate.Denominator);
+}
+
+bool MobuUtilities::AreEqual(const FLiveLinkFrameRate& A, const FLiveLinkFrameRate& B)
+{
+	return (A.Numerator == B.Numerator) && (A.Denominator == B.Denominator);
 }

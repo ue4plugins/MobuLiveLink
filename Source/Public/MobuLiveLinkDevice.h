@@ -3,15 +3,13 @@
 #pragma once
 
 #include "MobuLiveLinkCommon.h"
-
 #include "IStreamObject.h"
-#include "CommandLine.h"
-#include "TaskGraphInterfaces.h"
-#include "ModuleManager.h"
-#include "Object.h"
-#include "ConfigCacheIni.h"
-
-#include "OutputDevice.h"
+#include "Misc/CommandLine.h"
+#include "Async/TaskGraphInterfaces.h"
+#include "Modules/ModuleManager.h"
+#include "UObject/Object.h"
+#include "Misc/ConfigCacheIni.h"
+#include "Misc/OutputDevice.h"
 
 //--- Registration defines
 #define MOBULIVELINK__CLASSNAME		FMobuLiveLink
@@ -41,7 +39,6 @@ public:
 	bool Start();		//!< Start device (online).
 
 	//--- The following will be called by the real-time engine.
-	//virtual bool AnimationNodeNotify(FBAnimationNode* AnimationNode, FBEvaluateInfo* EvaluateInfo);	//!< Real-time evaluation for node.
 	void DeviceIONotify(kDeviceIOs  Action, FBDeviceNotifyInfo &DeviceNotifyInfo) override;	//!< Notification of/for Device IO.
 	bool DeviceEvaluationNotify(kTransportMode Mode, FBEvaluateInfo* EvaluateInfo) override;	//!< Evaluation the device (write to hardware).
 	bool DeviceOperation(kDeviceOperations Operation) override;	//!< Operate device.
@@ -67,12 +64,23 @@ public:
 	void SetRefreshUI(bool bNewRefreshUI) { bShouldRefreshUI = bNewRefreshUI; };
 	bool ShouldRefreshUI() const { return bShouldRefreshUI; };
 
+	const TArray<TPair<FString, FLiveLinkFrameRate>> SampleOptions =
+	{
+		TPair<FString, FLiveLinkFrameRate>(FString("30hz"), FLiveLinkFrameRate::FPS_30),
+		TPair<FString, FLiveLinkFrameRate>(FString("50hz"), FLiveLinkFrameRate::FPS_50),
+		TPair<FString, FLiveLinkFrameRate>(FString("60hz"), FLiveLinkFrameRate::FPS_60),
+		TPair<FString, FLiveLinkFrameRate>(FString("100hz"), FLiveLinkFrameRate::FPS_100),
+		TPair<FString, FLiveLinkFrameRate>(FString("120hz"), FLiveLinkFrameRate::FPS_120),
+	};
+
+	FLiveLinkFrameRate CurrentSampleRate;
+	void UpdateSampleRate();
 private:
+	int32 GetCurrentSampleRateIndex();
 
 	bool bIsDirty;
 	bool bShouldRefreshUI;
 
-	double SamplingRate;
 	FBDeviceSamplingMode SamplingType;
 	FBFastLock mCleanUpLock;
 

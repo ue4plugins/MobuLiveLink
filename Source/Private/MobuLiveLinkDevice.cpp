@@ -6,18 +6,21 @@
 //--- Stream object for the Editor camera
 #include "MobuLiveLinkStreamObjects.h"
 
+//--- Utility functions
+#include "MobuLiveLinkUtilities.h"
+
 //--- Allow ticking of the engine
 #include "Containers/Ticker.h"
 
 //--- For getting the dll location on disk
-#include "Windows.h"
+#include "Windows/AllowWindowsPlatformTypes.h"
 #include <string>
-#include "Paths.h"
+#include "Misc/Paths.h"
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 FString GetDeviceIconPath()
 {
-	char   DllPath[MAX_PATH] = { 0 };
+	char DllPath[MAX_PATH] = { 0 };
 	GetModuleFileNameA((HINSTANCE)&__ImageBase, DllPath, _countof(DllPath));
 
 	FString BasePath = FPaths::GetPath(FString(DllPath));
@@ -27,12 +30,13 @@ FString GetDeviceIconPath()
 	return FinalPath;
 };
 
+#include "Windows/HideWindowsPlatformTypes.h"
+
 //--- Device strings
 #define MOBULIVELINK__CLASS	MOBULIVELINK__CLASSNAME
 #define MOBULIVELINK__NAME	MOBULIVELINK__CLASSSTR
 #define MOBULIVELINK__LABEL	"UE - LiveLink"
 #define MOBULIVELINK__DESC	"UE - LiveLink"
-#define MOBULIVELINK__PREFIX	"LightController"
 
 //--- FiLMBOX implementation and registration
 FBDeviceImplementation	(	MOBULIVELINK__CLASS	);
@@ -42,23 +46,14 @@ FBRegisterDevice		(	MOBULIVELINK__NAME,
 							MOBULIVELINK__DESC,
 							FStringToChar(GetDeviceIconPath()));
 
-struct ScopedFastLock
-{
-	ScopedFastLock(FBFastLock &lock) : _lock(lock) { _lock.Lock(); }
-	~ScopedFastLock() { _lock.Unlock(); }
-	FBFastLock &_lock;
-};
-
 /************************************************
  *	FiLMBOX Constructor.
  ************************************************/
 bool FMobuLiveLink::FBCreate()
 {
 	// Set sampling rate to 60 Hz
-	// Fixed for now but will be getting a dropdown UI soon
-	FBTime	lPeriod;
-	lPeriod.SetSecondDouble(1.0/60.0);
-	SamplingPeriod	= lPeriod;
+	CurrentSampleRate = FLiveLinkFrameRate::FPS_60;
+	UpdateSampleRate();
 
 	StartLiveLink();
 	FBSystem().Scene->OnChange.Add(this, (FBCallback)&FMobuLiveLink::EventSceneChange);
@@ -86,11 +81,22 @@ void FMobuLiveLink::FBDestroy()
 	StopLiveLink();
 }
 
+/************************************************
+*	Device operation.
+************************************************/
+void FMobuLiveLink::UpdateSampleRate()
+{
+	FBTime	lPeriod;
+	lPeriod.SetSecondDouble((double)CurrentSampleRate.Denominator / (double)CurrentSampleRate.Numerator);
+	FBTrace("Setting Sample Rate: %f\n", lPeriod.GetSecondDouble());
+	SamplingPeriod = lPeriod;
+}
+
 
 /************************************************
  *	Device operation.
  ************************************************/
-bool FMobuLiveLink::DeviceOperation( kDeviceOperations pOperation )
+bool FMobuLiveLink::DeviceOperation(kDeviceOperations pOperation)
 {
 	switch (pOperation)
 	{
@@ -105,9 +111,9 @@ bool FMobuLiveLink::DeviceOperation( kDeviceOperations pOperation )
 
 void FMobuLiveLink::SetDeviceInformation(const char* NewDeviceInformation)
 {
-	HardwareVersionInfo.SetString("Version 0.1");
+	HardwareVersionInfo.SetString("Version 1.0");
 	Information.SetString(NewDeviceInformation);
-	Status.SetString("Epic Games 2017");
+	Status.SetString("Epic Games 2018");
 }
 
 
@@ -128,11 +134,10 @@ bool FMobuLiveLink::Init()
 bool FMobuLiveLink::Start()
 {
 	FBProgress	lProgress;
-	lProgress.Caption	= "Setting up device";
-	lProgress.Text	= "Setting sampling rate";
+	lProgress.Caption = "Setting up device";
+	lProgress.Text = "Setting sampling rate";
 
 	SetDeviceInformation("Status: Online");
-
 	return true;
 }
 
@@ -143,11 +148,10 @@ bool FMobuLiveLink::Start()
 bool FMobuLiveLink::Stop()
 {
 	FBProgress	lProgress;
-	lProgress.Caption	= "Shutting down device";
+	lProgress.Caption = "Shutting down device";
 
 	SetDeviceInformation("Status: Offline");
-
-    return false;
+	return false;
 }
 
 
@@ -165,8 +169,8 @@ bool FMobuLiveLink::Done()
  ************************************************/
 bool FMobuLiveLink::Reset()
 {
-    Stop();
-    return Start();
+	Stop();
+	return Start();
 }
 
 /************************************************
@@ -174,7 +178,7 @@ bool FMobuLiveLink::Reset()
  ************************************************/
 bool FMobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo* pEvaluateInfo)
 {
-	ScopedFastLock scoped_lock(mCleanUpLock);
+	mCleanUpLock.Lock();
 
 	TickCoreTicker();
 
@@ -182,11 +186,13 @@ bool FMobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo*
 	{
 		UpdateStreamObjects();
 	}
-	for (auto MapPair : StreamObjects)
+	for (TPair<kReference, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
 	{
-		const auto& StreamObject = MapPair.Value;
+		const TSharedPtr<IStreamObject>& StreamObject = MapPair.Value;
 		StreamObject->UpdateSubjectFrame();
 	}
+
+	mCleanUpLock.Unlock();
 	return true;
 }
 
@@ -194,10 +200,10 @@ bool FMobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo*
 /************************************************
  *	Real-Time Synchronous Device IO.
  ************************************************/
-void FMobuLiveLink::DeviceIONotify( kDeviceIOs  pAction,FBDeviceNotifyInfo &pDeviceNotifyInfo)
+void FMobuLiveLink::DeviceIONotify(kDeviceIOs pAction,FBDeviceNotifyInfo &pDeviceNotifyInfo)
 {
 	FBTime lEvalTime;
-    switch (pAction)
+	switch (pAction)
 	{
 		// Output devices
 		case kIOPlayModeWrite:
@@ -216,11 +222,34 @@ void FMobuLiveLink::DeviceIONotify( kDeviceIOs  pAction,FBDeviceNotifyInfo &pDev
 	}
 }
 
+int32 FMobuLiveLink::GetCurrentSampleRateIndex()
+{
+	int32 CurrentSampleIdx = 0;
+	for (int SampleIdx = 0; SampleIdx < SampleOptions.Num(); ++SampleIdx)
+	{
+		const FLiveLinkFrameRate& TestSampleRate = SampleOptions[SampleIdx].Value;
+		if (MobuUtilities::AreEqual(CurrentSampleRate, TestSampleRate))
+		{
+			CurrentSampleIdx = SampleIdx;
+			break;
+		}
+	}
+	return CurrentSampleIdx;
+}
 
 //--- FBX load/save tags
-#define FBX_TAG_SECTION		MOBULIVELINK__CLASSSTR
-#define MOBULIVELINK_FBX_DATA	"MobuLiveLinkFBXData"
-#define MOBULIVELINK_NUMBER_OF_COLUMNS	4
+#define MOBULIVELINK_FBX_DATA "MobuLiveLinkFBXData"
+#define MOBULIVELINK_NUMBER_OF_DEVICE_COLUMNS 1
+#define MOBULIVELINK_NUMBER_OF_OBJECT_COLUMNS 4
+
+/************************************************
+* Save Format:
+*    NumberOfDeviceColumns
+*    NumberOfDeviceColumns * DeviceColumn
+*    NumberOfObjects
+*    NumberOfObjectColumns
+*    NumberOfObjects * NumberOfObjectColumns * ObjectColumn
+************************************************/
 
 /************************************************
 *	Store data in FBX.
@@ -231,15 +260,29 @@ bool FMobuLiveLink::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat
 	{
 		pFbxObject->FieldWriteBegin(MOBULIVELINK_FBX_DATA);
 		{
-			for (auto MapPair : StreamObjects)
+			// NumberOfDeviceColumns
+			pFbxObject->FieldWriteI(MOBULIVELINK_NUMBER_OF_DEVICE_COLUMNS);
+
+			// NumberOfDeviceColumns * DeviceColumn
+			pFbxObject->FieldWriteI(GetCurrentSampleRateIndex());
+
+			// NumberOfObjects
+			pFbxObject->FieldWriteI(StreamObjects.Num());
+
+			// NumberOfObjectColumns
+			pFbxObject->FieldWriteI(MOBULIVELINK_NUMBER_OF_OBJECT_COLUMNS);
+
+			// NumberOfObjects * NumberOfObjectColumns * ObjectColumn
+			for (TPair<kReference, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
 			{
 				const FString StreamObjectRootName = MapPair.Value->GetRootName();
-				const FName StreamObjectSubjectName = MapPair.Value->GetSubjectName();
-				const int32 StreamObjectStreamingMode = MapPair.Value->GetStreamingMode();
-				const int32 StreamObjectActive = MapPair.Value->GetActiveStatus();
 
 				if (StreamObjectRootName.Len() > 0)
 				{
+					const FName StreamObjectSubjectName = MapPair.Value->GetSubjectName();
+					const int32 StreamObjectStreamingMode = MapPair.Value->GetStreamingMode();
+					const int32 StreamObjectActive = MapPair.Value->GetActiveStatus();
+
 					pFbxObject->FieldWriteC(TCHAR_TO_UTF8(*StreamObjectRootName));
 					pFbxObject->FieldWriteC(TCHAR_TO_UTF8(*StreamObjectSubjectName.ToString()));
 					pFbxObject->FieldWriteI(StreamObjectStreamingMode);
@@ -261,15 +304,26 @@ bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreW
 	{
 		if (pFbxObject->FieldReadBegin(MOBULIVELINK_FBX_DATA))
 		{
-			int32 MapPairCounter = 0;
+			int32 NumberOfDeviceColumns = pFbxObject->FieldReadI();
+			int32 CurrentSampleIndex = pFbxObject->FieldReadI();
+			int32 NumberOfObjects = pFbxObject->FieldReadI();
+			int32 NumberOfObjectColumns = pFbxObject->FieldReadI();
 
-			for (int32 i = 0; i < pFbxObject->FieldReadGetCount(); i += MOBULIVELINK_NUMBER_OF_COLUMNS)
+			// Ensure the Sample Index is in a valid range
+			if (CurrentSampleIndex > 0 && CurrentSampleIndex < SampleOptions.Num())
 			{
-				FBComponentList FoundModels = NULL;
+				CurrentSampleRate = SampleOptions[CurrentSampleIndex].Value;
+				UpdateSampleRate();
+			}
+
+			for (int32 i = 0; i < NumberOfObjects; ++i)
+			{
+				int FieldsRead = 0;
+				FBComponentList FoundModels;
 				FString StreamObjectRootName(pFbxObject->FieldReadC());
 				FBFindObjectsByName(TCHAR_TO_UTF8(*StreamObjectRootName), FoundModels, true, false);
 
-				if (sizeof(FoundModels) > 0)
+				if (FoundModels.GetCount() > 0)
 				{
 					FBModel* FoundFBModel = (FBModel*)FoundModels[0];
 					TSharedPtr<IStreamObject> FoundStreamObject = StreamObjectManagement::FBModelToStreamObject(FoundFBModel, LiveLinkProvider);
@@ -277,25 +331,26 @@ bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreW
 
 					FName SubjectName(pFbxObject->FieldReadC());
 					int32 StreamingMode = pFbxObject->FieldReadI();
+					
 					bool ObjectActive = true;
-
 					if (pFbxObject->FieldReadI() == 0)
 					{
 						ObjectActive = false;
 					}
 
-					int32 LocalMapPairCounter = 0;
-					for (auto MapPair : StreamObjects)
-					{
-						if (MapPairCounter == LocalMapPairCounter)
-						{
-							MapPair.Value->UpdateSubjectName(SubjectName);
-							MapPair.Value->UpdateStreamingMode(StreamingMode);
-							MapPair.Value->UpdateActiveStatus(ObjectActive);
-							MapPairCounter += 1;
-						}
-						LocalMapPairCounter += 1;
-					}
+					FoundStreamObject->UpdateSubjectName(SubjectName);
+					FoundStreamObject->UpdateStreamingMode(StreamingMode);
+					FoundStreamObject->UpdateActiveStatus(ObjectActive);
+
+					// We have read 4 fields
+					FieldsRead += 4;
+				}
+
+				// If the file contains more columns than we know how to read
+				for (int Offset = FieldsRead; Offset < NumberOfObjectColumns; ++Offset)
+				{
+					// Advance to next field
+					pFbxObject->FieldReadC();
 				}
 			}
 			pFbxObject->FieldReadEnd();
@@ -328,8 +383,6 @@ void FMobuLiveLink::StopLiveLink()
 
 void FMobuLiveLink::EventSceneChange(HISender Sender, HKEvent Event)
 {
-	// todo: Possibly other events I need to handle
-
 	FBEventSceneChange SceneChangeEvent = Event;
 	switch (SceneChangeEvent.Type)
 	{
@@ -356,9 +409,9 @@ void FMobuLiveLink::EventSceneChange(HISender Sender, HKEvent Event)
 
 void FMobuLiveLink::UpdateStreamObjects()
 {
-	for (auto MapPair : StreamObjects)
+	for (TPair<kReference, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
 	{
-		const auto& StreamObject = MapPair.Value;
+		const TSharedPtr<IStreamObject>& StreamObject = MapPair.Value;
 		if (StreamObject->IsValid())
 		{
 			StreamObject->Refresh();
@@ -372,7 +425,7 @@ void FMobuLiveLink::UpdateStreamObjects()
 	SetRefreshUI(true);
 }
 
-FORCEINLINE void FMobuLiveLink::TickCoreTicker()
+void FMobuLiveLink::TickCoreTicker()
 {
 	double CurrentTime = FPlatformTime::Seconds();
 	FTicker::GetCoreTicker().Tick(CurrentTime - LastEvaluationTime);

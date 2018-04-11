@@ -3,32 +3,9 @@
 #include "RequiredProgramMainCPPInclude.h"
 #include "MobuLiveLinkCommon.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogBlankMoBuPlugin, Log, All);
+DEFINE_LOG_CATEGORY_STATIC(LogMoBuPlugin, Log, All);
 
 IMPLEMENT_APPLICATION(MobuLiveLinkPlugin, "MobuLiveLinkPlugin");
-
-
-
-class FMobuOutputDevice : public FOutputDevice
-{
-public:
-	FMobuOutputDevice() : bAllowLogVerbosity(false) {}
-
-	virtual void Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const class FName& Category) override
-	{
-		if ((bAllowLogVerbosity && Verbosity <= ELogVerbosity::Log) || (Verbosity <= ELogVerbosity::Display))
-		{
-			FBTrace("\nLog out now %s", V);
-		}
-	}
-
-private:
-
-	bool bAllowLogVerbosity;
-
-};
-
-
 
 //--- Library declaration
 FBLibraryDeclare( FMobuLiveLink )
@@ -44,19 +21,13 @@ FBLibraryDeclareEnd;
 bool FBLibrary::LibInit()	
 {
 	GEngineLoop.PreInit(TEXT("MobuLiveLinkPlugin -Messaging"));
-	//FModuleManager::Get().LoadModule(TEXT("UdpMessaging"));
 
 	ProcessNewlyLoadedUObjects();
-	// Tell the module manager is may now process newly-loaded UObjects when new C++ modules are loaded
+	// Tell the module manager that it may now process newly-loaded UObjects when new C++ modules are loaded
 	FModuleManager::Get().StartProcessingNewlyLoadedObjects();
-
 	FModuleManager::Get().LoadModule(TEXT("UdpMessaging"));
-	//FModuleManager::Get().LoadModule(TEXT("LiveLink"));
-	GLog->TearDown(); //clean up existing output devices
-	GLog->AddOutputDevice(new FMobuOutputDevice()); //Add Mobu output device
-
-	FBTrace("Set up Engine Loop and stuff\n");
-
+	
+	FBTrace("MobuLiveLink Library Initialized\n");
 	return true;
 }
 

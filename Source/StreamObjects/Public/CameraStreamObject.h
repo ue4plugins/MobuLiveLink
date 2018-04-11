@@ -7,9 +7,18 @@
 // FBCamera wrapper
 class FCameraStreamObject : public FModelStreamObject
 {
+private:
+	const TArray<FString> CameraStreamOptions = { TEXT("Root Only"), TEXT("Camera") };
+
+	enum FCameraStreamMode
+	{
+		RootOnly,
+		Camera
+	};
+
 public:
 	FCameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
-
-	void Refresh() override;
-	void UpdateSubjectFrame() override;
+	virtual const FString GetStreamOptions() const override;
+	virtual void Refresh() override;
+	virtual void UpdateSubjectFrame() override;
 };

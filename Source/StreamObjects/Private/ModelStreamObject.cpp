@@ -2,22 +2,21 @@
 
 #include "ModelStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
-
-FModelStreamObject::FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	FModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy") })
-{
-	Refresh();
-};
+#include <typeinfo>
 
 //// Creation / Destruction
-
-FModelStreamObject::FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, std::initializer_list<FString> Options)
-	: RootModel(ModelPointer), Provider(StreamProvider), ConnectionOptions(Options), bIsActive(true), StreamingMode(0)
+FModelStreamObject::FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, bool bShouldRefresh)
+	: RootModel(ModelPointer), Provider(StreamProvider), bIsActive(true), StreamingMode(FModelStreamMode::RootOnly)
 {
 	FString ModelLongName(ANSI_TO_TCHAR(RootModel->LongName));
 	FString RightString;
 	ModelLongName.Split(TEXT(":"), &ModelLongName, &RightString);
 	SubjectName = FName(*ModelLongName);
+
+	if (bShouldRefresh)
+	{
+		Refresh();
+	}
 };
 
 FModelStreamObject::~FModelStreamObject()
@@ -34,7 +33,7 @@ const bool FModelStreamObject::ShouldShowInUI() const
 
 const FString FModelStreamObject::GetStreamOptions() const
 {
-	return FString::Join(ConnectionOptions, _T("~"));
+	return FString::Join(ModelStreamOptions, _T("~"));
 };
 
 FName FModelStreamObject::GetSubjectName() const
@@ -91,7 +90,7 @@ bool FModelStreamObject::IsValid() const
 
 void FModelStreamObject::Refresh()
 {
-	BaseMetadata.Add(FName("Stream Type"), ConnectionOptions[StreamingMode]);
+	BaseMetadata.Add(FName("Stream Type"), ModelStreamOptions[StreamingMode]);
 
 	BoneNames.Empty();
 	BoneParents.Empty();
@@ -102,7 +101,7 @@ void FModelStreamObject::Refresh()
 	BoneModels.Emplace(RootModel);
 
 	// If Streaming as Hierarchy
-	if (StreamingMode > 0)
+	if (StreamingMode != FModelStreamMode::RootOnly)
 	{
 		TArray<TPair<int, FBModel*>> SearchList;
 		TArray<TPair<int, FBModel*>> SearchListNext;
@@ -111,11 +110,11 @@ void FModelStreamObject::Refresh()
 
 		while (SearchList.Num() > 0)
 		{
-			for (const auto& SearchPair : SearchList)
+			for (const TPair<int, FBModel*>& SearchPair : SearchList)
 			{
 				int ParentIdx = SearchPair.Key;
 				FBModel* SearchModel = SearchPair.Value;
-				int ChildCount = SearchModel->Children.GetCount(); // Yuck
+				int ChildCount = SearchModel->Children.GetCount();
 
 				for (int ChildIdx = 0; ChildIdx < ChildCount; ++ChildIdx)
 				{
@@ -137,7 +136,10 @@ void FModelStreamObject::Refresh()
 
 void FModelStreamObject::UpdateSubjectFrame()
 {
-	if (!bIsActive) return;
+	if (!bIsActive)
+	{
+		return;
+	}
 
 	int BoneCount = BoneNames.Num();
 	TArray<FTransform> BoneTransforms;

@@ -5,12 +5,20 @@
 #include "ModelStreamObject.h"
 
 // FBLight wrapper
-// TODO: Will require some thought on how to handle different light types
 class FLightStreamObject : public FModelStreamObject
 {
+private:
+	const TArray<FString> LightStreamOptions = { TEXT("Root Only"), TEXT("Light") };
+
+	enum FLightStreamMode
+	{
+		RootOnly,
+		Light
+	};
+
 public:
 	FLightStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
-
-	void Refresh() override;
-	void UpdateSubjectFrame() override;
+	virtual const FString GetStreamOptions() const override;
+	virtual void Refresh() override;
+	virtual void UpdateSubjectFrame() override;
 };

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "LiveLinkProvider.h"
 #include "LiveLinkRefSkeleton.h"
 

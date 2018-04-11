@@ -9,9 +9,17 @@
 // or used as a base class for StreamObjects who's Root object derives from FBModel
 class FModelStreamObject : public IStreamObject
 {
+private:
+	const TArray<FString> ModelStreamOptions = { TEXT("Root Only"), TEXT("Full Hierarchy") };
+
+	enum FModelStreamMode
+	{
+		RootOnly,
+		FullHierarchy
+	};
 public:
 	// Construct from a FBModel*
-	FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
+	FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, bool bShouldRefresh=true);
 
 	virtual ~FModelStreamObject();
 
@@ -40,16 +48,11 @@ public:
 	virtual void UpdateSubjectFrame() override;
 
 protected:
-
-	// Constructor for Child Classes
-	FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, std::initializer_list<FString> Options);
-
 	// Stream Variables
 
 	const FBModel* RootModel;
 
 	const TSharedPtr<ILiveLinkProvider> Provider;
-	const TArray<FString> ConnectionOptions;
 
 	FName SubjectName;
 	TArray<FName> BoneNames;

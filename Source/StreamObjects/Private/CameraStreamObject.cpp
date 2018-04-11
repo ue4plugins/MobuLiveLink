@@ -4,9 +4,9 @@
 #include "MobuLiveLinkUtilities.h"
 
 FCameraStreamObject::FCameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	FModelStreamObject(ModelPointer, StreamProvider, { TEXT("Root Only"), TEXT("Full Hierarchy"), TEXT("Camera") })
+	FModelStreamObject(ModelPointer, StreamProvider, false)
 {
-	StreamingMode = 2;
+	StreamingMode = FCameraStreamMode::Camera;
 
 	BoneNames.Emplace(FName("Bone01"));
 	BoneParents.Emplace(-1);
@@ -14,15 +14,23 @@ FCameraStreamObject::FCameraStreamObject(const FBModel* ModelPointer, const TSha
 	Refresh();
 }
 
+const FString FCameraStreamObject::GetStreamOptions() const
+{
+	return FString::Join(CameraStreamOptions, _T("~"));
+};
+
 void FCameraStreamObject::Refresh() 
 {
-	BaseMetadata.Add(FName("Stream Type"), ConnectionOptions[StreamingMode]);
+	BaseMetadata.Add(FName("Stream Type"), CameraStreamOptions[StreamingMode]);
 	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
 }
 
 void FCameraStreamObject::UpdateSubjectFrame() 
 {
-	if (!bIsActive) return;
+	if (!bIsActive)
+	{
+		return;
+	}
 
 	TArray<FTransform> BoneTransforms;
 
@@ -33,7 +41,7 @@ void FCameraStreamObject::UpdateSubjectFrame()
 	TArray<FLiveLinkCurveElement> CurveData;
 
 	// If Streaming as Camera then get the Camera Properties
-	if (StreamingMode == 2)
+	if (StreamingMode == FCameraStreamMode::Camera)
 	{
 		CurveData = MobuUtilities::GetAllAnimatableCurves(CameraModel);
 
