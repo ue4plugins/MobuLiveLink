@@ -186,38 +186,38 @@ FLiveLinkFrameRate MobuUtilities::TimeModeToFrameRate(FBTimeMode TimeMode)
 {
 	switch (TimeMode)
 	{
-	case ORSDK2017::kFBTimeMode1000Frames:
+	case FBTimeMode::kFBTimeMode1000Frames:
 		return FLiveLinkFrameRate(1000,1);
-	case ORSDK2017::kFBTimeMode120Frames:
+	case FBTimeMode::kFBTimeMode120Frames:
 		return FLiveLinkFrameRate(120, 1);
-	case ORSDK2017::kFBTimeMode100Frames:
+	case FBTimeMode::kFBTimeMode100Frames:
 		return FLiveLinkFrameRate(100, 1);
-	case ORSDK2017::kFBTimeMode96Frames:
+	case FBTimeMode::kFBTimeMode96Frames:
 		return FLiveLinkFrameRate(96, 1);
-	case ORSDK2017::kFBTimeMode72Frames:
+	case FBTimeMode::kFBTimeMode72Frames:
 		return FLiveLinkFrameRate(72, 1);
-	case ORSDK2017::kFBTimeMode60Frames:
+	case FBTimeMode::kFBTimeMode60Frames:
 		return FLiveLinkFrameRate(60, 1);
-	case ORSDK2017::kFBTimeMode5994Frames:
+	case FBTimeMode::kFBTimeMode5994Frames:
 		return FLiveLinkFrameRate(60000, 1001);
-	case ORSDK2017::kFBTimeMode50Frames:
+	case FBTimeMode::kFBTimeMode50Frames:
 		return FLiveLinkFrameRate(50, 1);
-	case ORSDK2017::kFBTimeMode48Frames:
+	case FBTimeMode::kFBTimeMode48Frames:
 		return FLiveLinkFrameRate(48, 1);
-	case ORSDK2017::kFBTimeMode30Frames:
+	case FBTimeMode::kFBTimeMode30Frames:
 		return FLiveLinkFrameRate(30, 1);
-	case ORSDK2017::kFBTimeMode2997Frames_Drop:
+	case FBTimeMode::kFBTimeMode2997Frames_Drop:
 		return FLiveLinkFrameRate(30000, 1001);
-	case ORSDK2017::kFBTimeMode2997Frames:
+	case FBTimeMode::kFBTimeMode2997Frames:
 		return FLiveLinkFrameRate(30000, 1001);
-	case ORSDK2017::kFBTimeMode25Frames:
+	case FBTimeMode::kFBTimeMode25Frames:
 		return FLiveLinkFrameRate(25, 1);
-	case ORSDK2017::kFBTimeMode24Frames:
+	case FBTimeMode::kFBTimeMode24Frames:
 		return FLiveLinkFrameRate(24, 1);
-	case ORSDK2017::kFBTimeMode23976Frames:
+	case FBTimeMode::kFBTimeMode23976Frames:
 		return FLiveLinkFrameRate(24000, 1001);
-	case ORSDK2017::kFBTimeModeDefault:
-	case ORSDK2017::kFBTimeModeCustom:
+	case FBTimeMode::kFBTimeModeDefault:
+	case FBTimeMode::kFBTimeModeCustom:
 	default:
 		return FLiveLinkFrameRate(FMath::RoundToInt(FBPlayerControl().GetTransportFpsValue() * 1001), 1001);
 	}
