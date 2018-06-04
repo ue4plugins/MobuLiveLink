@@ -8,6 +8,7 @@ public class MobuLiveLinkPlugin : ModuleRules
 	public MobuLiveLinkPlugin(ReadOnlyTargetRules Target) : base(Target)
 	{
 		bEnforceIWYU = false;
+        bUseRTTI = true;
 
 		PrivateIncludePaths.AddRange( new string[] 
 		{
