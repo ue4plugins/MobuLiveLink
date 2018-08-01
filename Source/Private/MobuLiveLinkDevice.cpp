@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 //--- Class declaration
 #include "MobuLiveLinkDevice.h"
@@ -46,6 +46,15 @@ FBRegisterDevice		(	MOBULIVELINK__NAME,
 							MOBULIVELINK__DESC,
 							FStringToChar(GetDeviceIconPath()));
 
+void FMobuLiveLink::EventRenderUpdate(HISender Sender, HKEvent Event)
+{
+	FBGlobalEvalCallbackTiming EventTiming = ((FBEventEvalGlobalCallback)Event).GetTiming();
+	if (EventTiming == FBSDKNamespace::kFBGlobalEvalCallbackBeforeRender && this->Online)
+	{
+		UpdateStream();
+	}
+}
+
 /************************************************
  *	FiLMBOX Constructor.
  ************************************************/
@@ -53,6 +62,7 @@ bool FMobuLiveLink::FBCreate()
 {
 	// Set sampling rate to 60 Hz
 	CurrentSampleRate = FLiveLinkFrameRate::FPS_60;
+	bShouldUpdateInRenderCallback = false;
 	UpdateSampleRate();
 
 	StartLiveLink();
@@ -76,7 +86,10 @@ bool FMobuLiveLink::FBCreate()
 void FMobuLiveLink::FBDestroy()
 {
 	FBSystem().Scene->OnChange.Remove(this, (FBCallback)&FMobuLiveLink::EventSceneChange);
-
+	if (bShouldUpdateInRenderCallback)
+	{
+		FBEvaluateManager::TheOne().OnRenderingPipelineEvent.Remove(this, (FBCallback)&FMobuLiveLink::EventRenderUpdate);
+	}
 	StreamObjects.Empty();
 	StopLiveLink();
 }
@@ -87,7 +100,27 @@ void FMobuLiveLink::FBDestroy()
 void FMobuLiveLink::UpdateSampleRate()
 {
 	FBTime	lPeriod;
-	lPeriod.SetSecondDouble((double)CurrentSampleRate.Denominator / (double)CurrentSampleRate.Numerator);
+
+	if (MobuUtilities::AreEqual(CurrentSampleRate, FLiveLinkFrameRate(-1, 1)))
+	{
+		// After Render
+		FBEvaluateManager::TheOne().OnRenderingPipelineEvent.Add(this, (FBCallback)&FMobuLiveLink::EventRenderUpdate);
+
+		bShouldUpdateInRenderCallback = true;
+
+		lPeriod.SetSecondDouble(1.0);
+	}
+	else
+	{
+		if (bShouldUpdateInRenderCallback)
+		{
+			FBEvaluateManager::TheOne().OnRenderingPipelineEvent.Remove(this, (FBCallback)&FMobuLiveLink::EventRenderUpdate);
+		}
+
+		bShouldUpdateInRenderCallback = false;
+
+		lPeriod.SetSecondDouble((double)CurrentSampleRate.Denominator / (double)CurrentSampleRate.Numerator);
+	}
 	FBTrace("Setting Sample Rate: %f\n", lPeriod.GetSecondDouble());
 	SamplingPeriod = lPeriod;
 }
@@ -178,6 +211,15 @@ bool FMobuLiveLink::Reset()
  ************************************************/
 bool FMobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo* pEvaluateInfo)
 {
+	if (!bShouldUpdateInRenderCallback)
+	{
+		UpdateStream();
+	}
+	return true;
+}
+
+void FMobuLiveLink::UpdateStream()
+{
 	mCleanUpLock.Lock();
 
 	TickCoreTicker();
@@ -193,7 +235,6 @@ bool FMobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo*
 	}
 
 	mCleanUpLock.Unlock();
-	return true;
 }
 
 

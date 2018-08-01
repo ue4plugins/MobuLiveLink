@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -49,6 +49,7 @@ public:
 
 	//--- Events
 	void EventSceneChange(HISender Sender, HKEvent Event);
+	void EventRenderUpdate(HISender Sender, HKEvent Event);
 
 public:
 	const FString mProviderName = TEXT("Mobu Live Link");
@@ -71,15 +72,20 @@ public:
 		TPair<FString, FLiveLinkFrameRate>(FString("60hz"), FLiveLinkFrameRate::FPS_60),
 		TPair<FString, FLiveLinkFrameRate>(FString("100hz"), FLiveLinkFrameRate::FPS_100),
 		TPair<FString, FLiveLinkFrameRate>(FString("120hz"), FLiveLinkFrameRate::FPS_120),
+		TPair<FString, FLiveLinkFrameRate>(FString("Before Render"), FLiveLinkFrameRate(-1, 1)),
 	};
 
 	FLiveLinkFrameRate CurrentSampleRate;
 	void UpdateSampleRate();
 private:
+	void UpdateStream(); //!< Get latest data and send to unreal
+
 	int32 GetCurrentSampleRateIndex();
 
 	bool bIsDirty;
 	bool bShouldRefreshUI;
+
+	bool bShouldUpdateInRenderCallback; //!< Whether to update after render or to update in device evaluation
 
 	FBDeviceSamplingMode SamplingType;
 	FBFastLock mCleanUpLock;
