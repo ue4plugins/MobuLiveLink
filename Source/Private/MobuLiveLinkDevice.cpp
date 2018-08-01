@@ -46,15 +46,6 @@ FBRegisterDevice		(	MOBULIVELINK__NAME,
 							MOBULIVELINK__DESC,
 							FStringToChar(GetDeviceIconPath()));
 
-void FMobuLiveLink::EventRenderUpdate(HISender Sender, HKEvent Event)
-{
-	FBGlobalEvalCallbackTiming EventTiming = ((FBEventEvalGlobalCallback)Event).GetTiming();
-	if (EventTiming == FBSDKNamespace::kFBGlobalEvalCallbackBeforeRender && this->Online)
-	{
-		UpdateStream();
-	}
-}
-
 /************************************************
  *	FiLMBOX Constructor.
  ************************************************/
@@ -207,7 +198,7 @@ bool FMobuLiveLink::Reset()
 }
 
 /************************************************
- *	Device Evaluation Notify.
+ *	Device Evaluation.
  ************************************************/
 bool FMobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo* pEvaluateInfo)
 {
@@ -216,6 +207,15 @@ bool FMobuLiveLink::DeviceEvaluationNotify(kTransportMode pMode, FBEvaluateInfo*
 		UpdateStream();
 	}
 	return true;
+}
+
+void FMobuLiveLink::EventRenderUpdate(HISender Sender, HKEvent Event)
+{
+	FBGlobalEvalCallbackTiming EventTiming = ((FBEventEvalGlobalCallback)Event).GetTiming();
+	if (EventTiming == FBSDKNamespace::kFBGlobalEvalCallbackBeforeRender && this->Online)
+	{
+		UpdateStream();
+	}
 }
 
 void FMobuLiveLink::UpdateStream()
