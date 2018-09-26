@@ -27,7 +27,7 @@ TSharedPtr<IStreamObject> StreamObjectManagement::FBModelToStreamObject(FBModel*
 
 TSharedPtr<IStreamObject> StreamObjectManagement::StoreCamera(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
 {
-	FBTrace("%s is a Camera!\n", Model->LongName);
+	FBTrace("%s is a Camera!\n", *Model->LongName);
 
 	TSharedPtr<IStreamObject> CameraStore = MakeShared<FCameraStreamObject>(Model, LiveLinkProvider);
 	return CameraStore;
@@ -35,7 +35,7 @@ TSharedPtr<IStreamObject> StreamObjectManagement::StoreCamera(const FBModel* Mod
 
 TSharedPtr<IStreamObject> StreamObjectManagement::StoreLight(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
 {
-	FBTrace("%s is a Light!\n", Model->LongName);
+	FBTrace("%s is a Light!\n", *Model->LongName);
 
 	TSharedPtr<IStreamObject> LightStore = MakeShared<FLightStreamObject>(Model, LiveLinkProvider);
 	return LightStore;
@@ -43,7 +43,7 @@ TSharedPtr<IStreamObject> StreamObjectManagement::StoreLight(const FBModel* Mode
 
 TSharedPtr<IStreamObject> StreamObjectManagement::StoreSkeleton(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
 {
-	FBTrace("%s is a Skeleton!\n", Model->LongName);
+	FBTrace("%s is a Skeleton!\n", *Model->LongName);
 
 	TSharedPtr<IStreamObject> SkeletonStore = MakeShared<FSkeletonHierarchyStreamObject>(Model, LiveLinkProvider);
 	return SkeletonStore;
@@ -51,7 +51,7 @@ TSharedPtr<IStreamObject> StreamObjectManagement::StoreSkeleton(const FBModel* M
 
 TSharedPtr<IStreamObject> StreamObjectManagement::StoreGeneric(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider)
 {
-	FBTrace("%s is an Unknown Type! - %s\n", Model->LongName, ((FBModel*)Model)->ClassName());
+	FBTrace("%s is an Unknown Type! - %s\n", *Model->LongName, *((FBModel*)Model)->ClassName());
 
 	TSharedPtr<IStreamObject> GenericStore = MakeShared<FModelStreamObject>(Model, LiveLinkProvider);
 	return GenericStore;
