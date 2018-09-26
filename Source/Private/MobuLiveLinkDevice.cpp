@@ -52,7 +52,7 @@ FBRegisterDevice		(	MOBULIVELINK__NAME,
 bool FMobuLiveLink::FBCreate()
 {
 	// Set sampling rate to 60 Hz
-	CurrentSampleRate = FLiveLinkFrameRate::FPS_60;
+	CurrentSampleRate = FFrameRate(60, 1);
 	bShouldUpdateInRenderCallback = false;
 	UpdateSampleRate();
 
@@ -92,7 +92,7 @@ void FMobuLiveLink::UpdateSampleRate()
 {
 	FBTime	lPeriod;
 
-	if (MobuUtilities::AreEqual(CurrentSampleRate, FLiveLinkFrameRate(-1, 1)))
+	if (CurrentSampleRate == FFrameRate(-1, 1))
 	{
 		// After Render
 		FBEvaluateManager::TheOne().OnRenderingPipelineEvent.Add(this, (FBCallback)&FMobuLiveLink::EventRenderUpdate);
@@ -268,8 +268,8 @@ int32 FMobuLiveLink::GetCurrentSampleRateIndex()
 	int32 CurrentSampleIdx = 0;
 	for (int SampleIdx = 0; SampleIdx < SampleOptions.Num(); ++SampleIdx)
 	{
-		const FLiveLinkFrameRate& TestSampleRate = SampleOptions[SampleIdx].Value;
-		if (MobuUtilities::AreEqual(CurrentSampleRate, TestSampleRate))
+		const FFrameRate& TestSampleRate = SampleOptions[SampleIdx].Value;
+		if (CurrentSampleRate == TestSampleRate)
 		{
 			CurrentSampleIdx = SampleIdx;
 			break;

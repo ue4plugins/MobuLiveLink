@@ -65,17 +65,17 @@ public:
 	void SetRefreshUI(bool bNewRefreshUI) { bShouldRefreshUI = bNewRefreshUI; };
 	bool ShouldRefreshUI() const { return bShouldRefreshUI; };
 
-	const TArray<TPair<FString, FLiveLinkFrameRate>> SampleOptions =
+	const TArray<TPair<FString, FFrameRate>> SampleOptions =
 	{
-		TPair<FString, FLiveLinkFrameRate>(FString("30hz"), FLiveLinkFrameRate::FPS_30),
-		TPair<FString, FLiveLinkFrameRate>(FString("50hz"), FLiveLinkFrameRate::FPS_50),
-		TPair<FString, FLiveLinkFrameRate>(FString("60hz"), FLiveLinkFrameRate::FPS_60),
-		TPair<FString, FLiveLinkFrameRate>(FString("100hz"), FLiveLinkFrameRate::FPS_100),
-		TPair<FString, FLiveLinkFrameRate>(FString("120hz"), FLiveLinkFrameRate::FPS_120),
-		TPair<FString, FLiveLinkFrameRate>(FString("Before Render"), FLiveLinkFrameRate(-1, 1)),
+		TPair<FString, FFrameRate>(FString("30hz"), FFrameRate(30, 1)),
+		TPair<FString, FFrameRate>(FString("50hz"), FFrameRate(50, 1)),
+		TPair<FString, FFrameRate>(FString("60hz"), FFrameRate(60, 1)),
+		TPair<FString, FFrameRate>(FString("100hz"), FFrameRate(100, 1)),
+		TPair<FString, FFrameRate>(FString("120hz"), FFrameRate(120, 1)),
+		TPair<FString, FFrameRate>(FString("Before Render"), FFrameRate(-1, 1)),
 	};
 
-	FLiveLinkFrameRate CurrentSampleRate;
+	FFrameRate CurrentSampleRate;
 	void UpdateSampleRate();
 private:
 	void UpdateStream(); //!< Get latest data and send to unreal

@@ -140,9 +140,9 @@ void FMobuLiveLinkLayout::UIConfigure()
 	int CurrentSampleIndex = 0;
 	for (int SampleOptionIdx=0; SampleOptionIdx < LiveLinkDevice->SampleOptions.Num(); ++SampleOptionIdx)
 	{
-		const TPair<FString, FLiveLinkFrameRate>& SampleOption = LiveLinkDevice->SampleOptions[SampleOptionIdx];
+		const TPair<FString, FFrameRate>& SampleOption = LiveLinkDevice->SampleOptions[SampleOptionIdx];
 		SampleRateList.Items.Add(FStringToChar(SampleOption.Key));
-		if (MobuUtilities::AreEqual(SampleOption.Value, LiveLinkDevice->CurrentSampleRate))
+		if (SampleOption.Value == LiveLinkDevice->CurrentSampleRate)
 		{
 			CurrentSampleIndex = SampleOptionIdx;
 		}
@@ -302,8 +302,8 @@ void FMobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent E
 
 void FMobuLiveLinkLayout::EventSampleRateChange(HISender Sender, HKEvent Event)
 {
-	const FLiveLinkFrameRate& NewSampleRate = LiveLinkDevice->SampleOptions[SampleRateList.ItemIndex].Value;
-	if (!MobuUtilities::AreEqual(NewSampleRate, LiveLinkDevice->CurrentSampleRate))
+	const FFrameRate& NewSampleRate = LiveLinkDevice->SampleOptions[SampleRateList.ItemIndex].Value;
+	if (NewSampleRate != LiveLinkDevice->CurrentSampleRate)
 	{
 		LiveLinkDevice->CurrentSampleRate = NewSampleRate;
 		LiveLinkDevice->UpdateSampleRate();

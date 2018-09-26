@@ -13,8 +13,6 @@ public:
 	static TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel, const FString& Prefix = FString());
 	static void AppendFilmbackSettings(FBCamera* CameraModel, TArray<FLiveLinkCurveElement>& CurveElements);
 
-	static FLiveLinkFrameRate TimeModeToFrameRate(FBTimeMode TimeMode);
-	static void GetSceneTimecode(FLiveLinkTimeCode& SceneTimecode);
-
-	static bool AreEqual(const FLiveLinkFrameRate& A, const FLiveLinkFrameRate& B);
+	static FFrameRate TimeModeToFrameRate(FBTimeMode TimeMode);
+	static void GetSceneTimecode(FQualifiedFrameTime& SceneTimecode);
 };

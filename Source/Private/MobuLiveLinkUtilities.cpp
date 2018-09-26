@@ -182,57 +182,52 @@ void MobuUtilities::AppendFilmbackSettings(FBCamera* CameraModel, TArray<FLiveLi
 	CurveElements[NewItemIndex].CurveValue = FilmAspectRatio;
 }
 
-FLiveLinkFrameRate MobuUtilities::TimeModeToFrameRate(FBTimeMode TimeMode)
+FFrameRate MobuUtilities::TimeModeToFrameRate(FBTimeMode TimeMode)
 {
 	switch (TimeMode)
 	{
 	case FBTimeMode::kFBTimeMode1000Frames:
-		return FLiveLinkFrameRate(1000,1);
+		return FFrameRate(1000,1);
 	case FBTimeMode::kFBTimeMode120Frames:
-		return FLiveLinkFrameRate(120, 1);
+		return FFrameRate(120, 1);
 	case FBTimeMode::kFBTimeMode100Frames:
-		return FLiveLinkFrameRate(100, 1);
+		return FFrameRate(100, 1);
 	case FBTimeMode::kFBTimeMode96Frames:
-		return FLiveLinkFrameRate(96, 1);
+		return FFrameRate(96, 1);
 	case FBTimeMode::kFBTimeMode72Frames:
-		return FLiveLinkFrameRate(72, 1);
+		return FFrameRate(72, 1);
 	case FBTimeMode::kFBTimeMode60Frames:
-		return FLiveLinkFrameRate(60, 1);
+		return FFrameRate(60, 1);
 	case FBTimeMode::kFBTimeMode5994Frames:
-		return FLiveLinkFrameRate(60000, 1001);
+		return FFrameRate(60000, 1001);
 	case FBTimeMode::kFBTimeMode50Frames:
-		return FLiveLinkFrameRate(50, 1);
+		return FFrameRate(50, 1);
 	case FBTimeMode::kFBTimeMode48Frames:
-		return FLiveLinkFrameRate(48, 1);
+		return FFrameRate(48, 1);
 	case FBTimeMode::kFBTimeMode30Frames:
-		return FLiveLinkFrameRate(30, 1);
+		return FFrameRate(30, 1);
 	case FBTimeMode::kFBTimeMode2997Frames_Drop:
-		return FLiveLinkFrameRate(30000, 1001);
+		return FFrameRate(30000, 1001);
 	case FBTimeMode::kFBTimeMode2997Frames:
-		return FLiveLinkFrameRate(30000, 1001);
+		return FFrameRate(30000, 1001);
 	case FBTimeMode::kFBTimeMode25Frames:
-		return FLiveLinkFrameRate(25, 1);
+		return FFrameRate(25, 1);
 	case FBTimeMode::kFBTimeMode24Frames:
-		return FLiveLinkFrameRate(24, 1);
+		return FFrameRate(24, 1);
 	case FBTimeMode::kFBTimeMode23976Frames:
-		return FLiveLinkFrameRate(24000, 1001);
+		return FFrameRate(24000, 1001);
 	case FBTimeMode::kFBTimeModeDefault:
 	case FBTimeMode::kFBTimeModeCustom:
 	default:
-		return FLiveLinkFrameRate(FMath::RoundToInt(FBPlayerControl().GetTransportFpsValue() * 1001), 1001);
+		return FFrameRate(FMath::RoundToInt(FBPlayerControl().GetTransportFpsValue() * 1001), 1001);
 	}
 }
 
-void MobuUtilities::GetSceneTimecode(FLiveLinkTimeCode& SceneTimecode)
+void MobuUtilities::GetSceneTimecode(FQualifiedFrameTime& SceneTimecode)
 {
 	FBTime LocalTime = FBSystem().LocalTime;
 
-	SceneTimecode.FrameRate = TimeModeToFrameRate(FBPlayerControl().GetTransportFps());
-	SceneTimecode.Seconds = FMath::FloorToInt(LocalTime.GetSecondDouble());
-	SceneTimecode.Frames = LocalTime.GetFrame() %  FMath::CeilToInt((double)SceneTimecode.FrameRate.Numerator / (double)SceneTimecode.FrameRate.Denominator);
-}
-
-bool MobuUtilities::AreEqual(const FLiveLinkFrameRate& A, const FLiveLinkFrameRate& B)
-{
-	return (A.Numerator == B.Numerator) && (A.Denominator == B.Denominator);
+	FFrameTime FrameTime((int32)LocalTime.GetFrame());
+	FFrameRate FrameRate = TimeModeToFrameRate(FBPlayerControl().GetTransportFps());
+	SceneTimecode = FQualifiedFrameTime(FrameTime, FrameRate);
 }
