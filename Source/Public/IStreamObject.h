@@ -28,7 +28,7 @@ public:
 
 	virtual void UpdateActiveStatus(bool bIsNowActive) = 0;
 
-	virtual const kReference GetReference() const = 0;
+	virtual const FBModel* GetModelPointer() const = 0;
 	
 	virtual const FString GetRootName() const = 0;
 

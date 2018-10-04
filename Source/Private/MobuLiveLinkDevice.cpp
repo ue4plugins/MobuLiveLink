@@ -51,9 +51,8 @@ FBRegisterDevice		(	MOBULIVELINK__NAME,
  ************************************************/
 bool FMobuLiveLink::FBCreate()
 {
-	// Set sampling rate to 60 Hz
-	CurrentSampleRate = FFrameRate(60, 1);
-	bShouldUpdateInRenderCallback = false;
+	// Set sampling rate to Before Render
+	CurrentSampleRate = SampleOptions.Last().Value;
 	UpdateSampleRate();
 
 	StartLiveLink();
@@ -62,7 +61,7 @@ bool FMobuLiveLink::FBCreate()
 	SetDirty(false);
 
 	TSharedPtr<IStreamObject> EditorCamera = MakeShared<FEditorActiveCameraStreamObject>(LiveLinkProvider);
-	StreamObjects.Emplace((kReference)nullptr, EditorCamera);
+	StreamObjects.Emplace(-1, EditorCamera);
 
 	LastEvaluationTime = FPlatformTime::Seconds();
 
@@ -228,7 +227,7 @@ void FMobuLiveLink::UpdateStream()
 	{
 		UpdateStreamObjects();
 	}
-	for (TPair<kReference, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
+	for (TPair<int32, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
 	{
 		const TSharedPtr<IStreamObject>& StreamObject = MapPair.Value;
 		StreamObject->UpdateSubjectFrame();
@@ -314,7 +313,7 @@ bool FMobuLiveLink::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat
 			pFbxObject->FieldWriteI(MOBULIVELINK_NUMBER_OF_OBJECT_COLUMNS);
 
 			// NumberOfObjects * NumberOfObjectColumns * ObjectColumn
-			for (TPair<kReference, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
+			for (TPair<int32, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
 			{
 				const FString StreamObjectRootName = MapPair.Value->GetRootName();
 
@@ -368,7 +367,7 @@ bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreW
 				{
 					FBModel* FoundFBModel = (FBModel*)FoundModels[0];
 					TSharedPtr<IStreamObject> FoundStreamObject = StreamObjectManagement::FBModelToStreamObject(FoundFBModel, LiveLinkProvider);
-					StreamObjects.Emplace((kReference)FoundFBModel, FoundStreamObject);
+					StreamObjects.Emplace(GetNextUID(), FoundStreamObject);
 
 					FName SubjectName(pFbxObject->FieldReadC());
 					int32 StreamingMode = pFbxObject->FieldReadI();
@@ -450,7 +449,7 @@ void FMobuLiveLink::EventSceneChange(HISender Sender, HKEvent Event)
 
 void FMobuLiveLink::UpdateStreamObjects()
 {
-	for (TPair<kReference, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
+	for (TPair<int32, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
 	{
 		const TSharedPtr<IStreamObject>& StreamObject = MapPair.Value;
 		if (StreamObject->IsValid())
@@ -471,4 +470,9 @@ void FMobuLiveLink::TickCoreTicker()
 	double CurrentTime = FPlatformTime::Seconds();
 	FTicker::GetCoreTicker().Tick(CurrentTime - LastEvaluationTime);
 	LastEvaluationTime = CurrentTime;
+}
+
+int32 FMobuLiveLink::GetNextUID()
+{
+	return NextUID++;
 }

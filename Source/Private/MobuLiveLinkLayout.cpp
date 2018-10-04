@@ -157,9 +157,9 @@ void FMobuLiveLinkLayout::UIReset()
 	FBTrace("UI Reset!\n");
 	StreamSpread.Clear();
 	CreateSpreadColumns();
-	for (const TPair<kReference, StreamObjectPtr>& MapPair : LiveLinkDevice->StreamObjects)
+	for (const TPair<int32, StreamObjectPtr>& MapPair : LiveLinkDevice->StreamObjects)
 	{
-		AddSpreadRowFromStreamObject(MapPair.Value);
+		AddSpreadRowFromStreamObject(MapPair.Key, MapPair.Value);
 	}
 	LiveLinkDevice->SetRefreshUI(false);
 }
@@ -176,28 +176,34 @@ void FMobuLiveLinkLayout::EventUIIdle(HISender Sender, HKEvent Event)
 	}
 }
 
-void FMobuLiveLinkLayout::AddSpreadRowFromStreamObject(StreamObjectPtr Object)
+void FMobuLiveLinkLayout::AddSpreadRowFromStreamObject(int32 NewRowKey, StreamObjectPtr Object)
 {
 	// Check whether the Object should be shown
 	if (!Object->ShouldShowInUI()) return;
 
-	const kReference ObjectReference = Object->GetReference();
 	const FString RootName = Object->GetRootName();
 
-	StreamSpread.RowAdd(FStringToChar(RootName), ObjectReference);
+	StreamSpread.RowAdd(FStringToChar(RootName), NewRowKey);
 
-	StreamSpread.SetCell(ObjectReference, 0, FStringToChar(Object->GetSubjectName().ToString()));
-	StreamSpread.SetCell(ObjectReference, 1, FStringToChar(Object->GetStreamOptions()));
-	StreamSpread.SetCell(ObjectReference, 1, Object->GetStreamingMode());
+	StreamSpread.SetCell(NewRowKey, 0, FStringToChar(Object->GetSubjectName().ToString()));
+	StreamSpread.SetCell(NewRowKey, 1, FStringToChar(Object->GetStreamOptions()));
+	StreamSpread.SetCell(NewRowKey, 1, Object->GetStreamingMode());
 	bool bIsActive = Object->GetActiveStatus();
-	StreamSpread.SetCell(ObjectReference, 2, bIsActive);
-	StreamSpread.SetCell(ObjectReference, 2, BoolToActiveText(bIsActive));
+	StreamSpread.SetCell(NewRowKey, 2, bIsActive);
+	StreamSpread.SetCell(NewRowKey, 2, BoolToActiveText(bIsActive));
 }
 
 
 bool IsModelInDeviceStream(const FMobuLiveLink* MobuDevice, const FBModel* Model)
 {
-	return MobuDevice->StreamObjects.Contains((kReference)Model);
+	for (const TPair<int32, TSharedPtr<IStreamObject>>& StreamPair : MobuDevice->StreamObjects)
+	{
+		if (StreamPair.Value->GetModelPointer() == Model)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void FMobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
@@ -224,8 +230,9 @@ void FMobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 		else if (!IsModelInDeviceStream(LiveLinkDevice, Model))
 		{
 			StreamObjectPtr StoreObject = StreamObjectManagement::FBModelToStreamObject(Model, LiveLinkDevice->LiveLinkProvider);
-			LiveLinkDevice->StreamObjects.Emplace((kReference)Model, StoreObject);
-			AddSpreadRowFromStreamObject(StoreObject);
+			int32 NewUID = LiveLinkDevice->GetNextUID();
+			LiveLinkDevice->StreamObjects.Emplace(NewUID, StoreObject);
+			AddSpreadRowFromStreamObject(NewUID, StoreObject);
 			FBTrace("Added New Object to StreamObject\n");
 
 			ParentsToIgnore.Emplace(Model);
@@ -238,11 +245,11 @@ void FMobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 void FMobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 {
 	int SelectedCount = 0;
-	TArray<kReference> DeletionObjects;
+	TArray<int32> DeletionObjects;
 	DeletionObjects.Reserve(LiveLinkDevice->StreamObjects.Num());
-	for (const TPair<kReference, StreamObjectPtr>& MapPair : LiveLinkDevice->StreamObjects)
+	for (const TPair<int32, StreamObjectPtr>& MapPair : LiveLinkDevice->StreamObjects)
 	{
-		kReference RowKey = MapPair.Value->GetReference();
+		int32 RowKey = MapPair.Key;
 		bool bRowSelected = StreamSpread.GetRow(RowKey).RowSelected;
 		if (bRowSelected)
 		{
@@ -250,7 +257,7 @@ void FMobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 			SelectedCount++;
 		}
 	}
-	for (const kReference& DeletionKey : DeletionObjects)
+	for (int32 DeletionKey : DeletionObjects)
 	{
 		LiveLinkDevice->StreamObjects.Remove(DeletionKey);
 	}

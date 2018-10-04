@@ -72,9 +72,9 @@ void FModelStreamObject::UpdateActiveStatus(bool bIsNowActive)
 	Refresh();
 };
 
-const kReference FModelStreamObject::GetReference() const
+const FBModel* FModelStreamObject::GetModelPointer() const
 {
-	return (kReference)RootModel;
+	return RootModel;
 };
 
 const FString FModelStreamObject::GetRootName() const

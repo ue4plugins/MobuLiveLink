@@ -38,7 +38,7 @@ public:
 	virtual bool GetActiveStatus() const override;
 	virtual void UpdateActiveStatus(bool bIsNowActive) override;
 
-	virtual const kReference GetReference() const override;
+	virtual const FBModel* GetModelPointer() const override;
 
 	virtual const FString GetRootName() const override;
 

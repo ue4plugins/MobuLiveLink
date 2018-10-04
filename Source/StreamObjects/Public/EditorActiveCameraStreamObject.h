@@ -26,7 +26,7 @@ public:
 	bool GetActiveStatus() const final;
 	void UpdateActiveStatus(bool bIsNowActive) final;
 
-	const kReference GetReference() const final;
+	const FBModel* GetModelPointer() const final;
 
 	const FString GetRootName() const final;
 

@@ -63,9 +63,9 @@ void FEditorActiveCameraStreamObject::UpdateActiveStatus(bool bIsNowActive)
 	// Active Status is not changeable on the Editor camera
 };
 
-const kReference FEditorActiveCameraStreamObject::GetReference() const
+const FBModel* FEditorActiveCameraStreamObject::GetModelPointer() const
 {
-	return (kReference)nullptr;
+	return nullptr;
 };
 
 const FString FEditorActiveCameraStreamObject::GetRootName() const

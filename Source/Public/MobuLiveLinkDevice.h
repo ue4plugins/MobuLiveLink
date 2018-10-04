@@ -53,7 +53,7 @@ public:
 
 public:
 	const FString mProviderName = TEXT("Mobu Live Link");
-	TMap<kReference, TSharedPtr<IStreamObject>> StreamObjects;
+	TMap<int32, TSharedPtr<IStreamObject>> StreamObjects;
 	
 	TSharedPtr<ILiveLinkProvider> LiveLinkProvider;
 
@@ -77,7 +77,11 @@ public:
 
 	FFrameRate CurrentSampleRate;
 	void UpdateSampleRate();
+
+	int32 GetNextUID();
 private:
+	int32 NextUID = 1;
+
 	void UpdateStream(); //!< Get latest data and send to unreal
 
 	int32 GetCurrentSampleRateIndex();

@@ -40,7 +40,7 @@ private:
 
 	typedef TSharedPtr<IStreamObject> StreamObjectPtr;
 
-	void AddSpreadRowFromStreamObject(StreamObjectPtr Object);
+	void AddSpreadRowFromStreamObject(int32 NewRowKey, StreamObjectPtr Object);
 
 	FBSystem				System;
 	FMobuLiveLink*			LiveLinkDevice;
