@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -26,6 +26,9 @@ public:
 	bool GetActiveStatus() const final;
 	void UpdateActiveStatus(bool bIsNowActive) final;
 
+	virtual bool GetSendAnimatableStatus() const final;
+	virtual void UpdateSendAnimatableStatus(bool bNewSendAnimatable) final;
+
 	const FBModel* GetModelPointer() const final;
 
 	const FString GetRootName() const final;
@@ -40,8 +43,6 @@ private:
 	const TSharedPtr<ILiveLinkProvider> Provider;
 
 	const FName SubjectName;
-	const TArray<FName> BoneNames;
-	const TArray<int32> BoneParents;
-
-	TMap<FName, FString> BaseMetadata;
+	bool bIsActive;
+	bool bSendAnimatable;
 };

@@ -1,10 +1,10 @@
-﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "MobuLiveLinkUtilities.h"
 
-#define INCHES_TO_MILLIMETERS 25.4
+const float MobuUtilities::InchesToMillimeters = 25.4f;
 
-FTransform MobuUtilities::MobuTransformToUnreal(FBMatrix& MobuTransfrom)
+FTransform MobuUtilities::MobuTransformToUnreal(FBMatrix MobuTransfrom)
 {
 	FBMatrix MobuTransformUnrealSpace;
 	FBTVector TVector;
@@ -38,7 +38,17 @@ FTransform MobuUtilities::MobuTransformToUnreal(FBMatrix& MobuTransfrom)
 	UnrealTransform.SetScale3D(FVector(SVector[0], SVector[1], SVector[2]));
 
 	return UnrealTransform;
-};
+}
+
+FColor MobuUtilities::MobuColorToUnreal(FBColor Color)
+{
+	FColor Result;
+	Result.R = FMath::Clamp(Color[0] * 255.0, 0.0, 255.0);
+	Result.G = FMath::Clamp(Color[1] * 255.0, 0.0, 255.0);
+	Result.B = FMath::Clamp(Color[2] * 255.0, 0.0, 255.0);
+	Result.A = 255;
+	return Result;
+}
 
 FTransform MobuUtilities::UnrealTransformFromModel(FBModel* MobuModel, bool bIsGlobal)
 {
@@ -55,49 +65,60 @@ FTransform MobuUtilities::UnrealTransformFromModel(FBModel* MobuModel, bool bIsG
 	return MobuTransformToUnreal(MobuTransform);
 };
 
-FTransform MobuUtilities::UnrealTransformFromCamera(FBCamera* CameraModel)
+// Get all properties on a given model that are both Animatable and are of a Type we can stream
+TArray<FName> MobuUtilities::GetAllAnimatableCurveNames(FBModel* MobuModel, const FString& Prefix)
 {
-	// MotionBuilder suggests that GetMatrix is deprecated for Cameras and to 
-	// reconstruct from the Camera Matrices explicitly
+	const int PropertyCount = MobuModel->PropertyList.GetCount();
 
-	FBMatrix ModelView;
-	FBMatrix MatOffset;
+	TArray<FName> LiveLinkCurves;
+	// Reserve enough memory for worst case
+	LiveLinkCurves.Reserve(PropertyCount);
 
-	CameraModel->GetCameraMatrix(ModelView, FBCameraMatrixType::kFBModelView, nullptr);
-	FBMatrix InvModelView = ModelView.Inverse();
+	for (int i = 0; i < PropertyCount; ++i)
+	{
+		FBProperty* Property = MobuModel->PropertyList[i];
+		if (Property->IsAnimatable())
+		{
+			//Only add supported property
+			switch (Property->GetPropertyType())
+			{
+			case kFBPT_bool:
+			case kFBPT_double:
+			case kFBPT_float:
+			case kFBPT_enum:
+			case kFBPT_int:
+			case kFBPT_int64:
+			case kFBPT_uint64:
+				break;
+			default:
+				continue;
+			}
 
-	// Y-Up Correction
-	FBRVector RotOffset(90, 0, 0);
-	FBRotationToMatrix(MatOffset, RotOffset);
-	FBMatrixMult(ModelView, MatOffset, ModelView);
-
-	// Camera is now in Unreal Space
-	FTransform CameraTransform = MobuTransformToUnreal(ModelView);
-
-	// Mobu Cameras look down a different axis so flip them here
-	FQuat CameraRotation = CameraTransform.GetRotation();
-	FQuat LensRotation;
-	LensRotation.MakeFromEuler(FVector(-90, -90, 0));
-	CameraTransform.SetRotation(CameraRotation * LensRotation);
-
-	return CameraTransform;
+			if (!Prefix.IsEmpty())
+			{
+				LiveLinkCurves.Add(*(Prefix + FString(":") + Property->GetName()));
+			}
+			else
+			{
+				LiveLinkCurves.Add(Property->GetName());
+			}
+		}
+	}
+	return LiveLinkCurves;
 }
 
-// Get all properties on a given model that are both Animatable and are of a Type we can stream
-TArray<FLiveLinkCurveElement> MobuUtilities::GetAllAnimatableCurves(FBModel* MobuModel, const FString& Prefix)
+TArray<float> MobuUtilities::GetAllAnimatableCurveValues(FBModel* MobuModel)
 {
 	int PropertyCount = MobuModel->PropertyList.GetCount();
 
-	TArray<FLiveLinkCurveElement> LiveLinkCurves;
+	TArray<float> LiveLinkCurves;
 	// Reserve enough memory for worst case
 	LiveLinkCurves.Reserve(PropertyCount);
 
 	float PropertyValue;
-	FName PropertyName;
 	for (int i = 0; i < PropertyCount; ++i)
 	{
 		FBProperty* Property = MobuModel->PropertyList[i];
-		FString CurveName(Property->GetName());
 		if (Property->IsAnimatable())
 		{
 			switch (Property->GetPropertyType())
@@ -147,39 +168,10 @@ TArray<FLiveLinkCurveElement> MobuUtilities::GetAllAnimatableCurves(FBModel* Mob
 			default:
 				continue;
 			}
-
-			FLiveLinkCurveElement NewCurveElement;
-			if (!Prefix.IsEmpty())
-			{
-				CurveName = Prefix + FString(":") + CurveName;
-			}
-			NewCurveElement.CurveName = FName(*CurveName);
-			NewCurveElement.CurveValue = PropertyValue;
-
-			LiveLinkCurves.Emplace(NewCurveElement);
+			LiveLinkCurves.Add(PropertyValue);
 		}
 	}
 	return LiveLinkCurves;
-}
-
-void MobuUtilities::AppendFilmbackSettings(FBCamera* CameraModel, TArray<FLiveLinkCurveElement>& CurveElements)
-{
-	// Film size isn't an animatable property so does not come through by default
-	int NewItemIndex;
-	double FilmSizeHeight, FilmSizeWidth, FilmAspectRatio;
-	CameraModel->FilmSizeHeight.GetData(&FilmSizeHeight, sizeof(FilmSizeHeight), nullptr);
-	CameraModel->FilmSizeWidth.GetData(&FilmSizeWidth, sizeof(FilmSizeWidth), nullptr);
-	CameraModel->FilmAspectRatio.GetData(&FilmAspectRatio, sizeof(FilmAspectRatio), nullptr);
-
-	NewItemIndex = CurveElements.AddDefaulted();
-	CurveElements[NewItemIndex].CurveName = FName("FilmSizeHeight");
-	CurveElements[NewItemIndex].CurveValue = FilmSizeHeight * INCHES_TO_MILLIMETERS;
-	NewItemIndex = CurveElements.AddDefaulted();
-	CurveElements[NewItemIndex].CurveName = FName("FilmSizeWidth");
-	CurveElements[NewItemIndex].CurveValue = FilmSizeWidth * INCHES_TO_MILLIMETERS;
-	NewItemIndex = CurveElements.AddDefaulted();
-	CurveElements[NewItemIndex].CurveName = FName("FilmAspectRatio");
-	CurveElements[NewItemIndex].CurveValue = FilmAspectRatio;
 }
 
 FFrameRate MobuUtilities::TimeModeToFrameRate(FBTimeMode TimeMode)
@@ -223,11 +215,11 @@ FFrameRate MobuUtilities::TimeModeToFrameRate(FBTimeMode TimeMode)
 	}
 }
 
-void MobuUtilities::GetSceneTimecode(FQualifiedFrameTime& SceneTimecode)
+FQualifiedFrameTime MobuUtilities::GetSceneTimecode()
 {
 	FBTime LocalTime = FBSystem().LocalTime;
 
 	FFrameTime FrameTime((int32)LocalTime.GetFrame());
 	FFrameRate FrameRate = TimeModeToFrameRate(FBPlayerControl().GetTransportFps());
-	SceneTimecode = FQualifiedFrameTime(FrameTime, FrameRate);
+	return FQualifiedFrameTime(FrameTime, FrameRate);
 }

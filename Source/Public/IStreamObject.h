@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -11,6 +11,7 @@ class IStreamObject
 {
 public:
 	// Interface for modifying and accessing stream parameters
+	virtual ~IStreamObject() {}
 
 	virtual const bool ShouldShowInUI() const = 0;
 
@@ -27,6 +28,10 @@ public:
 	virtual bool GetActiveStatus() const = 0;
 
 	virtual void UpdateActiveStatus(bool bIsNowActive) = 0;
+
+	virtual bool GetSendAnimatableStatus() const = 0;
+
+	virtual void UpdateSendAnimatableStatus(bool bNewSendAnimatable) = 0;
 
 	virtual const FBModel* GetModelPointer() const = 0;
 	

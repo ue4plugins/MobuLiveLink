@@ -1,8 +1,13 @@
-﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
 #include "IStreamObject.h"
+
+struct FLiveLinkSkeletonStaticData;
+struct FLiveLinkAnimationFrameData;
+struct FLiveLinkTransformStaticData;
+struct FLiveLinkTransformFrameData;
 
 // Generic object that supports FBModels
 // Either used for simple objects where no more specific class exists (Nulls, etc.)
@@ -15,8 +20,9 @@ private:
 	enum FModelStreamMode
 	{
 		RootOnly,
-		FullHierarchy
+		FullHierarchy,
 	};
+
 public:
 	// Construct from a FBModel*
 	FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, bool bShouldRefresh=true);
@@ -38,6 +44,9 @@ public:
 	virtual bool GetActiveStatus() const override;
 	virtual void UpdateActiveStatus(bool bIsNowActive) override;
 
+	virtual bool GetSendAnimatableStatus() const override;
+	virtual void UpdateSendAnimatableStatus(bool bNewSendAnimatable) override;
+
 	virtual const FBModel* GetModelPointer() const override;
 
 	virtual const FString GetRootName() const override;
@@ -47,20 +56,23 @@ public:
 	virtual void Refresh() override;
 	virtual void UpdateSubjectFrame() override;
 
+public:
+	static void UpdateBaseStaticData(const FBModel* Model, bool bSendAnimatable, FLiveLinkBaseStaticData& InOutBaseFrameData);
+	static void UpdateBaseFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkBaseFrameData& InOutBaseFrameData);
+	void UpdateSubjectSkeletalStaticData(FLiveLinkSkeletonStaticData& InOutTransformFrame);
+	void UpdateSubjectSkeletalFrameData(FLiveLinkAnimationFrameData& InOutTransformFrame);
+	static void UpdateSubjectTransformStaticData(const FBModel* Model, bool bSendAnimatable, FLiveLinkTransformStaticData& InOutTransformFrame);
+	static void UpdateSubjectTransformFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkTransformFrameData& InOutTransformFrame);
+
 protected:
 	// Stream Variables
-
-	const FBModel* RootModel;
-
+	const FBModel* const RootModel;
 	const TSharedPtr<ILiveLinkProvider> Provider;
 
 	FName SubjectName;
-	TArray<FName> BoneNames;
 	TArray<int32> BoneParents;
 	TArray<const FBModel*> BoneModels;
-	int StreamingMode;
 	bool bIsActive;
-
-	TMap<FName, FString> BaseMetadata;
-
+	bool bSendAnimatable;
+	int StreamingMode;
 };

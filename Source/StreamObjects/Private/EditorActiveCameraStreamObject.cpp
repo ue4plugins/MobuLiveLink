@@ -1,21 +1,26 @@
-﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "EditorActiveCameraStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
 
+#include "CameraStreamObject.h"
+#include "ModelStreamObject.h"
+
+#include "Roles/LiveLinkCameraRole.h"
+#include "Roles/LiveLinkCameraTypes.h"
+
 FEditorActiveCameraStreamObject::FEditorActiveCameraStreamObject(const TSharedPtr<ILiveLinkProvider> StreamProvider)
-	: Provider(StreamProvider), 
-	SubjectName("EditorActiveCamera"), 
-	BoneNames({FName("root")}), 
-	BoneParents({-1})
+	: Provider(StreamProvider)
+	, SubjectName("EditorActiveCamera")
+	, bIsActive(true)
+	, bSendAnimatable(false)
 {
-	BaseMetadata.Add(FName("Stream Type"), SubjectName.ToString());
-	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
+	Refresh();
 }
 
 FEditorActiveCameraStreamObject::~FEditorActiveCameraStreamObject()
 {
-	Provider->ClearSubject(SubjectName);
+	Provider->RemoveSubject(SubjectName);
 	FBTrace("Destroying Editor Camera\n");
 }
 
@@ -54,13 +59,26 @@ void FEditorActiveCameraStreamObject::UpdateStreamingMode(int NewStreamingMode)
 
 bool FEditorActiveCameraStreamObject::GetActiveStatus() const
 {
-	// Editor camera is always active
-	return true;
+	return bIsActive;
 };
 
 void FEditorActiveCameraStreamObject::UpdateActiveStatus(bool bIsNowActive)
 {
-	// Active Status is not changeable on the Editor camera
+	bIsActive = bIsNowActive;
+};
+
+bool FEditorActiveCameraStreamObject::GetSendAnimatableStatus() const
+{
+	return bSendAnimatable;
+};
+
+void FEditorActiveCameraStreamObject::UpdateSendAnimatableStatus(bool bNewSendAnimatable)
+{
+	if (bSendAnimatable != bNewSendAnimatable)
+	{
+		bSendAnimatable = bNewSendAnimatable;
+		Refresh();
+	}
 };
 
 const FBModel* FEditorActiveCameraStreamObject::GetModelPointer() const
@@ -83,26 +101,30 @@ bool FEditorActiveCameraStreamObject::IsValid() const
 
 void FEditorActiveCameraStreamObject::Refresh()
 {
-	// Refresh is not a valid operation
+	FBSystem System;
+	const FBCamera* CameraModel = System.Scene->Renderer->CurrentCamera;
+
+	FLiveLinkStaticDataStruct CameraData(FLiveLinkCameraStaticData::StaticStruct());
+	FModelStreamObject::UpdateSubjectTransformStaticData(CameraModel, bSendAnimatable, *CameraData.Cast<FLiveLinkCameraStaticData>());
+	FCameraStreamObject::UpdateSubjectCameraStaticData(CameraModel, *CameraData.Cast<FLiveLinkCameraStaticData>());
+	Provider->UpdateSubjectStaticData(SubjectName, ULiveLinkCameraRole::StaticClass(), MoveTemp(CameraData));
 }
 
 void FEditorActiveCameraStreamObject::UpdateSubjectFrame()
 {
+	if (!bIsActive)
+	{
+		return;
+	}
+
 	FBSystem System;
-	FBCamera* CameraModel = System.Scene->Renderer->CurrentCamera;
+	const FBCamera* CameraModel = System.Scene->Renderer->CurrentCamera;
 
-	TArray<FTransform> BoneTransforms;
-
-	// Single Bone
-	BoneTransforms.Emplace(MobuUtilities::UnrealTransformFromCamera(CameraModel));
-
-	TArray<FLiveLinkCurveElement> CurveData = MobuUtilities::GetAllAnimatableCurves(CameraModel);
-
-	MobuUtilities::AppendFilmbackSettings(CameraModel, CurveData);
-
-	FLiveLinkMetaData FrameMetadata;
-	FrameMetadata.StringMetaData = BaseMetadata;
-	MobuUtilities::GetSceneTimecode(FrameMetadata.SceneTime);
-
-	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, FrameMetadata, FPlatformTime::Seconds());
+	if (CameraModel)
+	{
+		FLiveLinkFrameDataStruct CameraData(FLiveLinkCameraFrameData::StaticStruct());
+		FModelStreamObject::UpdateSubjectTransformFrameData(CameraModel, bSendAnimatable, *CameraData.Cast<FLiveLinkTransformFrameData>());
+		FCameraStreamObject::UpdateSubjectCameraFrameData(CameraModel, *CameraData.Cast<FLiveLinkCameraFrameData>());
+		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(CameraData));
+	}
 }

@@ -1,4 +1,4 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -17,6 +17,7 @@
 
 #define IntToChar(input) std::to_string(input).c_str()
 #define FStringToChar(input) ((std::string)TCHAR_TO_UTF8(*input)).c_str()
+#define CharToFString(input) UTF8_TO_TCHAR(input)
 
 //! Simple input device.
 class FMobuLiveLink : public FBDevice
@@ -52,11 +53,6 @@ public:
 	void EventRenderUpdate(HISender Sender, HKEvent Event);
 
 public:
-	const FString mProviderName = TEXT("Mobu Live Link");
-	TMap<int32, TSharedPtr<IStreamObject>> StreamObjects;
-	
-	TSharedPtr<ILiveLinkProvider> LiveLinkProvider;
-
 	void UpdateStreamObjects();
 
 	void SetDirty(bool bNewDirty) { bIsDirty = bNewDirty; };
@@ -79,7 +75,22 @@ public:
 	void UpdateSampleRate();
 
 	int32 GetNextUID();
+
+	bool IsEditorCameraStreamed() const;
+	void SetEditorCameraStreamed(bool bStream);
+
+	const FString& GetProviderName() const { return CurrentProviderName; }
+	void SetProviderName(const FString& NewValue);
+
+public:
+	TMap<int32, TSharedPtr<IStreamObject>> StreamObjects;
+	TSharedPtr<ILiveLinkProvider> LiveLinkProvider;
+
 private:
+	TWeakPtr<IStreamObject> EditorCameraObject;
+
+	FString CurrentProviderName = "Mobu Live Link";
+
 	int32 NextUID = 1;
 
 	void UpdateStream(); //!< Get latest data and send to unreal

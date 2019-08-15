@@ -1,4 +1,4 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 //--- Class declaration
 #include "MobuLiveLinkDevice.h"
@@ -38,7 +38,7 @@ FString GetDeviceIconPath()
 #define MOBULIVELINK__LABEL	"UE - LiveLink"
 #define MOBULIVELINK__DESC	"UE - LiveLink"
 
-//--- FiLMBOX implementation and registration
+//--- MobuLiveLink  implementation and registration
 FBDeviceImplementation	(	MOBULIVELINK__CLASS	);
 FBRegisterDevice		(	MOBULIVELINK__NAME,
 							MOBULIVELINK__CLASS,
@@ -47,7 +47,7 @@ FBRegisterDevice		(	MOBULIVELINK__NAME,
 							FStringToChar(GetDeviceIconPath()));
 
 /************************************************
- *	FiLMBOX Constructor.
+ *	FMobuLiveLink Constructor.
  ************************************************/
 bool FMobuLiveLink::FBCreate()
 {
@@ -61,6 +61,7 @@ bool FMobuLiveLink::FBCreate()
 	SetDirty(false);
 
 	TSharedPtr<IStreamObject> EditorCamera = MakeShared<FEditorActiveCameraStreamObject>(LiveLinkProvider);
+	EditorCameraObject = EditorCamera;
 	StreamObjects.Emplace(-1, EditorCamera);
 
 	LastEvaluationTime = FPlatformTime::Seconds();
@@ -71,7 +72,7 @@ bool FMobuLiveLink::FBCreate()
 
 
 /************************************************
- *	FiLMBOX Destructor.
+ *	FMobuLiveLink Destructor.
  ************************************************/
 void FMobuLiveLink::FBDestroy()
 {
@@ -134,9 +135,9 @@ bool FMobuLiveLink::DeviceOperation(kDeviceOperations pOperation)
 
 void FMobuLiveLink::SetDeviceInformation(const char* NewDeviceInformation)
 {
-	HardwareVersionInfo.SetString("Version 1.0");
+	HardwareVersionInfo.SetString("Version 2.0");
 	Information.SetString(NewDeviceInformation);
-	Status.SetString("Epic Games 2018");
+	Status.SetString("Epic Games 2019");
 }
 
 
@@ -278,17 +279,19 @@ int32 FMobuLiveLink::GetCurrentSampleRateIndex()
 }
 
 //--- FBX load/save tags
-#define MOBULIVELINK_FBX_DATA "MobuLiveLinkFBXData"
-#define MOBULIVELINK_NUMBER_OF_DEVICE_COLUMNS 1
-#define MOBULIVELINK_NUMBER_OF_OBJECT_COLUMNS 4
+#define MOBULIVELINK_FBX_DATA "MobuLiveLinkFBXDataV3"
 
 /************************************************
 * Save Format:
-*    NumberOfDeviceColumns
-*    NumberOfDeviceColumns * DeviceColumn
-*    NumberOfObjects
-*    NumberOfObjectColumns
-*    NumberOfObjects * NumberOfObjectColumns * ObjectColumn
+*    Str Provider Name
+*    Int Stream editor camera
+*    Int sample rate index
+*    Int Number of object
+*      Str Root Name
+*      Str Subject Name
+*      Int Stream mode index
+*      Int Active status
+*      Int Animatable status
 ************************************************/
 
 /************************************************
@@ -300,33 +303,42 @@ bool FMobuLiveLink::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat
 	{
 		pFbxObject->FieldWriteBegin(MOBULIVELINK_FBX_DATA);
 		{
-			// NumberOfDeviceColumns
-			pFbxObject->FieldWriteI(MOBULIVELINK_NUMBER_OF_DEVICE_COLUMNS);
+			// Provider Name
+			pFbxObject->FieldWriteC(FStringToChar(GetProviderName()));
 
-			// NumberOfDeviceColumns * DeviceColumn
+			// Stream editor camera
+			pFbxObject->FieldWriteI(IsEditorCameraStreamed());
+
+			// Sample rate index
 			pFbxObject->FieldWriteI(GetCurrentSampleRateIndex());
 
 			// NumberOfObjects
-			pFbxObject->FieldWriteI(StreamObjects.Num());
-
-			// NumberOfObjectColumns
-			pFbxObject->FieldWriteI(MOBULIVELINK_NUMBER_OF_OBJECT_COLUMNS);
-
-			// NumberOfObjects * NumberOfObjectColumns * ObjectColumn
+			int NumberOfObjects = 0;
 			for (TPair<int32, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
 			{
 				const FString StreamObjectRootName = MapPair.Value->GetRootName();
+				if (StreamObjectRootName.Len() > 0)
+				{
+					++NumberOfObjects;
+				}
+			}
+			pFbxObject->FieldWriteI(NumberOfObjects);
 
+			for (TPair<int32, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
+			{
+				const FString StreamObjectRootName = MapPair.Value->GetRootName();
 				if (StreamObjectRootName.Len() > 0)
 				{
 					const FName StreamObjectSubjectName = MapPair.Value->GetSubjectName();
 					const int32 StreamObjectStreamingMode = MapPair.Value->GetStreamingMode();
 					const int32 StreamObjectActive = MapPair.Value->GetActiveStatus();
+					const int32 StreamAnimatableActive = MapPair.Value->GetSendAnimatableStatus();
 
 					pFbxObject->FieldWriteC(TCHAR_TO_UTF8(*StreamObjectRootName));
 					pFbxObject->FieldWriteC(TCHAR_TO_UTF8(*StreamObjectSubjectName.ToString()));
 					pFbxObject->FieldWriteI(StreamObjectStreamingMode);
 					pFbxObject->FieldWriteI(StreamObjectActive);
+					pFbxObject->FieldWriteI(StreamAnimatableActive);
 				}
 			}
 			pFbxObject->FieldWriteEnd();
@@ -344,21 +356,26 @@ bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreW
 	{
 		if (pFbxObject->FieldReadBegin(MOBULIVELINK_FBX_DATA))
 		{
-			int32 NumberOfDeviceColumns = pFbxObject->FieldReadI();
-			int32 CurrentSampleIndex = pFbxObject->FieldReadI();
-			int32 NumberOfObjects = pFbxObject->FieldReadI();
-			int32 NumberOfObjectColumns = pFbxObject->FieldReadI();
+			// Provider Name
+			SetProviderName(CharToFString(pFbxObject->FieldReadC()));
 
-			// Ensure the Sample Index is in a valid range
+			// Stream editor camera
+			const bool bStreamEditorCamera = pFbxObject->FieldReadI() != 0;
+			SetEditorCameraStreamed(bStreamEditorCamera);
+
+			// Sample rate index
+			const int32 CurrentSampleIndex = pFbxObject->FieldReadI();
 			if (CurrentSampleIndex > 0 && CurrentSampleIndex < SampleOptions.Num())
 			{
 				CurrentSampleRate = SampleOptions[CurrentSampleIndex].Value;
 				UpdateSampleRate();
 			}
 
+			// NumberOfObjects
+			const int32 NumberOfObjects = pFbxObject->FieldReadI();
+
 			for (int32 i = 0; i < NumberOfObjects; ++i)
 			{
-				int FieldsRead = 0;
 				FBComponentList FoundModels;
 				FString StreamObjectRootName(pFbxObject->FieldReadC());
 				FBFindObjectsByName(TCHAR_TO_UTF8(*StreamObjectRootName), FoundModels, true, false);
@@ -372,25 +389,20 @@ bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreW
 					FName SubjectName(pFbxObject->FieldReadC());
 					int32 StreamingMode = pFbxObject->FieldReadI();
 					
-					bool ObjectActive = true;
-					if (pFbxObject->FieldReadI() == 0)
-					{
-						ObjectActive = false;
-					}
+					bool bObjectActive = pFbxObject->FieldReadI() != 0;
+					bool bStreamOAnimatableActive = pFbxObject->FieldReadI() != 0;
 
 					FoundStreamObject->UpdateSubjectName(SubjectName);
 					FoundStreamObject->UpdateStreamingMode(StreamingMode);
-					FoundStreamObject->UpdateActiveStatus(ObjectActive);
-
-					// We have read 4 fields
-					FieldsRead += 4;
+					FoundStreamObject->UpdateActiveStatus(bObjectActive);
+					FoundStreamObject->UpdateSendAnimatableStatus(bStreamOAnimatableActive);
 				}
-
-				// If the file contains more columns than we know how to read
-				for (int Offset = FieldsRead; Offset < NumberOfObjectColumns; ++Offset)
+				else
 				{
-					// Advance to next field
 					pFbxObject->FieldReadC();
+					pFbxObject->FieldReadI();
+					pFbxObject->FieldReadI();
+					pFbxObject->FieldReadI();
 				}
 			}
 			pFbxObject->FieldReadEnd();
@@ -403,7 +415,8 @@ bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreW
 void FMobuLiveLink::StartLiveLink()
 {
 	StopLiveLink();
-	LiveLinkProvider = ILiveLinkProvider::CreateLiveLinkProvider(mProviderName);
+
+	LiveLinkProvider = ILiveLinkProvider::CreateLiveLinkProvider(GetProviderName());
 	
 	FBTrace("Live Link Started!\n");
 }
@@ -475,4 +488,35 @@ void FMobuLiveLink::TickCoreTicker()
 int32 FMobuLiveLink::GetNextUID()
 {
 	return NextUID++;
+}
+
+bool FMobuLiveLink::IsEditorCameraStreamed() const
+{
+	TSharedPtr<IStreamObject> EditorCameraObjectPin = EditorCameraObject.Pin();
+	if (EditorCameraObjectPin.IsValid())
+	{
+		return EditorCameraObjectPin->GetActiveStatus();
+	}
+	return false;
+}
+
+void FMobuLiveLink::SetEditorCameraStreamed(bool bStream)
+{
+	TSharedPtr<IStreamObject> EditorCameraObjectPin = EditorCameraObject.Pin();
+	if (EditorCameraObjectPin.IsValid())
+	{
+		EditorCameraObjectPin->UpdateActiveStatus(bStream);
+	}
+}
+
+void FMobuLiveLink::SetProviderName(const FString& NewValue)
+{
+	if (NewValue != GetProviderName())
+	{
+		CurrentProviderName = NewValue;
+		FBDestroy();
+		FBCreate();
+		SetDirty(false);
+		SetRefreshUI(true);
+	}
 }

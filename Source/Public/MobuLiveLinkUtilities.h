@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -7,12 +7,14 @@
 class MobuUtilities
 {
 public:
-	static FTransform MobuTransformToUnreal(FBMatrix& MobuTransfrom);
+	static const float InchesToMillimeters;
+
+	static FTransform MobuTransformToUnreal(FBMatrix MobuTransfrom);
+	static FColor MobuColorToUnreal(FBColor Color);
 	static FTransform UnrealTransformFromModel(FBModel* MobuModel, bool bIsGlobal = true);
-	static FTransform UnrealTransformFromCamera(FBCamera* CameraModel);
-	static TArray<FLiveLinkCurveElement> GetAllAnimatableCurves(FBModel* MobuModel, const FString& Prefix = FString());
-	static void AppendFilmbackSettings(FBCamera* CameraModel, TArray<FLiveLinkCurveElement>& CurveElements);
+	static TArray<FName> GetAllAnimatableCurveNames(FBModel* MobuModel, const FString& Prefix = FString());
+	static TArray<float> GetAllAnimatableCurveValues(FBModel* MobuModel);
 
 	static FFrameRate TimeModeToFrameRate(FBTimeMode TimeMode);
-	static void GetSceneTimecode(FQualifiedFrameTime& SceneTimecode);
+	static FQualifiedFrameTime GetSceneTimecode();
 };

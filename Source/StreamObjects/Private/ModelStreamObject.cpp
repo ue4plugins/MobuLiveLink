@@ -1,13 +1,24 @@
-﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "ModelStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
 #include <typeinfo>
 
-//// Creation / Destruction
+#include "Roles/LiveLinkAnimationRole.h"
+#include "Roles/LiveLinkAnimationTypes.h"
+#include "Roles/LiveLinkTransformRole.h"
+#include "Roles/LiveLinkTransformTypes.h"
+
+// Creation / Destruction
 FModelStreamObject::FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, bool bShouldRefresh)
-	: RootModel(ModelPointer), Provider(StreamProvider), bIsActive(true), StreamingMode(FModelStreamMode::RootOnly)
+	: RootModel(ModelPointer)
+	, Provider(StreamProvider)
+	, bIsActive(true)
+	, bSendAnimatable(false)
+	, StreamingMode(FModelStreamMode::RootOnly)
 {
+	check(ModelPointer);
+
 	FString ModelLongName(ANSI_TO_TCHAR(RootModel->LongName));
 	FString RightString;
 	ModelLongName.Split(TEXT(":"), &ModelLongName, &RightString);
@@ -21,7 +32,7 @@ FModelStreamObject::FModelStreamObject(const FBModel* ModelPointer, const TShare
 
 FModelStreamObject::~FModelStreamObject()
 {
-	Provider->ClearSubject(SubjectName);
+	Provider->RemoveSubject(SubjectName);
 };
 
 // Stream Object Interface
@@ -43,9 +54,12 @@ FName FModelStreamObject::GetSubjectName() const
 
 void FModelStreamObject::UpdateSubjectName(FName NewSubjectName)
 {
-	Provider->ClearSubject(SubjectName);
-	SubjectName = NewSubjectName;
-	Refresh();
+	if (NewSubjectName != SubjectName)
+	{
+		Provider->RemoveSubject(SubjectName);
+		SubjectName = NewSubjectName;
+		Refresh();
+	}
 };
 
 
@@ -56,10 +70,12 @@ int FModelStreamObject::GetStreamingMode() const
 
 void FModelStreamObject::UpdateStreamingMode(int NewStreamingMode)
 {
-	StreamingMode = NewStreamingMode;
-	Refresh();
+	if (StreamingMode != NewStreamingMode)
+	{
+		StreamingMode = NewStreamingMode;
+		Refresh();
+	}
 };
-
 
 bool FModelStreamObject::GetActiveStatus() const
 {
@@ -69,7 +85,20 @@ bool FModelStreamObject::GetActiveStatus() const
 void FModelStreamObject::UpdateActiveStatus(bool bIsNowActive)
 {
 	bIsActive = bIsNowActive;
-	Refresh();
+};
+
+bool FModelStreamObject::GetSendAnimatableStatus() const
+{
+	return bSendAnimatable;
+};
+
+void FModelStreamObject::UpdateSendAnimatableStatus(bool bNewSendAnimatable)
+{
+	if (bSendAnimatable != bNewSendAnimatable)
+	{
+		bSendAnimatable = bNewSendAnimatable;
+		Refresh();
+	}
 };
 
 const FBModel* FModelStreamObject::GetModelPointer() const
@@ -80,7 +109,7 @@ const FBModel* FModelStreamObject::GetModelPointer() const
 const FString FModelStreamObject::GetRootName() const
 {
 	return FString(ANSI_TO_TCHAR(RootModel->LongName));
-}
+};
 
 bool FModelStreamObject::IsValid() const
 {
@@ -90,18 +119,63 @@ bool FModelStreamObject::IsValid() const
 
 void FModelStreamObject::Refresh()
 {
-	BaseMetadata.Add(FName("Stream Type"), ModelStreamOptions[StreamingMode]);
+	if (GetStreamingMode() == FModelStreamMode::FullHierarchy)
+	{
+		FLiveLinkStaticDataStruct SkeletonData(FLiveLinkSkeletonStaticData::StaticStruct());
+		UpdateSubjectSkeletalStaticData(*SkeletonData.Cast<FLiveLinkSkeletonStaticData>());
+		Provider->UpdateSubjectStaticData(SubjectName, ULiveLinkAnimationRole::StaticClass(), MoveTemp(SkeletonData));
+	}
+	else
+	{
+		FLiveLinkStaticDataStruct TransformData(FLiveLinkTransformStaticData::StaticStruct());
+		UpdateSubjectTransformStaticData(RootModel, bSendAnimatable, *TransformData.Cast<FLiveLinkTransformStaticData>());
+		Provider->UpdateSubjectStaticData(SubjectName, ULiveLinkTransformRole::StaticClass(), MoveTemp(TransformData));
+	}
+}
 
-	BoneNames.Empty();
-	BoneParents.Empty();
-	BoneModels.Empty();
+void FModelStreamObject::UpdateSubjectFrame()
+{
+	if (!bIsActive)
+	{
+		return;
+	}
 
-	BoneNames.Emplace(RootModel->Name);
+	if (GetStreamingMode() == FModelStreamMode::FullHierarchy)
+	{
+		FLiveLinkFrameDataStruct TransformData = (FLiveLinkAnimationFrameData::StaticStruct());
+		UpdateSubjectSkeletalFrameData(*TransformData.Cast<FLiveLinkAnimationFrameData>());
+		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(TransformData));
+	}
+	else
+	{
+		FLiveLinkFrameDataStruct TransformData = (FLiveLinkTransformFrameData::StaticStruct());
+		UpdateSubjectTransformFrameData(RootModel, bSendAnimatable, *TransformData.Cast<FLiveLinkTransformFrameData>());
+		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(TransformData));
+	}
+}
+
+void FModelStreamObject::UpdateBaseStaticData(const FBModel* Model, bool bSendAnimatable, FLiveLinkBaseStaticData& InOutBaseStaticData)
+{
+	InOutBaseStaticData.PropertyNames = MobuUtilities::GetAllAnimatableCurveNames(const_cast<FBModel*>(Model), FString(ANSI_TO_TCHAR(Model->Name)));
+}
+
+void FModelStreamObject::UpdateSubjectTransformStaticData(const FBModel* Model, bool bSendAnimatable, FLiveLinkTransformStaticData& InOutTransformStatic)
+{
+	UpdateBaseStaticData(Model, bSendAnimatable, InOutTransformStatic);
+}
+
+void FModelStreamObject::UpdateSubjectSkeletalStaticData(FLiveLinkSkeletonStaticData& InOutAnimationStatic)
+{
+	UpdateBaseStaticData(RootModel, bSendAnimatable, InOutAnimationStatic);
+
+	InOutAnimationStatic.BoneNames.Reset();
+	BoneParents.Reset();
+	BoneModels.Reset();
+
+	InOutAnimationStatic.BoneNames.Emplace(RootModel->Name);
 	BoneParents.Emplace(-1);
 	BoneModels.Emplace(RootModel);
 
-	// If Streaming as Hierarchy
-	if (StreamingMode != FModelStreamMode::RootOnly)
 	{
 		TArray<TPair<int, FBModel*>> SearchList;
 		TArray<TPair<int, FBModel*>> SearchListNext;
@@ -120,7 +194,7 @@ void FModelStreamObject::Refresh()
 				{
 					FBModel* ChildModel = SearchModel->Children[ChildIdx];
 
-					BoneNames.Emplace(ChildModel->Name);
+					InOutAnimationStatic.BoneNames.Emplace(ChildModel->Name);
 					BoneParents.Emplace(ParentIdx);
 					BoneModels.Emplace(ChildModel);
 
@@ -128,45 +202,67 @@ void FModelStreamObject::Refresh()
 				}
 			}
 			SearchList = SearchListNext;
-			SearchListNext.Empty();
+			SearchListNext.Reset();
 		}
 	}
-	Provider->UpdateSubject(SubjectName, BoneNames, BoneParents);
-};
 
-void FModelStreamObject::UpdateSubjectFrame()
+	InOutAnimationStatic.BoneParents = BoneParents;
+
+	check(BoneModels.Num() == InOutAnimationStatic.BoneNames.Num());
+	if (bSendAnimatable)
+	{
+		for (int32 BoneIndex = 0; BoneIndex < BoneModels.Num(); ++BoneIndex)
+		{
+			InOutAnimationStatic.PropertyNames.Append(MobuUtilities::GetAllAnimatableCurveNames(const_cast<FBModel*>(BoneModels[BoneIndex]), InOutAnimationStatic.BoneNames[BoneIndex].ToString()));
+		}
+	}
+}
+
+void FModelStreamObject::UpdateBaseFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkBaseFrameData& InOutBaseFrameData)
 {
-	if (!bIsActive)
+	InOutBaseFrameData.WorldTime = FPlatformTime::Seconds();
+	InOutBaseFrameData.MetaData.SceneTime = MobuUtilities::GetSceneTimecode();
+	if (bSendAnimatable)
+	{
+		InOutBaseFrameData.PropertyValues = MobuUtilities::GetAllAnimatableCurveValues(const_cast<FBModel*>(Model));
+	}
+}
+
+void FModelStreamObject::UpdateSubjectTransformFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkTransformFrameData& InOutTransformFrame)
+{
+	UpdateBaseFrameData(Model, bSendAnimatable, InOutTransformFrame);
+	InOutTransformFrame.Transform = MobuUtilities::UnrealTransformFromModel(const_cast<FBModel*>(Model));
+}
+
+void FModelStreamObject::UpdateSubjectSkeletalFrameData(FLiveLinkAnimationFrameData& InOutAnimationFrame)
+{
+	UpdateBaseFrameData(RootModel, bSendAnimatable, InOutAnimationFrame);
+
+	if (BoneParents.Num() != BoneModels.Num())
 	{
 		return;
 	}
 
-	int BoneCount = BoneNames.Num();
-	TArray<FTransform> BoneTransforms;
-	BoneTransforms.SetNum(BoneCount);
+	const int32 BoneCount = BoneParents.Num();
+	InOutAnimationFrame.Transforms.SetNum(BoneCount);
 
 	TArray<FTransform> ParentInverseTransforms;
 	ParentInverseTransforms.SetNum(BoneCount);
 
-	TArray<FLiveLinkCurveElement> CurveData;
-
 	// loop through children here
 	for (int BoneIndex = 0; BoneIndex < BoneModels.Num(); ++BoneIndex)
 	{
-		BoneTransforms[BoneIndex] = MobuUtilities::UnrealTransformFromModel((FBModel*)BoneModels[BoneIndex]);
-		ParentInverseTransforms[BoneIndex] = BoneTransforms[BoneIndex].Inverse();
+		InOutAnimationFrame.Transforms[BoneIndex] = MobuUtilities::UnrealTransformFromModel(const_cast<FBModel*>(BoneModels[BoneIndex]));
+		ParentInverseTransforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex].Inverse();
 		if (BoneParents[BoneIndex] != -1)
 		{
-			BoneTransforms[BoneIndex] = BoneTransforms[BoneIndex] * ParentInverseTransforms[BoneParents[BoneIndex]];
+			InOutAnimationFrame.Transforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex] * ParentInverseTransforms[BoneParents[BoneIndex]];
 		}
 
-		// Stream all parameters of all bones as "<BoneName>:<ParameterName>"
-		CurveData.Append(MobuUtilities::GetAllAnimatableCurves((FBModel*)BoneModels[BoneIndex], BoneNames[BoneIndex].ToString()));
+		if (bSendAnimatable)
+		{
+			// Stream all parameters of all bones as "<BoneName>:<ParameterName>"
+			InOutAnimationFrame.PropertyValues.Append(MobuUtilities::GetAllAnimatableCurveValues(const_cast<FBModel*>(BoneModels[BoneIndex])));
+		}
 	}
-
-	FLiveLinkMetaData FrameMetadata;
-	FrameMetadata.StringMetaData = BaseMetadata;
-	MobuUtilities::GetSceneTimecode(FrameMetadata.SceneTime);
-
-	Provider->UpdateSubjectFrame(SubjectName, BoneTransforms, CurveData, FrameMetadata, FPlatformTime::Seconds());
-};
+}

@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "RequiredProgramMainCPPInclude.h"
 #include "MobuLiveLinkCommon.h"
@@ -22,7 +22,11 @@ bool FBLibrary::LibInit()
 {
 	GEngineLoop.PreInit(TEXT("MobuLiveLinkPlugin -Messaging"));
 
+	// ensure target platform manager is referenced early as it must be created on the main thread
+	GetTargetPlatformManager();
+
 	ProcessNewlyLoadedUObjects();
+
 	// Tell the module manager that it may now process newly-loaded UObjects when new C++ modules are loaded
 	FModuleManager::Get().StartProcessingNewlyLoadedObjects();
 	FModuleManager::Get().LoadModule(TEXT("UdpMessaging"));
