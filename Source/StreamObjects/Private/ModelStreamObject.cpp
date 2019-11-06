@@ -156,7 +156,10 @@ void FModelStreamObject::UpdateSubjectFrame()
 
 void FModelStreamObject::UpdateBaseStaticData(const FBModel* Model, bool bSendAnimatable, FLiveLinkBaseStaticData& InOutBaseStaticData)
 {
-	InOutBaseStaticData.PropertyNames = MobuUtilities::GetAllAnimatableCurveNames(const_cast<FBModel*>(Model), FString(ANSI_TO_TCHAR(Model->Name)));
+	if (bSendAnimatable)
+	{
+		InOutBaseStaticData.PropertyNames = MobuUtilities::GetAllAnimatableCurveNames(const_cast<FBModel*>(Model), FString(ANSI_TO_TCHAR(Model->Name)));
+	}
 }
 
 void FModelStreamObject::UpdateSubjectTransformStaticData(const FBModel* Model, bool bSendAnimatable, FLiveLinkTransformStaticData& InOutTransformStatic)

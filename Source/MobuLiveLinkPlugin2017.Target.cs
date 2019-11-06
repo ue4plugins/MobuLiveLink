@@ -13,8 +13,6 @@ public abstract class MobuLiveLinkPluginTargetBase : TargetRules
 		bShouldCompileAsDLL = true;
 		LinkType = TargetLinkType.Monolithic;
 
-		Tools.DotNETCommon.Log.TraceLog("MyMessage" + this.Name);
-
 		bool bIsNotForLicensees = false;
 		string NotForLicenseesFolder = bIsNotForLicensees ? "NotForLicensees" : "";
 

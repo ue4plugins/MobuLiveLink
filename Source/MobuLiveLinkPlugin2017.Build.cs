@@ -47,13 +47,10 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 
 				if (Target.Platform == UnrealTargetPlatform.Win64)  // @todo: Support other platforms?
 				{
-					PublicLibraryPaths.Add(Path.Combine(MobuInstallFolder, "OpenRealitySDK/lib/x64"));
+					string LibDir = Path.Combine(MobuInstallFolder, "OpenRealitySDK/lib/x64");
 
 					// Mobu library we're depending on
-					PublicAdditionalLibraries.AddRange(new string[]
-					{
-						"fbsdk.lib",
-					});
+					PublicAdditionalLibraries.Add(Path.Combine(LibDir, "fbsdk.lib"));
 				}
 			}
 		}
