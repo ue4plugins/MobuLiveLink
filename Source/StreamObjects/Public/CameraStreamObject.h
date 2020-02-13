@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -21,10 +21,10 @@ private:
 	};
 
 public:
-	FCameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider);
+	FCameraStreamObject(const FBModel* ModelPointer);
 	virtual const FString GetStreamOptions() const override;
-	virtual void Refresh() override;
-	virtual void UpdateSubjectFrame() override;
+	virtual void Refresh(const TSharedPtr<ILiveLinkProvider> Provider) override;
+	virtual void UpdateSubjectFrame(const TSharedPtr<ILiveLinkProvider> Provider, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime) override;
 
 public:
 	static void UpdateSubjectCameraStaticData(const FBCamera* CameraModel, FLiveLinkCameraStaticData& InOutCameraStatic);

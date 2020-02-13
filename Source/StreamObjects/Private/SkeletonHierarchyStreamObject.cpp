@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SkeletonHierarchyStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
@@ -6,11 +6,10 @@
 #include "Roles/LiveLinkAnimationRole.h"
 #include "Roles/LiveLinkAnimationTypes.h"
 
-FSkeletonHierarchyStreamObject::FSkeletonHierarchyStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	FModelStreamObject(ModelPointer, StreamProvider, false)
+FSkeletonHierarchyStreamObject::FSkeletonHierarchyStreamObject(const FBModel* ModelPointer) :
+	FModelStreamObject(ModelPointer)
 {
 	StreamingMode = FSkeletonStreamMode::SkeletonHierarchy;
-	Refresh();
 };
 
 const FString FSkeletonHierarchyStreamObject::GetStreamOptions() const
@@ -18,7 +17,7 @@ const FString FSkeletonHierarchyStreamObject::GetStreamOptions() const
 	return FString::Join(SkeletonStreamOptions, _T("~"));
 };
 
-void FSkeletonHierarchyStreamObject::Refresh() 
+void FSkeletonHierarchyStreamObject::Refresh(const TSharedPtr<ILiveLinkProvider> Provider)
 {
 	BoneNames.Empty();
 	BoneParents.Empty();
@@ -26,7 +25,7 @@ void FSkeletonHierarchyStreamObject::Refresh()
 
 	if (StreamingMode == FSkeletonStreamMode::RootOnly)
 	{
-		FModelStreamObject::Refresh();
+		FModelStreamObject::Refresh(Provider);
 	}
 	else
 	{
@@ -37,7 +36,7 @@ void FSkeletonHierarchyStreamObject::Refresh()
 	}
 };
 
-void FSkeletonHierarchyStreamObject::UpdateSubjectFrame()
+void FSkeletonHierarchyStreamObject::UpdateSubjectFrame(const TSharedPtr<ILiveLinkProvider> Provider, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime)
 {
 	if (!bIsActive)
 	{
@@ -46,12 +45,12 @@ void FSkeletonHierarchyStreamObject::UpdateSubjectFrame()
 
 	if (StreamingMode == FSkeletonStreamMode::RootOnly)
 	{
-		FModelStreamObject::UpdateSubjectFrame();
+		FModelStreamObject::UpdateSubjectFrame(Provider, WorldTime, QualifiedFrameTime);
 	}
 	else
 	{
 		FLiveLinkFrameDataStruct AnimationData(FLiveLinkAnimationFrameData::StaticStruct());
-		FModelStreamObject::UpdateBaseFrameData(RootModel, bSendAnimatable, *AnimationData.Cast<FLiveLinkAnimationFrameData>());
+		FModelStreamObject::UpdateBaseFrameData(RootModel, bSendAnimatable, WorldTime, QualifiedFrameTime, *AnimationData.Cast<FLiveLinkAnimationFrameData>());
 		UpdateSubjectFrameData(*AnimationData.Cast<FLiveLinkAnimationFrameData>());
 		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(AnimationData));
 	}
@@ -113,7 +112,6 @@ void FSkeletonHierarchyStreamObject::UpdateSubjectStaticData(FLiveLinkSkeletonSt
 	}
 }
 
-
 void FSkeletonHierarchyStreamObject::UpdateSubjectFrameData(FLiveLinkAnimationFrameData& InOutAnimationFrame)
 {
 	int BoneCount = BoneNames.Num();
@@ -126,10 +124,21 @@ void FSkeletonHierarchyStreamObject::UpdateSubjectFrameData(FLiveLinkAnimationFr
 	for (int BoneIndex = 0; BoneIndex < BoneModels.Num(); ++BoneIndex)
 	{
 		InOutAnimationFrame.Transforms[BoneIndex] = MobuUtilities::UnrealTransformFromModel(const_cast<FBModel*>(BoneModels[BoneIndex]));
-		ParentInverseTransforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex].Inverse();
-		if (BoneParents[BoneIndex] != -1)
+
+		// We seem to be getting NaNs from somewhere for some reason, so let's trap them here to prevent the engine from hitting the Ensure()
+		if (InOutAnimationFrame.Transforms[BoneIndex].ContainsNaN())
 		{
-			InOutAnimationFrame.Transforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex] * ParentInverseTransforms[BoneParents[BoneIndex]];
+			FBTrace("ERROR - Bone %s for Subject %s contains NaNs - %s\n", TCHAR_TO_UTF8(*BoneNames[BoneIndex].ToString()), TCHAR_TO_UTF8(*SubjectName.ToString()), TCHAR_TO_UTF8(*InOutAnimationFrame.Transforms[BoneIndex].ToString()));
+			ParentInverseTransforms[BoneIndex].SetIdentity();
+			InOutAnimationFrame.Transforms[BoneIndex].SetIdentity();
+		}
+		else
+		{
+			ParentInverseTransforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex].Inverse();
+			if (BoneParents[BoneIndex] != -1)
+			{
+				InOutAnimationFrame.Transforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex] * ParentInverseTransforms[BoneParents[BoneIndex]];
+			}
 		}
 
 		if (bSendAnimatable)

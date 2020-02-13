@@ -1,8 +1,15 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
 #include "MobuLiveLinkCommon.h"
+
+enum class ETimecodeMode : int32
+{
+	TimecodeMode_Local		= 0,
+	TimecodeMode_System		= 1,
+	TimecodeMode_Reference	= 2
+};
 
 class MobuUtilities
 {
@@ -16,5 +23,5 @@ public:
 	static TArray<float> GetAllAnimatableCurveValues(FBModel* MobuModel);
 
 	static FFrameRate TimeModeToFrameRate(FBTimeMode TimeMode);
-	static FQualifiedFrameTime GetSceneTimecode();
+	static FQualifiedFrameTime GetSceneTimecode(ETimecodeMode TimecodeMode);
 };

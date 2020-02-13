@@ -1,8 +1,9 @@
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
 #include "MobuLiveLinkCommon.h"
+#include "MobuLiveLinkUtilities.h"
 #include "IStreamObject.h"
 #include "Misc/CommandLine.h"
 #include "Async/TaskGraphInterfaces.h"
@@ -52,7 +53,13 @@ public:
 	void EventSceneChange(HISender Sender, HKEvent Event);
 	void EventRenderUpdate(HISender Sender, HKEvent Event);
 
+private:
+	typedef TSharedPtr<IStreamObject> StreamObjectPtr;
+
 public:
+	void AddStreamObject(int32 NewUID, StreamObjectPtr NewObject);
+	void RemoveStreamObject(int32 DeletionKey, StreamObjectPtr RemoveObject);
+	void ChangeSubjectName(StreamObjectPtr ObjectPtr, const char* NewSubjectNameStr);
 	void UpdateStreamObjects();
 
 	void SetDirty(bool bNewDirty) { bIsDirty = bNewDirty; };
@@ -78,6 +85,11 @@ public:
 
 	bool IsEditorCameraStreamed() const;
 	void SetEditorCameraStreamed(bool bStream);
+
+	ETimecodeMode	GetTimecodeMode() const;
+	int32			GetTimecodeModeAsInt() const;
+	void			SetTimecodeMode(ETimecodeMode InTimecodeMode);
+	void			SetTimecodeModeFromInt(int32 InTimecodeModeInt);
 
 	const FString& GetProviderName() const { return CurrentProviderName; }
 	void SetProviderName(const FString& NewValue);
@@ -108,6 +120,7 @@ private:
 	TMap<FBSceneChangeType, const char *> SceneChangeNameMap;
 
 	double LastEvaluationTime;
+	ETimecodeMode TimecodeMode;
 
 	void SetDeviceInformation(const char* NewDeviceInformation);
 	void TickCoreTicker();

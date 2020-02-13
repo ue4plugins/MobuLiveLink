@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "EditorActiveCameraStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
@@ -9,19 +9,15 @@
 #include "Roles/LiveLinkCameraRole.h"
 #include "Roles/LiveLinkCameraTypes.h"
 
-FEditorActiveCameraStreamObject::FEditorActiveCameraStreamObject(const TSharedPtr<ILiveLinkProvider> StreamProvider)
-	: Provider(StreamProvider)
-	, SubjectName("EditorActiveCamera")
+FEditorActiveCameraStreamObject::FEditorActiveCameraStreamObject()
+	: SubjectName("EditorActiveCamera")
 	, bIsActive(true)
 	, bSendAnimatable(false)
 {
-	Refresh();
 }
 
 FEditorActiveCameraStreamObject::~FEditorActiveCameraStreamObject()
 {
-	Provider->RemoveSubject(SubjectName);
-	FBTrace("Destroying Editor Camera\n");
 }
 
 const bool FEditorActiveCameraStreamObject::ShouldShowInUI() const
@@ -77,7 +73,6 @@ void FEditorActiveCameraStreamObject::UpdateSendAnimatableStatus(bool bNewSendAn
 	if (bSendAnimatable != bNewSendAnimatable)
 	{
 		bSendAnimatable = bNewSendAnimatable;
-		Refresh();
 	}
 };
 
@@ -99,7 +94,7 @@ bool FEditorActiveCameraStreamObject::IsValid() const
 	return true;
 }
 
-void FEditorActiveCameraStreamObject::Refresh()
+void FEditorActiveCameraStreamObject::Refresh(const TSharedPtr<ILiveLinkProvider> Provider)
 {
 	FBSystem System;
 	const FBCamera* CameraModel = System.Scene->Renderer->CurrentCamera;
@@ -110,7 +105,7 @@ void FEditorActiveCameraStreamObject::Refresh()
 	Provider->UpdateSubjectStaticData(SubjectName, ULiveLinkCameraRole::StaticClass(), MoveTemp(CameraData));
 }
 
-void FEditorActiveCameraStreamObject::UpdateSubjectFrame()
+void FEditorActiveCameraStreamObject::UpdateSubjectFrame(const TSharedPtr<ILiveLinkProvider> Provider, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime)
 {
 	if (!bIsActive)
 	{
@@ -123,7 +118,7 @@ void FEditorActiveCameraStreamObject::UpdateSubjectFrame()
 	if (CameraModel)
 	{
 		FLiveLinkFrameDataStruct CameraData(FLiveLinkCameraFrameData::StaticStruct());
-		FModelStreamObject::UpdateSubjectTransformFrameData(CameraModel, bSendAnimatable, *CameraData.Cast<FLiveLinkTransformFrameData>());
+		FModelStreamObject::UpdateSubjectTransformFrameData(CameraModel, bSendAnimatable, WorldTime, QualifiedFrameTime, *CameraData.Cast<FLiveLinkTransformFrameData>());
 		FCameraStreamObject::UpdateSubjectCameraFrameData(CameraModel, *CameraData.Cast<FLiveLinkCameraFrameData>());
 		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(CameraData));
 	}

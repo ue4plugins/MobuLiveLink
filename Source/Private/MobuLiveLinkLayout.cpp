@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MobuLiveLinkLayout.h"
 #include "MobuLiveLinkStreamObjects.h"
@@ -13,11 +13,10 @@ FBRegisterDeviceLayout(MOBULIVELINK__LAYOUT,
 	FB_DEFAULT_SDK_ICON);
 
 
-#define BoolToActiveText(input) (input ? "Active" : "Inactive")
-#define BoolToSendAnimatableText(input) (input ? "Stream" : "Inactive")
-
 bool FMobuLiveLinkLayout::FBCreate()
 {
+	FBTrace("Creating UI\n");
+
 	// Get a handle on the device.
 	LiveLinkDevice = (FMobuLiveLink*)(FBDevice*)Device;
 
@@ -37,47 +36,50 @@ bool FMobuLiveLinkLayout::FBCreate()
 void FMobuLiveLinkLayout::FBDestroy()
 {
 	// Remove device & system callbacks
-	FBTrace("Destroying\n");
+	FBTrace("Destroying UI\n");
 
 	System.OnUIIdle.Remove(this, (FBCallback)&FMobuLiveLinkLayout::EventUIIdle);
 }
 
 void FMobuLiveLinkLayout::UICreate()
 {
-	int S, W, H;		// space, height
+	int S, W, H;		// default spacing, width, height in pixels
+
 	S = 4;
-	H = 25;
+	W = 110;
+	H = 18;
 
 	const char MainLayoutName[] = "MainLayout";
+	const char ObjectSelectorLabelName[] = "ObjectSelectorLabel";
 	const char ObjectSelectorName[] = "ObjectSelector";
 	const char AddToStreamButtonName[] = "AddToStreamButton";
 	const char RemoveFromStreamButtonName[] = "RemoveFromStreamButton";
 	const char StreamEditorCameraButtonName[] = "StreamEditorCameraButton";
+	const char TimecodeModeListLabelName[] = "TimecodeModeListLabel";
+	const char TimecodeModeListName[] = "TimecodeModeList";
 	const char SampleRateLabelName[] = "SampleRateLabel";
 	const char SampleRateListName[] = "SampleRateList";
-	const char ProviderNameEditName[] = "ProviderNameEdit";
 	const char ProviderNameLabelName[] = "ProviderNameLabel";
+	const char ProviderNameTextName[] = "ProviderNameText";
+	const char ProviderNameEditButtonName[] = "ProviderNameEditButton";
 	const char StreamSpreadName[] = "StreamSpread";
 
 	// Create regions
 	AddRegion(MainLayoutName, MainLayoutName,
-		S, kFBAttachLeft, "", 1.00,
-		S, kFBAttachTop, "", 1.00,
-		-S, kFBAttachRight, "", 1.00,
-		-S, kFBAttachBottom, "", 1.00);
+		S, kFBAttachLeft, nullptr, 1.00,
+		S, kFBAttachTop, nullptr, 1.00,
+		-S, kFBAttachRight, nullptr, 1.00,
+		-S, kFBAttachBottom, nullptr, 1.00);
 
 	// Assign regions
 	SetControl(MainLayoutName, StreamLayout);
 
-	W = 110;
-	H = 18;
-
 	// Add regions
 	{
 		StreamLayout.AddRegion(SampleRateLabelName, SampleRateLabelName,
-			S, kFBAttachLeft, "", 1.00,
-			S, kFBAttachTop, "", 1.00,
-			0, kFBAttachNone, nullptr, 1.00,
+			S, kFBAttachLeft, nullptr, 1.00,
+			S, kFBAttachTop, nullptr, 1.00,
+			W * 0.65f, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
 
 		StreamLayout.AddRegion(SampleRateListName, SampleRateListName,
@@ -85,58 +87,87 @@ void FMobuLiveLinkLayout::UICreate()
 			0, kFBAttachTop, SampleRateLabelName, 1.00,
 			W, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
-
-		StreamLayout.AddRegion(ProviderNameLabelName, ProviderNameLabelName,
-			S*2.f, kFBAttachRight, SampleRateListName, 1.00,
+			
+		StreamLayout.AddRegion(TimecodeModeListLabelName, TimecodeModeListLabelName,
+			10, kFBAttachRight, SampleRateListName, 1.00,
 			0, kFBAttachTop, SampleRateListName, 1.00,
-			0, kFBAttachNone, nullptr, 1.00,
+			50, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
 
-		StreamLayout.AddRegion(ProviderNameEditName, ProviderNameEditName,
+		StreamLayout.AddRegion(TimecodeModeListName, TimecodeModeListName,
+			S, kFBAttachRight, TimecodeModeListLabelName, 1.00,
+			0, kFBAttachTop, TimecodeModeListLabelName, 1.00,
+			80, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		StreamLayout.AddRegion(ProviderNameLabelName, ProviderNameLabelName,
+			S * 4.0f, kFBAttachRight, TimecodeModeListName, 1.00,
+			0, kFBAttachTop, TimecodeModeListName, 1.00,
+			W * 0.75f, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		StreamLayout.AddRegion(ProviderNameTextName, ProviderNameTextName,
 			0, kFBAttachRight, ProviderNameLabelName, 1.00,
 			0, kFBAttachTop, ProviderNameLabelName, 1.00,
-			W*2.f, kFBAttachRight, "", 1.00,
+			W * 2.0f, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		StreamLayout.AddRegion(ProviderNameEditButtonName, ProviderNameEditButtonName,
+			S, kFBAttachRight, ProviderNameTextName, 1.00,
+			0, kFBAttachTop, ProviderNameTextName, 1.00,
+			W * 0.75f, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
 	}
 
 	{
-		StreamLayout.AddRegion(ObjectSelectorName, ObjectSelectorName,
-			S, kFBAttachLeft, "", 1.00,
+		StreamLayout.AddRegion(ObjectSelectorLabelName, ObjectSelectorLabelName,
+			S, kFBAttachLeft, nullptr, 1.00,
 			S, kFBAttachBottom, SampleRateLabelName, 1.00,
-			2 * W, kFBAttachNone, nullptr, 1.00,
+			W * 0.85f, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		StreamLayout.AddRegion(ObjectSelectorName, ObjectSelectorName,
+			0, kFBAttachRight, ObjectSelectorLabelName, 1.00,
+			0, kFBAttachTop, ObjectSelectorLabelName, 1.00,
+			W * 2.0f, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
 
 		StreamLayout.AddRegion(AddToStreamButtonName, AddToStreamButtonName,
 			S, kFBAttachRight, ObjectSelectorName, 1.00,
 			0, kFBAttachTop, ObjectSelectorName, 1.00,
-			0.75*W, kFBAttachNone, nullptr, 1.00,
+			W * 0.75f, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
 
 		StreamLayout.AddRegion(RemoveFromStreamButtonName, RemoveFromStreamButtonName,
 			S, kFBAttachRight, AddToStreamButtonName, 1.00,
 			0, kFBAttachTop, AddToStreamButtonName, 1.00,
-			0.75*W, kFBAttachNone, nullptr, 1.00,
+			W * 0.75f, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
 
 		StreamLayout.AddRegion(StreamEditorCameraButtonName, StreamEditorCameraButtonName,
-			S, kFBAttachRight, RemoveFromStreamButtonName, 1.00,
+			S * 4.0f, kFBAttachRight, RemoveFromStreamButtonName, 1.00,
 			0, kFBAttachTop, RemoveFromStreamButtonName, 1.00,
-			2*W, kFBAttachNone, nullptr, 1.00,
+			W * 1.35f, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
 	}
+
 	{
 		StreamLayout.AddRegion(StreamSpreadName, StreamSpreadName,
-			S, kFBAttachLeft, "", 1.00,
-			S, kFBAttachBottom, ObjectSelectorName, 1.00,
-			-S, kFBAttachRight, "", 1.00,
-			-S, kFBAttachBottom, "", 1.00);
+			S, kFBAttachLeft, nullptr, 1.00,
+			S, kFBAttachBottom, ObjectSelectorLabelName, 1.00,
+			-S, kFBAttachRight, nullptr, 1.00,
+			-S, kFBAttachBottom, nullptr, 1.00);
 	}
 
 	StreamLayout.SetControl(SampleRateLabelName, SampleRateListLabel);
 	StreamLayout.SetControl(SampleRateListName, SampleRateList);
+	StreamLayout.SetControl(TimecodeModeListLabelName, TimecodeModeListLabel);
+	StreamLayout.SetControl(TimecodeModeListName, TimecodeModeList);
 	StreamLayout.SetControl(ProviderNameLabelName, ProviderNameLabel);
-	StreamLayout.SetControl(ProviderNameEditName, ProviderNameEdit);
+	StreamLayout.SetControl(ProviderNameTextName, ProviderNameText);
+	StreamLayout.SetControl(ProviderNameEditButtonName, ProviderNameEditButton);
 
+	StreamLayout.SetControl(ObjectSelectorLabelName, ObjectSelectorLabel);
 	StreamLayout.SetControl(ObjectSelectorName, ObjectSelector);
 	StreamLayout.SetControl(AddToStreamButtonName, AddToStreamButton);
 	StreamLayout.SetControl(RemoveFromStreamButtonName, RemoveFromStreamButton);
@@ -147,13 +178,21 @@ void FMobuLiveLinkLayout::UICreate()
 
 void FMobuLiveLinkLayout::CreateSpreadColumns()
 {
+	int W = 100;
+
 	StreamSpread.ColumnAdd("Subject Name", 0);
+
 	StreamSpread.ColumnAdd("Stream Type", 1);
 	StreamSpread.GetColumn(1).Style = kFBCellStyleMenu;
-	StreamSpread.ColumnAdd("Status", 2);
+	StreamSpread.GetColumn(1).Width = W * 1.2f;
+
+	StreamSpread.ColumnAdd("Active", 2);
 	StreamSpread.GetColumn(2).Style = kFBCellStyle2StatesButton;
+	StreamSpread.GetColumn(2).Width = W * 0.5f;
+
 	StreamSpread.ColumnAdd("Stream Animatable", 3);
 	StreamSpread.GetColumn(3).Style = kFBCellStyle2StatesButton;
+	StreamSpread.GetColumn(3).Width = W;
 }
 
 void FMobuLiveLinkLayout::UIConfigure()
@@ -161,6 +200,8 @@ void FMobuLiveLinkLayout::UIConfigure()
 	SetBorder("MainLayout", kFBStandardBorder, false, true, 1, 0, 90, 0);
 
 	ObjectSelector.Property = &ObjectSelection;
+
+	ObjectSelectorLabel.Caption = "Subject Selector:";
 
 	AddToStreamButton.Caption = "Add";
 	AddToStreamButton.Justify = kFBTextJustifyCenter;
@@ -174,6 +215,15 @@ void FMobuLiveLinkLayout::UIConfigure()
 	StreamEditorCameraButton.Style = kFBCheckbox;
 	StreamEditorCameraButton.State = LiveLinkDevice->IsEditorCameraStreamed();
 	StreamEditorCameraButton.OnClick.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventStreamEditorCamera);
+
+	{
+		TimecodeModeList.Items.Add("Local");
+		TimecodeModeList.Items.Add("System");
+		TimecodeModeList.Items.Add("Reference");
+		TimecodeModeList.ItemIndex = LiveLinkDevice->GetTimecodeModeAsInt();
+		TimecodeModeList.OnChange.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventTimecodeModeChanged);
+		TimecodeModeListLabel.Caption = "Timecode:";
+	}
 
 	StreamSpread.Caption = "Object Root";
 	StreamSpread.MultiSelect = true;
@@ -199,9 +249,11 @@ void FMobuLiveLinkLayout::UIConfigure()
 	SampleRateListLabel.Caption = "Sample Rate:";
 	ProviderNameLabel.Caption = "Provider Name:";
 
-	//ProviderNameEdit.Caption = "Provider Name: ";
-	ProviderNameEdit.Text = FStringToChar(LiveLinkDevice->GetProviderName());
-	ProviderNameEdit.OnChange.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventProviderNameChanged);
+	ProviderNameText.Text = FStringToChar(LiveLinkDevice->GetProviderName());
+	ProviderNameText.ReadOnly = true;
+
+	ProviderNameEditButton.Caption = "Change";
+	ProviderNameEditButton.OnClick.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventEditProviderNamePopup);
 }
 
 void FMobuLiveLinkLayout::UIReset()
@@ -240,13 +292,8 @@ void FMobuLiveLinkLayout::AddSpreadRowFromStreamObject(int32 NewRowKey, StreamOb
 	StreamSpread.SetCell(NewRowKey, 0, FStringToChar(Object->GetSubjectName().ToString()));
 	StreamSpread.SetCell(NewRowKey, 1, FStringToChar(Object->GetStreamOptions()));
 	StreamSpread.SetCell(NewRowKey, 1, Object->GetStreamingMode());
-	bool bIsActive = Object->GetActiveStatus();
-	StreamSpread.SetCell(NewRowKey, 2, bIsActive);
-	StreamSpread.SetCell(NewRowKey, 2, BoolToActiveText(bIsActive));
-	bool bSendAnimatable = Object->GetSendAnimatableStatus();
-	StreamSpread.SetCell(NewRowKey, 3, bSendAnimatable);
-	StreamSpread.SetCell(NewRowKey, 3, BoolToSendAnimatableText(bSendAnimatable));
-	StreamSpread.GetColumn(3).Style = kFBCellStyle2StatesButton;
+	StreamSpread.SetCell(NewRowKey, 2, Object->GetActiveStatus());
+	StreamSpread.SetCell(NewRowKey, 3, Object->GetSendAnimatableStatus());
 }
 
 
@@ -285,14 +332,13 @@ void FMobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 		}
 		else if (!IsModelInDeviceStream(LiveLinkDevice, Model))
 		{
-			StreamObjectPtr StoreObject = StreamObjectManagement::FBModelToStreamObject(Model, LiveLinkDevice->LiveLinkProvider);
+			StreamObjectPtr StoreObject = StreamObjectManagement::FBModelToStreamObject(Model);
 			int32 NewUID = LiveLinkDevice->GetNextUID();
-			LiveLinkDevice->StreamObjects.Emplace(NewUID, StoreObject);
+
+			LiveLinkDevice->AddStreamObject(NewUID, StoreObject);
 			AddSpreadRowFromStreamObject(NewUID, StoreObject);
-			FBTrace("Added New Object to StreamObject\n");
 
 			ParentsToIgnore.Emplace(Model);
-			
 		}
 	}
 	ObjectSelection.Clear();
@@ -301,32 +347,26 @@ void FMobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 void FMobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 {
 	int SelectedCount = 0;
-	TArray<int32> DeletionObjects;
-	DeletionObjects.Reserve(LiveLinkDevice->StreamObjects.Num());
 	for (const TPair<int32, StreamObjectPtr>& MapPair : LiveLinkDevice->StreamObjects)
 	{
 		int32 RowKey = MapPair.Key;
 		bool bRowSelected = StreamSpread.GetRow(RowKey).RowSelected;
 		if (bRowSelected)
 		{
-			DeletionObjects.Emplace(RowKey);
+			LiveLinkDevice->RemoveStreamObject(RowKey, MapPair.Value);
 			SelectedCount++;
 		}
-	}
-	for (int32 DeletionKey : DeletionObjects)
-	{
-		LiveLinkDevice->StreamObjects.Remove(DeletionKey);
 	}
 	if (SelectedCount > 0)
 	{
 		UIReset();
 	}
-	FBTrace("%d items in selection!\n", SelectedCount);
+	FBTrace("Removed %d items in selection!\n", SelectedCount);
 }
 
 void FMobuLiveLinkLayout::EventStreamEditorCamera(HISender Sender, HKEvent Event)
 {
-	LiveLinkDevice->SetEditorCameraStreamed(StreamEditorCameraButton.State);
+	LiveLinkDevice->SetEditorCameraStreamed((bool)StreamEditorCameraButton.State);
 }
 
 void FMobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent Event)
@@ -345,7 +385,7 @@ void FMobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent E
 	{
 		const char* NewSubjectName;
 		StreamSpread.GetCell(SpreadEvent.Row, SpreadEvent.Column, NewSubjectName);
-		(*ObjectPtr)->UpdateSubjectName(FName(NewSubjectName));
+		LiveLinkDevice->ChangeSubjectName(*ObjectPtr, NewSubjectName);
 		break;
 	}
 	case 1: // Stream Type
@@ -359,7 +399,6 @@ void FMobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent E
 	{
 		int bIsActive;
 		StreamSpread.GetCell(SpreadEvent.Row, SpreadEvent.Column, bIsActive);
-		StreamSpread.SetCell(SpreadEvent.Row, SpreadEvent.Column, BoolToActiveText(bIsActive > 0));
 		(*ObjectPtr)->UpdateActiveStatus(bIsActive > 0);
 		break;
 	}
@@ -367,13 +406,19 @@ void FMobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent E
 	{
 		int bIsAnimatable;
 		StreamSpread.GetCell(SpreadEvent.Row, SpreadEvent.Column, bIsAnimatable);
-		StreamSpread.SetCell(SpreadEvent.Row, SpreadEvent.Column, BoolToSendAnimatableText(bIsAnimatable > 0));
 		(*ObjectPtr)->UpdateSendAnimatableStatus(bIsAnimatable > 0);
 		break;
 	}
 	default:
 		break;
 	}
+
+	LiveLinkDevice->SetDirty(true);
+}
+
+void FMobuLiveLinkLayout::EventTimecodeModeChanged(HISender Sender, HKEvent Event)
+{
+	LiveLinkDevice->SetTimecodeModeFromInt(TimecodeModeList.ItemIndex);
 }
 
 void FMobuLiveLinkLayout::EventSampleRateChange(HISender Sender, HKEvent Event)
@@ -386,9 +431,18 @@ void FMobuLiveLinkLayout::EventSampleRateChange(HISender Sender, HKEvent Event)
 	}
 }
 
-void FMobuLiveLinkLayout::EventProviderNameChanged(HISender Sender, HKEvent Event)
+void FMobuLiveLinkLayout::EventEditProviderNamePopup(HISender Sender, HKEvent Event)
 {
-	char* Value;
-	ProviderNameEdit.Text.GetData(&Value, sizeof(Value));
-	LiveLinkDevice->SetProviderName(CharToFString(Value));
+	char NewNameString[1024];
+	memset(NewNameString, 0, sizeof(NewNameString));
+	strncpy_s(NewNameString, sizeof(NewNameString) - 1, ProviderNameText.Text, sizeof(ProviderNameText.Text));
+
+	// This is scary with no buffer overrun safety on the Mobu SDK side
+	int ButtonClicked = FBMessageBoxGetUserValue("Change Provider Name", "Enter a new Live Link Provider name", NewNameString, kFBPopupString, "Accept", "Cancel");
+
+	if ((ButtonClicked == 1) && (strlen(NewNameString) > 0) && (LiveLinkDevice->GetProviderName() != CharToFString(NewNameString)))
+	{
+		ProviderNameText.Text = NewNameString;
+		LiveLinkDevice->SetProviderName(CharToFString(NewNameString));
+	}
 }

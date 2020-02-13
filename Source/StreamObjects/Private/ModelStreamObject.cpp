@@ -1,4 +1,4 @@
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "ModelStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
@@ -10,9 +10,8 @@
 #include "Roles/LiveLinkTransformTypes.h"
 
 // Creation / Destruction
-FModelStreamObject::FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, bool bShouldRefresh)
+FModelStreamObject::FModelStreamObject(const FBModel* ModelPointer)
 	: RootModel(ModelPointer)
-	, Provider(StreamProvider)
 	, bIsActive(true)
 	, bSendAnimatable(false)
 	, StreamingMode(FModelStreamMode::RootOnly)
@@ -23,16 +22,10 @@ FModelStreamObject::FModelStreamObject(const FBModel* ModelPointer, const TShare
 	FString RightString;
 	ModelLongName.Split(TEXT(":"), &ModelLongName, &RightString);
 	SubjectName = FName(*ModelLongName);
-
-	if (bShouldRefresh)
-	{
-		Refresh();
-	}
 };
 
 FModelStreamObject::~FModelStreamObject()
 {
-	Provider->RemoveSubject(SubjectName);
 };
 
 // Stream Object Interface
@@ -56,9 +49,7 @@ void FModelStreamObject::UpdateSubjectName(FName NewSubjectName)
 {
 	if (NewSubjectName != SubjectName)
 	{
-		Provider->RemoveSubject(SubjectName);
 		SubjectName = NewSubjectName;
-		Refresh();
 	}
 };
 
@@ -73,7 +64,6 @@ void FModelStreamObject::UpdateStreamingMode(int NewStreamingMode)
 	if (StreamingMode != NewStreamingMode)
 	{
 		StreamingMode = NewStreamingMode;
-		Refresh();
 	}
 };
 
@@ -97,7 +87,6 @@ void FModelStreamObject::UpdateSendAnimatableStatus(bool bNewSendAnimatable)
 	if (bSendAnimatable != bNewSendAnimatable)
 	{
 		bSendAnimatable = bNewSendAnimatable;
-		Refresh();
 	}
 };
 
@@ -117,7 +106,7 @@ bool FModelStreamObject::IsValid() const
 	return FBSystem().Scene->Components.Find((FBComponent*)RootModel) >= 0;
 };
 
-void FModelStreamObject::Refresh()
+void FModelStreamObject::Refresh(const TSharedPtr<ILiveLinkProvider> Provider)
 {
 	if (GetStreamingMode() == FModelStreamMode::FullHierarchy)
 	{
@@ -133,7 +122,7 @@ void FModelStreamObject::Refresh()
 	}
 }
 
-void FModelStreamObject::UpdateSubjectFrame()
+void FModelStreamObject::UpdateSubjectFrame(const TSharedPtr<ILiveLinkProvider> Provider, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime)
 {
 	if (!bIsActive)
 	{
@@ -143,13 +132,13 @@ void FModelStreamObject::UpdateSubjectFrame()
 	if (GetStreamingMode() == FModelStreamMode::FullHierarchy)
 	{
 		FLiveLinkFrameDataStruct TransformData = (FLiveLinkAnimationFrameData::StaticStruct());
-		UpdateSubjectSkeletalFrameData(*TransformData.Cast<FLiveLinkAnimationFrameData>());
+		UpdateSubjectSkeletalFrameData(WorldTime, QualifiedFrameTime, *TransformData.Cast<FLiveLinkAnimationFrameData>());
 		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(TransformData));
 	}
 	else
 	{
 		FLiveLinkFrameDataStruct TransformData = (FLiveLinkTransformFrameData::StaticStruct());
-		UpdateSubjectTransformFrameData(RootModel, bSendAnimatable, *TransformData.Cast<FLiveLinkTransformFrameData>());
+		UpdateSubjectTransformFrameData(RootModel, bSendAnimatable, WorldTime, QualifiedFrameTime, *TransformData.Cast<FLiveLinkTransformFrameData>());
 		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(TransformData));
 	}
 }
@@ -221,25 +210,25 @@ void FModelStreamObject::UpdateSubjectSkeletalStaticData(FLiveLinkSkeletonStatic
 	}
 }
 
-void FModelStreamObject::UpdateBaseFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkBaseFrameData& InOutBaseFrameData)
+void FModelStreamObject::UpdateBaseFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime, FLiveLinkBaseFrameData& InOutBaseFrameData)
 {
-	InOutBaseFrameData.WorldTime = FPlatformTime::Seconds();
-	InOutBaseFrameData.MetaData.SceneTime = MobuUtilities::GetSceneTimecode();
+	InOutBaseFrameData.WorldTime = WorldTime;
+	InOutBaseFrameData.MetaData.SceneTime = QualifiedFrameTime;
 	if (bSendAnimatable)
 	{
 		InOutBaseFrameData.PropertyValues = MobuUtilities::GetAllAnimatableCurveValues(const_cast<FBModel*>(Model));
 	}
 }
 
-void FModelStreamObject::UpdateSubjectTransformFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkTransformFrameData& InOutTransformFrame)
+void FModelStreamObject::UpdateSubjectTransformFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime, FLiveLinkTransformFrameData& InOutTransformFrame)
 {
-	UpdateBaseFrameData(Model, bSendAnimatable, InOutTransformFrame);
+	UpdateBaseFrameData(Model, bSendAnimatable, WorldTime, QualifiedFrameTime, InOutTransformFrame);
 	InOutTransformFrame.Transform = MobuUtilities::UnrealTransformFromModel(const_cast<FBModel*>(Model));
 }
 
-void FModelStreamObject::UpdateSubjectSkeletalFrameData(FLiveLinkAnimationFrameData& InOutAnimationFrame)
+void FModelStreamObject::UpdateSubjectSkeletalFrameData(FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime, FLiveLinkAnimationFrameData& InOutAnimationFrame)
 {
-	UpdateBaseFrameData(RootModel, bSendAnimatable, InOutAnimationFrame);
+	UpdateBaseFrameData(RootModel, bSendAnimatable, WorldTime, QualifiedFrameTime, InOutAnimationFrame);
 
 	if (BoneParents.Num() != BoneModels.Num())
 	{
@@ -256,10 +245,21 @@ void FModelStreamObject::UpdateSubjectSkeletalFrameData(FLiveLinkAnimationFrameD
 	for (int BoneIndex = 0; BoneIndex < BoneModels.Num(); ++BoneIndex)
 	{
 		InOutAnimationFrame.Transforms[BoneIndex] = MobuUtilities::UnrealTransformFromModel(const_cast<FBModel*>(BoneModels[BoneIndex]));
-		ParentInverseTransforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex].Inverse();
-		if (BoneParents[BoneIndex] != -1)
+
+		// We seem to be getting NaNs from somewhere for some reason, so let's trap them here to prevent the engine from hitting the Ensure()
+		if (InOutAnimationFrame.Transforms[BoneIndex].ContainsNaN())
 		{
-			InOutAnimationFrame.Transforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex] * ParentInverseTransforms[BoneParents[BoneIndex]];
+			FBTrace("ERROR - Subject %s contains NaNs - %s\n", TCHAR_TO_UTF8(*SubjectName.ToString()), TCHAR_TO_UTF8(*InOutAnimationFrame.Transforms[BoneIndex].ToString()));
+			ParentInverseTransforms[BoneIndex].SetIdentity();
+			InOutAnimationFrame.Transforms[BoneIndex].SetIdentity();
+		}
+		else
+		{
+			ParentInverseTransforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex].Inverse();
+			if (BoneParents[BoneIndex] != -1)
+			{
+				InOutAnimationFrame.Transforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex] * ParentInverseTransforms[BoneParents[BoneIndex]];
+			}
 		}
 
 		if (bSendAnimatable)

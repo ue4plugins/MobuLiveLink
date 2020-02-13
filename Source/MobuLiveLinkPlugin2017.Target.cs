@@ -1,4 +1,4 @@
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
 using System.Collections.Generic;
@@ -12,6 +12,7 @@ public abstract class MobuLiveLinkPluginTargetBase : TargetRules
 
 		bShouldCompileAsDLL = true;
 		LinkType = TargetLinkType.Monolithic;
+		SolutionDirectory = "Programs/LiveLink";
 
 		bool bIsNotForLicensees = false;
 		string NotForLicenseesFolder = bIsNotForLicensees ? "NotForLicensees" : "";
@@ -30,8 +31,8 @@ public abstract class MobuLiveLinkPluginTargetBase : TargetRules
 
 		string ResourcesFolder = Path.GetFullPath(Path.Combine("Programs", NotForLicenseesFolder, "MobuLiveLink/Resources"));
 		string BinariesDirectory = Path.GetFullPath(Path.Combine("../Binaries", "Win64", NotForLicenseesFolder, "MotionBuilder", InMobuVersionString));
-		string Command = "copy /a /b /y /v \"" + ResourcesFolder + "\\*.*\" \"" + BinariesDirectory + "\"";
-		PostBuildSteps.Add(Command);
+		PostBuildSteps.Add(string.Format("echo Copying {0} to {1}...", ResourcesFolder, BinariesDirectory));
+		PostBuildSteps.Add(string.Format("copy /a /b /y /v \"{0}\\*.*\" \"{1}\" 1>nul", ResourcesFolder, BinariesDirectory));
 	}
 }
 

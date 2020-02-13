@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -14,10 +14,10 @@
 class StreamObjectManagement
 {
 public:
-	static TSharedPtr<IStreamObject> FBModelToStreamObject(FBModel* SourceModel, TSharedPtr<ILiveLinkProvider> LiveLinkProvider);
+	static TSharedPtr<IStreamObject> FBModelToStreamObject(FBModel* SourceModel);
 
-	static TSharedPtr<IStreamObject> StoreCamera(const FBModel* CameraModel, TSharedPtr<ILiveLinkProvider> LiveLinkProvider);
-	static TSharedPtr<IStreamObject> StoreLight(const FBModel* LightModel, TSharedPtr<ILiveLinkProvider> LiveLinkProvider);
-	static TSharedPtr<IStreamObject> StoreGeneric(const FBModel* Model, TSharedPtr<ILiveLinkProvider> LiveLinkProvider);
-	static TSharedPtr<IStreamObject> StoreSkeleton(const FBModel* SkeletonModel, TSharedPtr<ILiveLinkProvider> LiveLinkProvider);
+	static TSharedPtr<IStreamObject> StoreCamera(const FBModel* CameraModel);
+	static TSharedPtr<IStreamObject> StoreLight(const FBModel* LightModel);
+	static TSharedPtr<IStreamObject> StoreGeneric(const FBModel* Model);
+	static TSharedPtr<IStreamObject> StoreSkeleton(const FBModel* SkeletonModel);
 };

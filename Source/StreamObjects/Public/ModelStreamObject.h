@@ -1,4 +1,4 @@
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -25,7 +25,7 @@ private:
 
 public:
 	// Construct from a FBModel*
-	FModelStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider, bool bShouldRefresh=true);
+	FModelStreamObject(const FBModel* ModelPointer);
 
 	virtual ~FModelStreamObject();
 
@@ -53,21 +53,20 @@ public:
 
 	virtual bool IsValid() const override;
 
-	virtual void Refresh() override;
-	virtual void UpdateSubjectFrame() override;
+	virtual void Refresh(const TSharedPtr<ILiveLinkProvider> Provider) override;
+	virtual void UpdateSubjectFrame(const TSharedPtr<ILiveLinkProvider> Provider, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime) override;
 
 public:
 	static void UpdateBaseStaticData(const FBModel* Model, bool bSendAnimatable, FLiveLinkBaseStaticData& InOutBaseFrameData);
-	static void UpdateBaseFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkBaseFrameData& InOutBaseFrameData);
+	static void UpdateBaseFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime, FLiveLinkBaseFrameData& InOutBaseFrameData);
 	void UpdateSubjectSkeletalStaticData(FLiveLinkSkeletonStaticData& InOutTransformFrame);
-	void UpdateSubjectSkeletalFrameData(FLiveLinkAnimationFrameData& InOutTransformFrame);
+	void UpdateSubjectSkeletalFrameData(FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime, FLiveLinkAnimationFrameData& InOutTransformFrame);
 	static void UpdateSubjectTransformStaticData(const FBModel* Model, bool bSendAnimatable, FLiveLinkTransformStaticData& InOutTransformFrame);
-	static void UpdateSubjectTransformFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkTransformFrameData& InOutTransformFrame);
+	static void UpdateSubjectTransformFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime, FLiveLinkTransformFrameData& InOutTransformFrame);
 
 protected:
 	// Stream Variables
 	const FBModel* const RootModel;
-	const TSharedPtr<ILiveLinkProvider> Provider;
 
 	FName SubjectName;
 	TArray<int32> BoneParents;

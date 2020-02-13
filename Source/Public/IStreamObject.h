@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -41,8 +41,7 @@ public:
 
 	// Interface for object streaming
 
-	virtual void Refresh() = 0;
+	virtual void Refresh(const TSharedPtr<ILiveLinkProvider> Provider) = 0;
 
-	virtual void UpdateSubjectFrame() = 0;
-
+	virtual void UpdateSubjectFrame(const TSharedPtr<ILiveLinkProvider> Provider, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime) = 0;
 };

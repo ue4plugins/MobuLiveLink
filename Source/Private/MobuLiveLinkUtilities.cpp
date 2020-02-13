@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MobuLiveLinkUtilities.h"
 
@@ -215,11 +215,41 @@ FFrameRate MobuUtilities::TimeModeToFrameRate(FBTimeMode TimeMode)
 	}
 }
 
-FQualifiedFrameTime MobuUtilities::GetSceneTimecode()
+FQualifiedFrameTime MobuUtilities::GetSceneTimecode(ETimecodeMode TimecodeMode)
 {
-	FBTime LocalTime = FBSystem().LocalTime;
+	FBTimeMode TimeMode = FBPlayerControl().GetTransportFps();
+	FFrameRate FrameRate = TimeModeToFrameRate(TimeMode);
+	FFrameTime FrameTime;
 
-	FFrameTime FrameTime((int32)LocalTime.GetFrame());
-	FFrameRate FrameRate = TimeModeToFrameRate(FBPlayerControl().GetTransportFps());
+	// Make sure we use the decimal frame time instead of the integer frame number to keep subframes
+	if (TimecodeMode == ETimecodeMode::TimecodeMode_Local)			// Local time (Take time)
+	{
+		FBTime MobuTime = FBSystem().LocalTime;
+		FrameTime = FFrameTime(FrameRate.AsFrameTime(MobuTime.GetSecondDouble()));
+	}
+	else if (TimecodeMode == ETimecodeMode::TimecodeMode_System)	// System time (PC clock)
+	{
+		const FDateTime DateTime = FDateTime::Now();
+		const FTimespan Timespan = DateTime.GetTimeOfDay();
+		FrameTime = FFrameTime(FrameRate.AsFrameTime(Timespan.GetTotalSeconds()));
+	}
+	else if (TimecodeMode == ETimecodeMode::TimecodeMode_Reference)	// Reference time (Incoming LTC)
+	{
+		FBReferenceTime MobuRefTime;
+		if (MobuRefTime.Count > 0)
+		{
+			FBTime RefTime = MobuRefTime.GetTime(MobuRefTime.ItemIndex, FBSystem().SystemTime);
+			FrameTime = FFrameTime(FrameRate.AsFrameTime(RefTime.GetSecondDouble()));
+		}
+		else
+		{
+			FBTrace("GetSceneTimecode - No Reference time sources\n");
+		}
+	}
+	else
+	{
+		FBTrace("GetSceneTimecode - Invalid timecode mode\n");
+	}
+
 	return FQualifiedFrameTime(FrameTime, FrameRate);
 }

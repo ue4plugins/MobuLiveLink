@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -8,7 +8,7 @@
 class FEditorActiveCameraStreamObject : public IStreamObject
 {
 public:
-	FEditorActiveCameraStreamObject(const TSharedPtr<ILiveLinkProvider> StreamProvider);
+	FEditorActiveCameraStreamObject();
 	virtual ~FEditorActiveCameraStreamObject();
 
 	// IStreamObject Interface
@@ -35,12 +35,10 @@ public:
 
 	bool IsValid() const final;
 
-	void Refresh() final;
-	void UpdateSubjectFrame() final;
+	void Refresh(const TSharedPtr<ILiveLinkProvider> Provider) final;
+	void UpdateSubjectFrame(const TSharedPtr<ILiveLinkProvider> Provider, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime) final;
 
 private:
-
-	const TSharedPtr<ILiveLinkProvider> Provider;
 
 	const FName SubjectName;
 	bool bIsActive;

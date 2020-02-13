@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "LightStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
@@ -10,12 +10,10 @@
 #include "Roles/LiveLinkTransformRole.h"
 #include "Roles/LiveLinkTransformTypes.h"
 
-FLightStreamObject::FLightStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	FModelStreamObject(ModelPointer, StreamProvider, false)
+FLightStreamObject::FLightStreamObject(const FBModel* ModelPointer) :
+	FModelStreamObject(ModelPointer)
 {
 	StreamingMode = FLightStreamMode::Light;
-
-	Refresh();
 };
 
 const FString FLightStreamObject::GetStreamOptions() const
@@ -23,7 +21,7 @@ const FString FLightStreamObject::GetStreamOptions() const
 	return FString::Join(LightStreamOptions, _T("~"));
 };
 
-void FLightStreamObject::Refresh()
+void FLightStreamObject::Refresh(const TSharedPtr<ILiveLinkProvider> Provider)
 {
 	if (GetStreamingMode() == FLightStreamMode::RootOnly)
 	{
@@ -46,7 +44,7 @@ void FLightStreamObject::Refresh()
 	}
 };
 
-void FLightStreamObject::UpdateSubjectFrame()
+void FLightStreamObject::UpdateSubjectFrame(const TSharedPtr<ILiveLinkProvider> Provider, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime)
 {
 	if (!bIsActive)
 	{
@@ -56,19 +54,19 @@ void FLightStreamObject::UpdateSubjectFrame()
 	if (GetStreamingMode() == FLightStreamMode::RootOnly)
 	{
 		FLiveLinkFrameDataStruct TransformData = (FLiveLinkTransformFrameData::StaticStruct());
-		UpdateSubjectTransformFrameData(RootModel, bSendAnimatable, *TransformData.Cast<FLiveLinkTransformFrameData>());
+		UpdateSubjectTransformFrameData(RootModel, bSendAnimatable, WorldTime, QualifiedFrameTime, *TransformData.Cast<FLiveLinkTransformFrameData>());
 		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(TransformData));
 	}
 	else if (GetStreamingMode() == FLightStreamMode::FullHierarchy)
 	{
 		FLiveLinkFrameDataStruct TransformData = (FLiveLinkAnimationFrameData::StaticStruct());
-		UpdateSubjectSkeletalFrameData(*TransformData.Cast<FLiveLinkAnimationFrameData>());
+		UpdateSubjectSkeletalFrameData(WorldTime, QualifiedFrameTime, *TransformData.Cast<FLiveLinkAnimationFrameData>());
 		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(TransformData));
 	}
 	else
 	{
 		FLiveLinkFrameDataStruct LightData(FLiveLinkLightFrameData::StaticStruct());
-		FModelStreamObject::UpdateSubjectTransformFrameData(const_cast<FBModel*>(RootModel), bSendAnimatable, *LightData.Cast<FLiveLinkTransformFrameData>());
+		FModelStreamObject::UpdateSubjectTransformFrameData(const_cast<FBModel*>(RootModel), bSendAnimatable, WorldTime, QualifiedFrameTime, *LightData.Cast<FLiveLinkTransformFrameData>());
 		UpdateSubjectLightFrameData(static_cast<const FBLight*>(RootModel), *LightData.Cast<FLiveLinkLightFrameData>());
 		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(LightData));
 	}

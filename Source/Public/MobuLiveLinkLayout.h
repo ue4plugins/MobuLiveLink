@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 #include <string>
@@ -25,25 +25,29 @@ public:
 	void EventRemoveFromStream(HISender Sender, HKEvent Event);
 	void EventStreamEditorCamera(HISender Sender, HKEvent Event);
 	void EventStreamSpreadCellChange(HISender Sender, HKEvent Event);
+	void EventTimecodeModeChanged(HISender Sender, HKEvent Event);
 	void EventSampleRateChange(HISender Sender, HKEvent Event);
-	void EventProviderNameChanged(HISender Sender, HKEvent Event);
+	void EventEditProviderNamePopup(HISender Sender, HKEvent Event);
 
 public:
 
 	FBLayout					StreamLayout;
 
+	FBLabel						ObjectSelectorLabel;
 	FBPropertyConnectionEditor	ObjectSelector;
 	FBButton					AddToStreamButton;
 	FBButton					RemoveFromStreamButton;
 	FBButton					StreamEditorCameraButton;
+	FBList						TimecodeModeList;
+	FBLabel						TimecodeModeListLabel;
 	FBLabel						SampleRateListLabel;
 	FBList						SampleRateList;
 	FBLabel						ProviderNameLabel;
-	FBEdit						ProviderNameEdit;
+	FBEdit						ProviderNameText;
+	FBButton					ProviderNameEditButton;
 	FBSpread					StreamSpread;
 
 private:
-
 	typedef TSharedPtr<IStreamObject> StreamObjectPtr;
 
 	void AddSpreadRowFromStreamObject(int32 NewRowKey, StreamObjectPtr Object);

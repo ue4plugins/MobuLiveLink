@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "CameraStreamObject.h"
 #include "MobuLiveLinkUtilities.h"
@@ -27,12 +27,10 @@ namespace
 	}
 }
 
-FCameraStreamObject::FCameraStreamObject(const FBModel* ModelPointer, const TSharedPtr<ILiveLinkProvider> StreamProvider) :
-	FModelStreamObject(ModelPointer, StreamProvider, false)
+FCameraStreamObject::FCameraStreamObject(const FBModel* ModelPointer) :
+	FModelStreamObject(ModelPointer)
 {
 	StreamingMode = FCameraStreamMode::Camera;
-
-	Refresh();
 }
 
 const FString FCameraStreamObject::GetStreamOptions() const
@@ -40,7 +38,7 @@ const FString FCameraStreamObject::GetStreamOptions() const
 	return FString::Join(CameraStreamOptions, _T("~"));
 };
 
-void FCameraStreamObject::Refresh() 
+void FCameraStreamObject::Refresh(const TSharedPtr<ILiveLinkProvider> Provider)
 {
 	if (GetStreamingMode() == FCameraStreamMode::RootOnly)
 	{
@@ -63,7 +61,7 @@ void FCameraStreamObject::Refresh()
 	}
 }
 
-void FCameraStreamObject::UpdateSubjectFrame() 
+void FCameraStreamObject::UpdateSubjectFrame(const TSharedPtr<ILiveLinkProvider> Provider, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime)
 {
 	if (!bIsActive)
 	{
@@ -74,20 +72,20 @@ void FCameraStreamObject::UpdateSubjectFrame()
 	{
 		FLiveLinkFrameDataStruct TransformData = (FLiveLinkTransformFrameData::StaticStruct());
 		FLiveLinkTransformFrameData& CameraTransformData = *TransformData.Cast<FLiveLinkTransformFrameData>();
-		UpdateSubjectTransformFrameData(RootModel, bSendAnimatable, CameraTransformData);
+		UpdateSubjectTransformFrameData(RootModel, bSendAnimatable, WorldTime, QualifiedFrameTime, CameraTransformData);
 		FixCameraRotation(CameraTransformData.Transform);
 		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(TransformData));
 	}
 	else if (GetStreamingMode() == FCameraStreamMode::FullHierarchy)
 	{
 		FLiveLinkFrameDataStruct TransformData = (FLiveLinkAnimationFrameData::StaticStruct());
-		UpdateSubjectSkeletalFrameData(*TransformData.Cast<FLiveLinkAnimationFrameData>());
+		UpdateSubjectSkeletalFrameData(WorldTime, QualifiedFrameTime, *TransformData.Cast<FLiveLinkAnimationFrameData>());
 		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(TransformData));
 	}
 	else
 	{
 		FLiveLinkFrameDataStruct CameraData(FLiveLinkCameraFrameData::StaticStruct());
-		FModelStreamObject::UpdateSubjectTransformFrameData(RootModel, bSendAnimatable, *CameraData.Cast<FLiveLinkTransformFrameData>());
+		FModelStreamObject::UpdateSubjectTransformFrameData(RootModel, bSendAnimatable, WorldTime, QualifiedFrameTime, *CameraData.Cast<FLiveLinkTransformFrameData>());
 		UpdateSubjectCameraFrameData(static_cast<const FBCamera*>(RootModel), *CameraData.Cast<FLiveLinkCameraFrameData>());
 		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(CameraData));
 	}

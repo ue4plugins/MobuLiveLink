@@ -1,4 +1,4 @@
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 //--- Class declaration
 #include "MobuLiveLinkDevice.h"
@@ -58,15 +58,14 @@ bool FMobuLiveLink::FBCreate()
 	StartLiveLink();
 	FBSystem().Scene->OnChange.Add(this, (FBCallback)&FMobuLiveLink::EventSceneChange);
 
-	SetDirty(false);
-
-	TSharedPtr<IStreamObject> EditorCamera = MakeShared<FEditorActiveCameraStreamObject>(LiveLinkProvider);
+	TSharedPtr<IStreamObject> EditorCamera = MakeShared<FEditorActiveCameraStreamObject>();
 	EditorCameraObject = EditorCamera;
-	StreamObjects.Emplace(-1, EditorCamera);
+	AddStreamObject(-1, EditorCamera);
 
 	LastEvaluationTime = FPlatformTime::Seconds();
+	TimecodeMode = ETimecodeMode::TimecodeMode_Local;
 
-	FBTrace("Creating Editor Camera\n");
+	FBTrace("MobuLiveLink FBCreate\n");
 	return true;
 }
 
@@ -80,9 +79,19 @@ void FMobuLiveLink::FBDestroy()
 	if (bShouldUpdateInRenderCallback)
 	{
 		FBEvaluateManager::TheOne().OnRenderingPipelineEvent.Remove(this, (FBCallback)&FMobuLiveLink::EventRenderUpdate);
+		bShouldUpdateInRenderCallback = false;
 	}
+
+	TSharedPtr<IStreamObject> EditorCameraObjectPin = EditorCameraObject.Pin();
+	if (EditorCameraObjectPin.IsValid())
+	{
+		LiveLinkProvider->RemoveSubject(EditorCameraObjectPin->GetSubjectName());
+		FBTrace("Destroying Editor Camera\n");
+	}
+
 	StreamObjects.Empty();
 	StopLiveLink();
+	FBTrace("MobuLiveLink FBDestroy\n");
 }
 
 /************************************************
@@ -94,10 +103,12 @@ void FMobuLiveLink::UpdateSampleRate()
 
 	if (CurrentSampleRate == FFrameRate(-1, 1))
 	{
-		// After Render
-		FBEvaluateManager::TheOne().OnRenderingPipelineEvent.Add(this, (FBCallback)&FMobuLiveLink::EventRenderUpdate);
-
-		bShouldUpdateInRenderCallback = true;
+		if (!bShouldUpdateInRenderCallback)
+		{
+			// After Render
+			FBEvaluateManager::TheOne().OnRenderingPipelineEvent.Add(this, (FBCallback)&FMobuLiveLink::EventRenderUpdate);
+			bShouldUpdateInRenderCallback = true;
+		}
 
 		lPeriod.SetSecondDouble(1.0);
 	}
@@ -106,9 +117,8 @@ void FMobuLiveLink::UpdateSampleRate()
 		if (bShouldUpdateInRenderCallback)
 		{
 			FBEvaluateManager::TheOne().OnRenderingPipelineEvent.Remove(this, (FBCallback)&FMobuLiveLink::EventRenderUpdate);
+			bShouldUpdateInRenderCallback = false;
 		}
-
-		bShouldUpdateInRenderCallback = false;
 
 		lPeriod.SetSecondDouble((double)CurrentSampleRate.Denominator / (double)CurrentSampleRate.Numerator);
 	}
@@ -135,9 +145,12 @@ bool FMobuLiveLink::DeviceOperation(kDeviceOperations pOperation)
 
 void FMobuLiveLink::SetDeviceInformation(const char* NewDeviceInformation)
 {
-	HardwareVersionInfo.SetString("Version 2.0");
-	Information.SetString(NewDeviceInformation);
-	Status.SetString("Epic Games 2019");
+	FString VersionString("v2.2 (");
+	VersionString += __DATE__;
+	VersionString += ")";
+	HardwareVersionInfo.SetString(FStringToChar(VersionString));
+	Information.SetString("Epic Games");
+	Status.SetString(NewDeviceInformation);
 }
 
 
@@ -215,6 +228,9 @@ void FMobuLiveLink::EventRenderUpdate(HISender Sender, HKEvent Event)
 	if (EventTiming == FBSDKNamespace::kFBGlobalEvalCallbackBeforeRender && this->Online)
 	{
 		UpdateStream();
+
+		// Count samples here since we aren't doing it in DeviceIONotify for render callback usage
+		AckOneSampleReceived();
 	}
 }
 
@@ -224,6 +240,10 @@ void FMobuLiveLink::UpdateStream()
 
 	TickCoreTicker();
 
+	FLiveLinkWorldTime WorldTime;
+	FQualifiedFrameTime QualifiedFrameTime = MobuUtilities::GetSceneTimecode(GetTimecodeMode());
+
+
 	if (IsDirty())
 	{
 		UpdateStreamObjects();
@@ -231,7 +251,7 @@ void FMobuLiveLink::UpdateStream()
 	for (TPair<int32, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
 	{
 		const TSharedPtr<IStreamObject>& StreamObject = MapPair.Value;
-		StreamObject->UpdateSubjectFrame();
+		StreamObject->UpdateSubjectFrame(LiveLinkProvider, WorldTime, QualifiedFrameTime);
 	}
 
 	mCleanUpLock.Unlock();
@@ -243,6 +263,12 @@ void FMobuLiveLink::UpdateStream()
  ************************************************/
 void FMobuLiveLink::DeviceIONotify(kDeviceIOs pAction,FBDeviceNotifyInfo &pDeviceNotifyInfo)
 {
+	// If we are tied to the render callback, then we don't want to count samples here
+	if (bShouldUpdateInRenderCallback)
+	{
+		return;
+	}
+
 	FBTime lEvalTime;
 	switch (pAction)
 	{
@@ -279,12 +305,13 @@ int32 FMobuLiveLink::GetCurrentSampleRateIndex()
 }
 
 //--- FBX load/save tags
-#define MOBULIVELINK_FBX_DATA "MobuLiveLinkFBXDataV3"
+#define MOBULIVELINK_FBX_DATA "MobuLiveLinkFBXDataV4"
 
 /************************************************
 * Save Format:
 *    Str Provider Name
 *    Int Stream editor camera
+*    Int use local or system clock to produce timecode
 *    Int sample rate index
 *    Int Number of object
 *      Str Root Name
@@ -303,11 +330,15 @@ bool FMobuLiveLink::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat
 	{
 		pFbxObject->FieldWriteBegin(MOBULIVELINK_FBX_DATA);
 		{
+			FBTrace("FbxStore started\n");
 			// Provider Name
 			pFbxObject->FieldWriteC(FStringToChar(GetProviderName()));
 
 			// Stream editor camera
 			pFbxObject->FieldWriteI(IsEditorCameraStreamed());
+
+			// Use Local or System time for timecode
+			pFbxObject->FieldWriteI(GetTimecodeModeAsInt());
 
 			// Sample rate index
 			pFbxObject->FieldWriteI(GetCurrentSampleRateIndex());
@@ -342,6 +373,7 @@ bool FMobuLiveLink::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat
 				}
 			}
 			pFbxObject->FieldWriteEnd();
+			FBTrace("FbxStore finished\n");
 		}
 	}
 	return true;
@@ -356,12 +388,17 @@ bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreW
 	{
 		if (pFbxObject->FieldReadBegin(MOBULIVELINK_FBX_DATA))
 		{
+			FBTrace("FbxRetrieve started\n");
 			// Provider Name
 			SetProviderName(CharToFString(pFbxObject->FieldReadC()));
 
 			// Stream editor camera
 			const bool bStreamEditorCamera = pFbxObject->FieldReadI() != 0;
 			SetEditorCameraStreamed(bStreamEditorCamera);
+
+			// Use Local or System time for timecode
+			const int32 ReadTimecodeModeInt = pFbxObject->FieldReadI();
+			SetTimecodeModeFromInt(ReadTimecodeModeInt);
 
 			// Sample rate index
 			const int32 CurrentSampleIndex = pFbxObject->FieldReadI();
@@ -383,8 +420,7 @@ bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreW
 				if (FoundModels.GetCount() > 0)
 				{
 					FBModel* FoundFBModel = (FBModel*)FoundModels[0];
-					TSharedPtr<IStreamObject> FoundStreamObject = StreamObjectManagement::FBModelToStreamObject(FoundFBModel, LiveLinkProvider);
-					StreamObjects.Emplace(GetNextUID(), FoundStreamObject);
+					TSharedPtr<IStreamObject> FoundStreamObject = StreamObjectManagement::FBModelToStreamObject(FoundFBModel);
 
 					FName SubjectName(pFbxObject->FieldReadC());
 					int32 StreamingMode = pFbxObject->FieldReadI();
@@ -396,6 +432,9 @@ bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreW
 					FoundStreamObject->UpdateStreamingMode(StreamingMode);
 					FoundStreamObject->UpdateActiveStatus(bObjectActive);
 					FoundStreamObject->UpdateSendAnimatableStatus(bStreamOAnimatableActive);
+
+					// Add the object last so the SubjectName is correct
+					AddStreamObject(GetNextUID(), FoundStreamObject);
 				}
 				else
 				{
@@ -406,6 +445,9 @@ bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreW
 				}
 			}
 			pFbxObject->FieldReadEnd();
+
+			SetRefreshUI(true);
+			FBTrace("FbxRetrieve finished\n");
 		}
 	}
 	return true;
@@ -414,11 +456,17 @@ bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreW
 
 void FMobuLiveLink::StartLiveLink()
 {
-	StopLiveLink();
+	if (LiveLinkProvider != nullptr)
+	{
+		FBTrace("Live Link Provider '%s' already started!\n", FStringToChar(GetProviderName()));
+		return;
+	}
 
 	LiveLinkProvider = ILiveLinkProvider::CreateLiveLinkProvider(GetProviderName());
+
+	UpdateStreamObjects();
 	
-	FBTrace("Live Link Started!\n");
+	FBTrace("Live Link Provider '%s' started!\n", FStringToChar(GetProviderName()));
 }
 
 
@@ -427,11 +475,11 @@ void FMobuLiveLink::StopLiveLink()
 	TickCoreTicker();
 	if (LiveLinkProvider.IsValid())
 	{
-		FBTrace("Provider References: %d\n", LiveLinkProvider.GetSharedReferenceCount());
+		FBTrace("LiveLinkProvider References: %d\n", LiveLinkProvider.GetSharedReferenceCount());
 		LiveLinkProvider = nullptr;
 		FBTrace("Deleting Live Link\n");
 	}
-	FBTrace("Live Link Stopped!\n");
+	FBTrace("Live Link Provider '%s' stopped!\n", FStringToChar(GetProviderName()));
 }
 
 void FMobuLiveLink::EventSceneChange(HISender Sender, HKEvent Event)
@@ -460,6 +508,41 @@ void FMobuLiveLink::EventSceneChange(HISender Sender, HKEvent Event)
 
 }
 
+void FMobuLiveLink::AddStreamObject(int32 NewUID, StreamObjectPtr NewObject)
+{
+	if (NewObject->IsValid())
+	{
+		FBTrace("Added new Subject '%s' to StreamObjects\n", FStringToChar(NewObject->GetSubjectName().ToString()));
+		StreamObjects.Emplace(NewUID, NewObject);
+
+		SetDirty(true);
+	}
+}
+
+void FMobuLiveLink::RemoveStreamObject(int32 DeletionKey, StreamObjectPtr RemoveObject)
+{
+	if (RemoveObject->IsValid())
+	{
+		FBTrace("Removed Subject '%s' from StreamObjects\n", FStringToChar(RemoveObject->GetSubjectName().ToString()));
+		StreamObjects.Remove(DeletionKey);
+		LiveLinkProvider->RemoveSubject(RemoveObject->GetSubjectName());
+
+		SetDirty(true);
+	}
+}
+
+void FMobuLiveLink::ChangeSubjectName(StreamObjectPtr ObjectPtr, const char* NewSubjectNameStr)
+{
+	if (ObjectPtr->GetSubjectName() != NewSubjectNameStr)
+	{
+		FBTrace("Subject Name changed from '%s' to '%s'\n", FStringToChar(ObjectPtr->GetSubjectName().ToString()), NewSubjectNameStr);
+		LiveLinkProvider->RemoveSubject(ObjectPtr->GetSubjectName());
+		ObjectPtr->UpdateSubjectName(FName(NewSubjectNameStr));
+
+		SetDirty(true);
+	}
+}
+
 void FMobuLiveLink::UpdateStreamObjects()
 {
 	for (TPair<int32, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
@@ -467,11 +550,11 @@ void FMobuLiveLink::UpdateStreamObjects()
 		const TSharedPtr<IStreamObject>& StreamObject = MapPair.Value;
 		if (StreamObject->IsValid())
 		{
-			StreamObject->Refresh();
+			StreamObject->Refresh(LiveLinkProvider);
 		}
 		else
 		{
-			StreamObjects.Remove(MapPair.Key);
+			FBTrace("UpdateStreamObjects - StreamObject for key %d isn't valid - this should never happen!\nPossible error in LiveLink subject list!", MapPair.Key);
 		}	
 	}
 	SetDirty(false);
@@ -509,14 +592,46 @@ void FMobuLiveLink::SetEditorCameraStreamed(bool bStream)
 	}
 }
 
+ETimecodeMode FMobuLiveLink::GetTimecodeMode() const
+{
+	return TimecodeMode;
+}
+
+int32 FMobuLiveLink::GetTimecodeModeAsInt() const
+{
+	return (int32)TimecodeMode;
+}
+
+void FMobuLiveLink::SetTimecodeMode(ETimecodeMode InTimecodeMode)
+{
+	TimecodeMode = InTimecodeMode;
+}
+
+void FMobuLiveLink::SetTimecodeModeFromInt(int32 InTimecodeModeInt)
+{
+	switch (InTimecodeModeInt)
+	{
+		case 2:		TimecodeMode = ETimecodeMode::TimecodeMode_Reference;
+					break;
+
+		case 1:		TimecodeMode = ETimecodeMode::TimecodeMode_System;
+					break;
+
+		// Intentional fallthrough
+		case 0:
+		default:	TimecodeMode = ETimecodeMode::TimecodeMode_Local;
+					break;
+	}
+}
+
 void FMobuLiveLink::SetProviderName(const FString& NewValue)
 {
 	if (NewValue != GetProviderName())
 	{
+		StopLiveLink();
 		CurrentProviderName = NewValue;
-		FBDestroy();
-		FBCreate();
-		SetDirty(false);
+		StartLiveLink();
+
 		SetRefreshUI(true);
 	}
 }
