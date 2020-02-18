@@ -238,7 +238,7 @@ FQualifiedFrameTime MobuUtilities::GetSceneTimecode(ETimecodeMode TimecodeMode)
 		FBReferenceTime MobuRefTime;
 		if (MobuRefTime.Count > 0)
 		{
-			FBTime RefTime = MobuRefTime.GetTime(MobuRefTime.ItemIndex, FBSystem().SystemTime);
+			FBTime RefTime = MobuRefTime.GetTime(MobuRefTime.ItemIndex, FBTime(0));
 			FrameTime = FFrameTime(FrameRate.AsFrameTime(RefTime.GetSecondDouble()));
 		}
 		else

@@ -145,11 +145,11 @@ bool FMobuLiveLink::DeviceOperation(kDeviceOperations pOperation)
 
 void FMobuLiveLink::SetDeviceInformation(const char* NewDeviceInformation)
 {
-	FString VersionString("v2.2 (");
+	FString VersionString("v2.3 (");
 	VersionString += __DATE__;
 	VersionString += ")";
 	HardwareVersionInfo.SetString(FStringToChar(VersionString));
-	Information.SetString("Epic Games");
+	Information.SetString("Epic Games, Inc.");
 	Status.SetString(NewDeviceInformation);
 }
 
