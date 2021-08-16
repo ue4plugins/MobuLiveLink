@@ -3,6 +3,7 @@
 #include "MobuLiveLinkLayout.h"
 #include "MobuLiveLinkStreamObjects.h"
 #include "MobuLiveLinkUtilities.h"
+#include <regex>
 #include <string>
 
 #define MOBULIVELINK__LAYOUT	FMobuLiveLinkLayout
@@ -12,6 +13,44 @@ FBRegisterDeviceLayout(MOBULIVELINK__LAYOUT,
 	MOBULIVELINK__CLASSSTR,
 	FB_DEFAULT_SDK_ICON);
 
+const char MainLayoutName[] = "MainLayout";
+
+// Removes all characters (in place) that are neither punctuation nor alphanumeric
+void StripWhitespace(char* InStr)
+{
+	const size_t Length = strlen(InStr);
+	if (Length == 0)
+	{
+		return;
+	}
+
+	size_t pos = 0;
+	for (size_t i=0; i<Length; ++i)
+	{
+		if (isalnum(InStr[i]) || ispunct(InStr[i]))
+		{
+			InStr[pos++] = InStr[i];
+		}
+	}
+
+	InStr[pos] = '\0';
+}
+
+bool IsValidIpAddressWithPort(const char* InIpAddress)
+{
+	// Regex explanation:
+	// \s*										-> Allow any amount of leading whitespace
+	// ([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])	-> Match single ip block, min 0, max 255
+	// \\.										-> Match dot
+	// {3}										-> Match 3 ip blocks with trailing dots
+	// ([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])	-> Match last ip block w/o trailing dot
+	// \\s*\\:\\s*								-> Match colon with any amount of surrounding whitespace
+	// \\d{1,5}									-> Match any number between 1 and 5 digits for the port
+	//
+	// to verify/test: https://regex101.com/r/wdePf9/1
+	std::regex IpRegex("^\\s*((([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.){3}([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5]))\\s*\\:\\s*(\\d{1,5})$");
+	return std::regex_match(InIpAddress, IpRegex);
+}
 
 bool FMobuLiveLinkLayout::FBCreate()
 {
@@ -43,108 +82,73 @@ void FMobuLiveLinkLayout::FBDestroy()
 
 void FMobuLiveLinkLayout::UICreate()
 {
-	int S, W, H;		// default spacing, width, height in pixels
+	// default spacing, width, height in pixels
+	const int S = 4;
+	const int W = 110;
+	const int H = 18;
 
-	S = 4;
-	W = 110;
-	H = 18;
+	const char* TabLayoutName = "TabPanel";
 
-	const char MainLayoutName[] = "MainLayout";
+	AddRegion(TabLayoutName, TabLayoutName,
+		S, kFBAttachLeft, "", 1.0,
+		S, kFBAttachTop, "", 1.0,
+		-S, kFBAttachRight, "", 1.0,
+		25, kFBAttachNone, NULL, 1.0);
+
+	// Create regions
+	AddRegion(MainLayoutName, MainLayoutName,
+		0, kFBAttachLeft, TabLayoutName, 1.00,
+		0, kFBAttachBottom, TabLayoutName, 1.00,
+		0, kFBAttachRight, TabLayoutName, 1.00,
+		-S, kFBAttachBottom, nullptr, 1.00);
+
+	// Assign regions
+	SetControl(TabLayoutName, TabPanel);
+	SetControl(MainLayoutName, Layouts[0]);
+
+	UICreateLayout0();
+	UICreateLayout1();
+}
+
+void FMobuLiveLinkLayout::UICreateLayout0()
+{
+	const int S = 4;
+	const int W = 110;
+	const int H = 18;
+
 	const char ObjectSelectorLabelName[] = "ObjectSelectorLabel";
 	const char ObjectSelectorName[] = "ObjectSelector";
 	const char AddToStreamButtonName[] = "AddToStreamButton";
 	const char RemoveFromStreamButtonName[] = "RemoveFromStreamButton";
 	const char StreamEditorCameraButtonName[] = "StreamEditorCameraButton";
-	const char TimecodeModeListLabelName[] = "TimecodeModeListLabel";
-	const char TimecodeModeListName[] = "TimecodeModeList";
-	const char SampleRateLabelName[] = "SampleRateLabel";
-	const char SampleRateListName[] = "SampleRateList";
-	const char ProviderNameLabelName[] = "ProviderNameLabel";
-	const char ProviderNameTextName[] = "ProviderNameText";
-	const char ProviderNameEditButtonName[] = "ProviderNameEditButton";
 	const char StreamSpreadName[] = "StreamSpread";
 
-	// Create regions
-	AddRegion(MainLayoutName, MainLayoutName,
-		S, kFBAttachLeft, nullptr, 1.00,
-		S, kFBAttachTop, nullptr, 1.00,
-		-S, kFBAttachRight, nullptr, 1.00,
-		-S, kFBAttachBottom, nullptr, 1.00);
-
-	// Assign regions
-	SetControl(MainLayoutName, StreamLayout);
-
-	// Add regions
 	{
-		StreamLayout.AddRegion(SampleRateLabelName, SampleRateLabelName,
+		Layouts[0].AddRegion(ObjectSelectorLabelName, ObjectSelectorLabelName,
 			S, kFBAttachLeft, nullptr, 1.00,
 			S, kFBAttachTop, nullptr, 1.00,
-			W * 0.65f, kFBAttachNone, nullptr, 1.00,
-			H, kFBAttachNone, nullptr, 1.00);
-
-		StreamLayout.AddRegion(SampleRateListName, SampleRateListName,
-			0, kFBAttachRight, SampleRateLabelName, 1.00,
-			0, kFBAttachTop, SampleRateLabelName, 1.00,
-			W, kFBAttachNone, nullptr, 1.00,
-			H, kFBAttachNone, nullptr, 1.00);
-			
-		StreamLayout.AddRegion(TimecodeModeListLabelName, TimecodeModeListLabelName,
-			10, kFBAttachRight, SampleRateListName, 1.00,
-			0, kFBAttachTop, SampleRateListName, 1.00,
-			50, kFBAttachNone, nullptr, 1.00,
-			H, kFBAttachNone, nullptr, 1.00);
-
-		StreamLayout.AddRegion(TimecodeModeListName, TimecodeModeListName,
-			S, kFBAttachRight, TimecodeModeListLabelName, 1.00,
-			0, kFBAttachTop, TimecodeModeListLabelName, 1.00,
-			80, kFBAttachNone, nullptr, 1.00,
-			H, kFBAttachNone, nullptr, 1.00);
-
-		StreamLayout.AddRegion(ProviderNameLabelName, ProviderNameLabelName,
-			S * 4.0f, kFBAttachRight, TimecodeModeListName, 1.00,
-			0, kFBAttachTop, TimecodeModeListName, 1.00,
-			W * 0.75f, kFBAttachNone, nullptr, 1.00,
-			H, kFBAttachNone, nullptr, 1.00);
-
-		StreamLayout.AddRegion(ProviderNameTextName, ProviderNameTextName,
-			0, kFBAttachRight, ProviderNameLabelName, 1.00,
-			0, kFBAttachTop, ProviderNameLabelName, 1.00,
-			W * 2.0f, kFBAttachNone, nullptr, 1.00,
-			H, kFBAttachNone, nullptr, 1.00);
-
-		StreamLayout.AddRegion(ProviderNameEditButtonName, ProviderNameEditButtonName,
-			S, kFBAttachRight, ProviderNameTextName, 1.00,
-			0, kFBAttachTop, ProviderNameTextName, 1.00,
-			W * 0.75f, kFBAttachNone, nullptr, 1.00,
-			H, kFBAttachNone, nullptr, 1.00);
-	}
-
-	{
-		StreamLayout.AddRegion(ObjectSelectorLabelName, ObjectSelectorLabelName,
-			S, kFBAttachLeft, nullptr, 1.00,
-			S, kFBAttachBottom, SampleRateLabelName, 1.00,
 			W * 0.85f, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
 
-		StreamLayout.AddRegion(ObjectSelectorName, ObjectSelectorName,
+		Layouts[0].AddRegion(ObjectSelectorName, ObjectSelectorName,
 			0, kFBAttachRight, ObjectSelectorLabelName, 1.00,
 			0, kFBAttachTop, ObjectSelectorLabelName, 1.00,
 			W * 2.0f, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
 
-		StreamLayout.AddRegion(AddToStreamButtonName, AddToStreamButtonName,
+		Layouts[0].AddRegion(AddToStreamButtonName, AddToStreamButtonName,
 			S, kFBAttachRight, ObjectSelectorName, 1.00,
 			0, kFBAttachTop, ObjectSelectorName, 1.00,
 			W * 0.75f, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
 
-		StreamLayout.AddRegion(RemoveFromStreamButtonName, RemoveFromStreamButtonName,
+		Layouts[0].AddRegion(RemoveFromStreamButtonName, RemoveFromStreamButtonName,
 			S, kFBAttachRight, AddToStreamButtonName, 1.00,
 			0, kFBAttachTop, AddToStreamButtonName, 1.00,
 			W * 0.75f, kFBAttachNone, nullptr, 1.00,
 			H, kFBAttachNone, nullptr, 1.00);
 
-		StreamLayout.AddRegion(StreamEditorCameraButtonName, StreamEditorCameraButtonName,
+		Layouts[0].AddRegion(StreamEditorCameraButtonName, StreamEditorCameraButtonName,
 			S * 4.0f, kFBAttachRight, RemoveFromStreamButtonName, 1.00,
 			0, kFBAttachTop, RemoveFromStreamButtonName, 1.00,
 			W * 1.35f, kFBAttachNone, nullptr, 1.00,
@@ -152,28 +156,147 @@ void FMobuLiveLinkLayout::UICreate()
 	}
 
 	{
-		StreamLayout.AddRegion(StreamSpreadName, StreamSpreadName,
+		Layouts[0].AddRegion(StreamSpreadName, StreamSpreadName,
 			S, kFBAttachLeft, nullptr, 1.00,
 			S, kFBAttachBottom, ObjectSelectorLabelName, 1.00,
 			-S, kFBAttachRight, nullptr, 1.00,
 			-S, kFBAttachBottom, nullptr, 1.00);
 	}
 
-	StreamLayout.SetControl(SampleRateLabelName, SampleRateListLabel);
-	StreamLayout.SetControl(SampleRateListName, SampleRateList);
-	StreamLayout.SetControl(TimecodeModeListLabelName, TimecodeModeListLabel);
-	StreamLayout.SetControl(TimecodeModeListName, TimecodeModeList);
-	StreamLayout.SetControl(ProviderNameLabelName, ProviderNameLabel);
-	StreamLayout.SetControl(ProviderNameTextName, ProviderNameText);
-	StreamLayout.SetControl(ProviderNameEditButtonName, ProviderNameEditButton);
+	Layouts[0].SetControl(ObjectSelectorLabelName, ObjectSelectorLabel);
+	Layouts[0].SetControl(ObjectSelectorName, ObjectSelector);
+	Layouts[0].SetControl(AddToStreamButtonName, AddToStreamButton);
+	Layouts[0].SetControl(RemoveFromStreamButtonName, RemoveFromStreamButton);
+	Layouts[0].SetControl(StreamEditorCameraButtonName, StreamEditorCameraButton);
 
-	StreamLayout.SetControl(ObjectSelectorLabelName, ObjectSelectorLabel);
-	StreamLayout.SetControl(ObjectSelectorName, ObjectSelector);
-	StreamLayout.SetControl(AddToStreamButtonName, AddToStreamButton);
-	StreamLayout.SetControl(RemoveFromStreamButtonName, RemoveFromStreamButton);
-	StreamLayout.SetControl(StreamEditorCameraButtonName, StreamEditorCameraButton);
+	Layouts[0].SetControl(StreamSpreadName, StreamSpread);
+}
 
-	StreamLayout.SetControl(StreamSpreadName, StreamSpread);
+void FMobuLiveLinkLayout::UICreateLayout1()
+{
+	const int S = 8;
+	const int W = 110;
+	const int H = 24;
+
+	const char SampleRateLabelName[] = "SampleRateLabel";
+	const char SampleRateListName[] = "SampleRateList";
+	const char ProviderNameLabelName[] = "ProviderNameLabel";
+	const char ProviderNameTextName[] = "ProviderNameText";
+	const char ProviderNameEditButtonName[] = "ProviderNameEditButton";
+	const char TimecodeModeListLabelName[] = "TimecodeModeListLabel";
+	const char TimecodeModeListName[] = "TimecodeModeList";
+	const char UnicastEndpointLabelName[] = "UnicastEndpointLabel";
+	const char UnicastEndpointAddressName[] = "UnicastEndpointAddress";
+	const char UnicastEndpointEditButtonName[] = "UnicastEndpointEditButton";
+	const char StaticEndpointLabelName[] = "StaticEndpointLabel";
+	const char StaticEndpointAddressName[] = "StaticEndpointAddress";
+	const char StaticEndpointAddButtonName[] = "StaticEndpointAddButton";
+	const char StaticEndpointRemoveButtonName[] = "StaticEndpointRemoveButton";
+
+	{
+		Layouts[1].AddRegion(SampleRateLabelName, SampleRateLabelName,
+			S, kFBAttachLeft, nullptr, 1.00,
+			S, kFBAttachTop, nullptr, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		Layouts[1].AddRegion(SampleRateListName, SampleRateListName,
+			S, kFBAttachRight, SampleRateLabelName, 1.00,
+			0, kFBAttachTop, SampleRateLabelName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+	}
+	{
+		Layouts[1].AddRegion(TimecodeModeListLabelName, TimecodeModeListLabelName,
+			S, kFBAttachLeft, nullptr, 1.00,
+			H, kFBAttachTop, SampleRateLabelName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		Layouts[1].AddRegion(TimecodeModeListName, TimecodeModeListName,
+			S, kFBAttachRight, TimecodeModeListLabelName, 1.00,
+			0, kFBAttachTop, TimecodeModeListLabelName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+	}
+	{
+		Layouts[1].AddRegion(ProviderNameLabelName, ProviderNameLabelName,
+			S, kFBAttachLeft, nullptr, 1.00,
+			H, kFBAttachTop, TimecodeModeListLabelName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		Layouts[1].AddRegion(ProviderNameTextName, ProviderNameTextName,
+			S, kFBAttachRight, ProviderNameLabelName, 1.00,
+			0, kFBAttachTop, ProviderNameLabelName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		Layouts[1].AddRegion(ProviderNameEditButtonName, ProviderNameEditButtonName,
+			S, kFBAttachRight, ProviderNameTextName, 1.00,
+			0, kFBAttachTop, ProviderNameTextName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+	}
+	{
+		Layouts[1].AddRegion(UnicastEndpointLabelName, UnicastEndpointLabelName,
+			S, kFBAttachLeft, nullptr, 1.00,
+			H, kFBAttachTop, ProviderNameLabelName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		Layouts[1].AddRegion(UnicastEndpointAddressName, UnicastEndpointAddressName,
+			S, kFBAttachRight, UnicastEndpointLabelName, 1.00,
+			0, kFBAttachTop, UnicastEndpointLabelName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		Layouts[1].AddRegion(UnicastEndpointEditButtonName, UnicastEndpointEditButtonName,
+			S, kFBAttachRight, UnicastEndpointAddressName, 1.00,
+			0, kFBAttachTop, UnicastEndpointAddressName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+	}
+	{
+		Layouts[1].AddRegion(StaticEndpointLabelName, StaticEndpointLabelName,
+			S, kFBAttachLeft, nullptr, 1.00,
+			H, kFBAttachTop, UnicastEndpointLabelName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		Layouts[1].AddRegion(StaticEndpointAddressName, StaticEndpointAddressName,
+			S, kFBAttachRight, StaticEndpointLabelName, 1.00,
+			0, kFBAttachTop, StaticEndpointLabelName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H * 3, kFBAttachNone, nullptr, 1.00);
+
+		Layouts[1].AddRegion(StaticEndpointAddButtonName, StaticEndpointAddButtonName,
+			S, kFBAttachRight, StaticEndpointAddressName, 1.00,
+			0, kFBAttachTop, StaticEndpointAddressName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+
+		Layouts[1].AddRegion(StaticEndpointRemoveButtonName, StaticEndpointRemoveButtonName,
+			S, kFBAttachRight, StaticEndpointAddressName, 1.00,
+			H, kFBAttachTop, StaticEndpointAddButtonName, 1.00,
+			W, kFBAttachNone, nullptr, 1.00,
+			H, kFBAttachNone, nullptr, 1.00);
+	}
+
+	Layouts[1].SetControl(SampleRateLabelName, SampleRateListLabel);
+	Layouts[1].SetControl(SampleRateListName, SampleRateList);
+	Layouts[1].SetControl(TimecodeModeListLabelName, TimecodeModeListLabel);
+	Layouts[1].SetControl(TimecodeModeListName, TimecodeModeList);
+	Layouts[1].SetControl(ProviderNameLabelName, ProviderNameLabel);
+	Layouts[1].SetControl(ProviderNameTextName, ProviderNameText);
+	Layouts[1].SetControl(ProviderNameEditButtonName, ProviderNameEditButton);
+	Layouts[1].SetControl(UnicastEndpointLabelName, UnicastEndpointLabel);
+	Layouts[1].SetControl(UnicastEndpointAddressName, UnicastEndpoint);
+	Layouts[1].SetControl(UnicastEndpointEditButtonName, UnicastEndpointEditButton);
+	Layouts[1].SetControl(StaticEndpointLabelName, StaticEndpointLabel);
+	Layouts[1].SetControl(StaticEndpointAddressName, StaticEndpoints);
+	Layouts[1].SetControl(StaticEndpointAddButtonName, StaticEndpointAddButton);
+	Layouts[1].SetControl(StaticEndpointRemoveButtonName, StaticEndpointRemoveButton);
 }
 
 void FMobuLiveLinkLayout::CreateSpreadColumns()
@@ -197,8 +320,17 @@ void FMobuLiveLinkLayout::CreateSpreadColumns()
 
 void FMobuLiveLinkLayout::UIConfigure()
 {
+	TabPanel.Items.SetString("Stream~Settings");
+	TabPanel.OnChange.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventTabPanelChange);
+
 	SetBorder("MainLayout", kFBStandardBorder, false, true, 1, 0, 90, 0);
 
+	UIConfigureLayout0();
+	UIConfigureLayout1();
+}
+
+void FMobuLiveLinkLayout::UIConfigureLayout0()
+{
 	ObjectSelector.Property = &ObjectSelection;
 
 	ObjectSelectorLabel.Caption = "Subject Selector:";
@@ -216,6 +348,16 @@ void FMobuLiveLinkLayout::UIConfigure()
 	StreamEditorCameraButton.State = LiveLinkDevice->IsEditorCameraStreamed();
 	StreamEditorCameraButton.OnClick.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventStreamEditorCamera);
 
+	StreamSpread.Caption = "Object Root";
+	StreamSpread.MultiSelect = true;
+
+	CreateSpreadColumns();
+
+	StreamSpread.OnCellChange.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventStreamSpreadCellChange);
+}
+
+void FMobuLiveLinkLayout::UIConfigureLayout1()
+{
 	{
 		TimecodeModeList.Items.Add("Local");
 		TimecodeModeList.Items.Add("System");
@@ -225,15 +367,8 @@ void FMobuLiveLinkLayout::UIConfigure()
 		TimecodeModeListLabel.Caption = "Timecode:";
 	}
 
-	StreamSpread.Caption = "Object Root";
-	StreamSpread.MultiSelect = true;
-
-	CreateSpreadColumns();
-
-	StreamSpread.OnCellChange.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventStreamSpreadCellChange);
-
 	int CurrentSampleIndex = 0;
-	for (int SampleOptionIdx=0; SampleOptionIdx < LiveLinkDevice->SampleOptions.Num(); ++SampleOptionIdx)
+	for (int SampleOptionIdx = 0; SampleOptionIdx < LiveLinkDevice->SampleOptions.Num(); ++SampleOptionIdx)
 	{
 		const TPair<FString, FFrameRate>& SampleOption = LiveLinkDevice->SampleOptions[SampleOptionIdx];
 		SampleRateList.Items.Add(FStringToChar(SampleOption.Key));
@@ -254,6 +389,21 @@ void FMobuLiveLinkLayout::UIConfigure()
 
 	ProviderNameEditButton.Caption = "Change";
 	ProviderNameEditButton.OnClick.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventEditProviderNamePopup);
+
+	UnicastEndpointLabel.Caption = "Unicast Endpoint:";
+	UnicastEndpoint.Text = FStringToChar(LiveLinkDevice->GetUnicastEndpoint());
+	UnicastEndpoint.ReadOnly = true;
+	UnicastEndpointEditButton.Caption = "Change";
+	UnicastEndpointEditButton.OnClick.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventChangeUnicastEndpoint);
+
+	StaticEndpointLabel.Caption = "Static Endpoints:";
+	StaticEndpoints.Style = kFBVerticalList;
+
+	StaticEndpointAddButton.Caption = "Add";
+	StaticEndpointAddButton.OnClick.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventAddStaticEndpoint);
+
+	StaticEndpointRemoveButton.Caption = "Remove";
+	StaticEndpointRemoveButton.OnClick.Add(this, (FBCallback)&FMobuLiveLinkLayout::EventRemoveStaticEndpoint);
 }
 
 void FMobuLiveLinkLayout::UIReset()
@@ -265,6 +415,15 @@ void FMobuLiveLinkLayout::UIReset()
 	{
 		AddSpreadRowFromStreamObject(MapPair.Key, MapPair.Value);
 	}
+	
+	UnicastEndpoint.Text = FStringToChar(LiveLinkDevice->GetUnicastEndpoint());
+	StaticEndpoints.Items.Clear();
+	const TArray<FString>& Endpoints = LiveLinkDevice->GetStaticEndpoints();
+	for (const FString& Endpoint : Endpoints)
+	{
+		StaticEndpoints.Items.Add(FStringToChar(Endpoint));
+	}
+
 	LiveLinkDevice->SetRefreshUI(false);
 }
 
@@ -347,20 +506,30 @@ void FMobuLiveLinkLayout::EventAddToStream(HISender Sender, HKEvent Event)
 void FMobuLiveLinkLayout::EventRemoveFromStream(HISender Sender, HKEvent Event)
 {
 	int SelectedCount = 0;
+
+	decltype(LiveLinkDevice->StreamObjects) StreamObjectsToRemove;
+
 	for (const TPair<int32, StreamObjectPtr>& MapPair : LiveLinkDevice->StreamObjects)
 	{
 		int32 RowKey = MapPair.Key;
 		bool bRowSelected = StreamSpread.GetRow(RowKey).RowSelected;
 		if (bRowSelected)
 		{
-			LiveLinkDevice->RemoveStreamObject(RowKey, MapPair.Value);
+			StreamObjectsToRemove.Add(MapPair);
 			SelectedCount++;
 		}
 	}
+
+	for (const auto& MapPair : StreamObjectsToRemove)
+	{
+		LiveLinkDevice->RemoveStreamObject(MapPair.Key, MapPair.Value);
+	}
+
 	if (SelectedCount > 0)
 	{
 		UIReset();
 	}
+
 	FBTrace("Removed %d items in selection!\n", SelectedCount);
 }
 
@@ -416,6 +585,19 @@ void FMobuLiveLinkLayout::EventStreamSpreadCellChange(HISender Sender, HKEvent E
 	LiveLinkDevice->SetDirty(true);
 }
 
+void FMobuLiveLinkLayout::EventTabPanelChange(HISender pSender, HKEvent pEvent)
+{
+	switch (TabPanel.ItemIndex)
+	{
+		case 0:
+			SetControl("MainLayout", Layouts[0]);
+		break;
+		case 1:
+			SetControl("MainLayout", Layouts[1]);
+		break;
+	}
+}
+
 void FMobuLiveLinkLayout::EventTimecodeModeChanged(HISender Sender, HKEvent Event)
 {
 	LiveLinkDevice->SetTimecodeModeFromInt(TimecodeModeList.ItemIndex);
@@ -444,5 +626,90 @@ void FMobuLiveLinkLayout::EventEditProviderNamePopup(HISender Sender, HKEvent Ev
 	{
 		ProviderNameText.Text = NewNameString;
 		LiveLinkDevice->SetProviderName(CharToFString(NewNameString));
+	}
+}
+
+void FMobuLiveLinkLayout::EventChangeUnicastEndpoint(HISender Sender, HKEvent Event)
+{
+	char NewUnicastString[1024];
+	memset(NewUnicastString, 0, sizeof(NewUnicastString));
+	strncpy_s(NewUnicastString, sizeof(NewUnicastString) - 1, UnicastEndpoint.Text, sizeof(UnicastEndpoint.Text));
+
+	const std::string Description("Enter a new Unicast Endpoint address to select which nic to use.");
+	const std::string FormatHint("\n\nThe entered address was not formatted correctly. The format must match this pattern:\nIpAddress:Port");
+	int ButtonClicked = 0;
+	bool bTryAgain = false;
+
+	do
+	{
+		std::string Message(Description);
+		if (bTryAgain)
+		{
+			Message += FormatHint;
+		}
+
+		// This is scary with no buffer overrun safety on the Mobu SDK side
+		ButtonClicked = FBMessageBoxGetUserValue("Change Unicast Endpoint", Message.c_str(), NewUnicastString, kFBPopupString, "Accept", "Cancel");
+		StripWhitespace(NewUnicastString);
+		bTryAgain = (ButtonClicked == 1) && !IsValidIpAddressWithPort(NewUnicastString);
+	} while (bTryAgain);
+
+	if ((ButtonClicked == 1) && (strlen(NewUnicastString) > 0) && (LiveLinkDevice->GetUnicastEndpoint() != CharToFString(NewUnicastString)))
+	{
+		UnicastEndpoint.Text = NewUnicastString;
+		LiveLinkDevice->SetUnicastEndpoint(CharToFString(NewUnicastString));
+	}
+}
+
+void FMobuLiveLinkLayout::EventAddStaticEndpoint(HISender Sender, HKEvent Event)
+{
+	char NewAddressString[1024] = "0.0.0.0:6666";
+
+	const std::string Description("Enter a new Static Endpoint Address of the PC running UE4.");
+	const std::string FormatHint("\n\nThe entered address was not formatted correctly. The format must match this pattern:\nIpAddress:Port");
+	int ButtonClicked = 0;
+	bool bTryAgain = false;
+
+	do
+	{
+		std::string Message(Description);
+		if (bTryAgain)
+		{
+			Message += FormatHint;
+		}
+		// This is scary with no buffer overrun safety on the Mobu SDK side
+		ButtonClicked = FBMessageBoxGetUserValue("Add StaticEndpoint", Message.c_str(), NewAddressString, kFBPopupString, "Accept", "Cancel");
+		StripWhitespace(NewAddressString);
+		bTryAgain = (ButtonClicked == 1) && !IsValidIpAddressWithPort(NewAddressString);
+	} while (bTryAgain);
+
+	if ((ButtonClicked == 1) && (strlen(NewAddressString) > 0))
+	{
+		const int ExistingIndex = StaticEndpoints.Items.IndexOf(NewAddressString);
+		if (ExistingIndex == -1) // avoid duplicates
+		{
+			StaticEndpoints.Items.Add(NewAddressString);
+			if (!LiveLinkDevice->AddStaticEndpoint(CharToFString(NewAddressString)))
+			{
+				FBMessageBox("Error", "Could not add Static Endpoint!", "OK");
+			}
+		}
+	}
+}
+
+void FMobuLiveLinkLayout::EventRemoveStaticEndpoint(HISender Sender, HKEvent Event)
+{
+	if (StaticEndpoints.ItemIndex == -1)
+	{
+		return;
+	}
+
+	if (!LiveLinkDevice->RemoveStaticEndpoint(StaticEndpoints.Items[StaticEndpoints.ItemIndex]))
+	{
+		FBMessageBox("Error", "Could not remove Static Endpoint!", "OK");
+	}
+	else
+	{
+		StaticEndpoints.Items.RemoveAt(StaticEndpoints.ItemIndex);
 	}
 }

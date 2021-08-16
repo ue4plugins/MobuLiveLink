@@ -56,6 +56,8 @@ public:
 private:
 	typedef TSharedPtr<IStreamObject> StreamObjectPtr;
 
+	void FbxRetrieveV4(FBFbxObject* FbxObject, kFbxObjectStore StoreWhat); //!< Retrieve from FBX file stored with the previous version.
+
 public:
 	void AddStreamObject(int32 NewUID, StreamObjectPtr NewObject);
 	void RemoveStreamObject(int32 DeletionKey, StreamObjectPtr RemoveObject);
@@ -94,6 +96,13 @@ public:
 	const FString& GetProviderName() const { return CurrentProviderName; }
 	void SetProviderName(const FString& NewValue);
 
+	bool AddStaticEndpoint(const FString& InEndpoint);
+	const TArray<FString>& GetStaticEndpoints() const { return StaticEndpoints; }
+	bool RemoveStaticEndpoint(const FString& InEndpoint);
+
+	FString GetUnicastEndpoint() const;
+	void SetUnicastEndpoint(const FString& InEndpoint);
+
 public:
 	TMap<int32, TSharedPtr<IStreamObject>> StreamObjects;
 	TSharedPtr<ILiveLinkProvider> LiveLinkProvider;
@@ -102,6 +111,8 @@ private:
 	TWeakPtr<IStreamObject> EditorCameraObject;
 
 	FString CurrentProviderName = "Mobu Live Link";
+	
+	TArray<FString> StaticEndpoints;
 
 	int32 NextUID = 1;
 
@@ -109,10 +120,10 @@ private:
 
 	int32 GetCurrentSampleRateIndex();
 
-	bool bIsDirty;
-	bool bShouldRefreshUI;
+	bool bIsDirty = false;
+	bool bShouldRefreshUI = false;
 
-	bool bShouldUpdateInRenderCallback; //!< Whether to update after render or to update in device evaluation
+	bool bShouldUpdateInRenderCallback = false; //!< Whether to update after render or to update in device evaluation
 
 	FBDeviceSamplingMode SamplingType;
 	FBFastLock mCleanUpLock;

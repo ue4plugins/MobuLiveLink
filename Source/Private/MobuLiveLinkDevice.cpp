@@ -12,6 +12,11 @@
 //--- Allow ticking of the engine
 #include "Containers/Ticker.h"
 
+//--- UDP Network configuration
+#include "Features/IModularFeatures.h"
+#include "INetworkMessagingExtension.h"
+#include "Shared/UdpMessagingSettings.h"
+
 //--- For getting the dll location on disk
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include <string>
@@ -145,7 +150,7 @@ bool FMobuLiveLink::DeviceOperation(kDeviceOperations pOperation)
 
 void FMobuLiveLink::SetDeviceInformation(const char* NewDeviceInformation)
 {
-	FString VersionString("v2.3 (");
+	FString VersionString("v2.5.0 (");
 	VersionString += __DATE__;
 	VersionString += ")";
 	HardwareVersionInfo.SetString(FStringToChar(VersionString));
@@ -305,7 +310,8 @@ int32 FMobuLiveLink::GetCurrentSampleRateIndex()
 }
 
 //--- FBX load/save tags
-#define MOBULIVELINK_FBX_DATA "MobuLiveLinkFBXDataV4"
+#define MOBULIVELINK_FBX_DATA_V4 "MobuLiveLinkFBXDataV4"
+#define MOBULIVELINK_FBX_DATA "MobuLiveLinkFBXDataV5"
 
 /************************************************
 * Save Format:
@@ -313,12 +319,15 @@ int32 FMobuLiveLink::GetCurrentSampleRateIndex()
 *    Int Stream editor camera
 *    Int use local or system clock to produce timecode
 *    Int sample rate index
+*    Str Unicast Endpoint
 *    Int Number of object
 *      Str Root Name
 *      Str Subject Name
 *      Int Stream mode index
 *      Int Active status
 *      Int Animatable status
+*    Int Number of Static Endpoints
+*      Str Static Endpoint
 ************************************************/
 
 /************************************************
@@ -372,6 +381,17 @@ bool FMobuLiveLink::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat
 					pFbxObject->FieldWriteI(StreamAnimatableActive);
 				}
 			}
+
+			// Unicast endpoint
+			pFbxObject->FieldWriteC(FStringToChar(GetUnicastEndpoint()));
+
+			// Static endpoints
+			pFbxObject->FieldWriteI(StaticEndpoints.Num());
+			for (const FString& Endpoint: StaticEndpoints)
+			{
+				pFbxObject->FieldWriteC(FStringToChar(Endpoint));
+			}
+
 			pFbxObject->FieldWriteEnd();
 			FBTrace("FbxStore finished\n");
 		}
@@ -382,75 +402,100 @@ bool FMobuLiveLink::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat
 /************************************************
 *	Retrieve data from FBX.
 ************************************************/
-bool FMobuLiveLink::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
+bool FMobuLiveLink::FbxRetrieve(FBFbxObject* FbxObject, kFbxObjectStore StoreWhat)
 {
-	if (pStoreWhat & kAttributes)
+	if (StoreWhat & kAttributes)
 	{
-		if (pFbxObject->FieldReadBegin(MOBULIVELINK_FBX_DATA))
+		if (FbxObject->FieldReadBegin(MOBULIVELINK_FBX_DATA_V4))
 		{
 			FBTrace("FbxRetrieve started\n");
-			// Provider Name
-			SetProviderName(CharToFString(pFbxObject->FieldReadC()));
+			FbxRetrieveV4(FbxObject, StoreWhat);
 
-			// Stream editor camera
-			const bool bStreamEditorCamera = pFbxObject->FieldReadI() != 0;
-			SetEditorCameraStreamed(bStreamEditorCamera);
+			FbxObject->FieldReadEnd();
 
-			// Use Local or System time for timecode
-			const int32 ReadTimecodeModeInt = pFbxObject->FieldReadI();
-			SetTimecodeModeFromInt(ReadTimecodeModeInt);
+			SetRefreshUI(true);
+			FBTrace("FbxRetrieve finished\n");
+		}
+		else if (FbxObject->FieldReadBegin(MOBULIVELINK_FBX_DATA))
+		{
+			FBTrace("FbxRetrieve started\n");
+			FbxRetrieveV4(FbxObject, StoreWhat);
 
-			// Sample rate index
-			const int32 CurrentSampleIndex = pFbxObject->FieldReadI();
-			if (CurrentSampleIndex > 0 && CurrentSampleIndex < SampleOptions.Num())
+			// Unicast endpoint
+			SetUnicastEndpoint(CharToFString(FbxObject->FieldReadC()));
+
+			// Static endpoints
+			const int StaticEndpointNum = FbxObject->FieldReadI();
+			for (int i = 0; i < StaticEndpointNum; ++i)
 			{
-				CurrentSampleRate = SampleOptions[CurrentSampleIndex].Value;
-				UpdateSampleRate();
+				AddStaticEndpoint(CharToFString(FbxObject->FieldReadC()));
 			}
-
-			// NumberOfObjects
-			const int32 NumberOfObjects = pFbxObject->FieldReadI();
-
-			for (int32 i = 0; i < NumberOfObjects; ++i)
-			{
-				FBComponentList FoundModels;
-				FString StreamObjectRootName(pFbxObject->FieldReadC());
-				FBFindObjectsByName(TCHAR_TO_UTF8(*StreamObjectRootName), FoundModels, true, false);
-
-				if (FoundModels.GetCount() > 0)
-				{
-					FBModel* FoundFBModel = (FBModel*)FoundModels[0];
-					TSharedPtr<IStreamObject> FoundStreamObject = StreamObjectManagement::FBModelToStreamObject(FoundFBModel);
-
-					FName SubjectName(pFbxObject->FieldReadC());
-					int32 StreamingMode = pFbxObject->FieldReadI();
-					
-					bool bObjectActive = pFbxObject->FieldReadI() != 0;
-					bool bStreamOAnimatableActive = pFbxObject->FieldReadI() != 0;
-
-					FoundStreamObject->UpdateSubjectName(SubjectName);
-					FoundStreamObject->UpdateStreamingMode(StreamingMode);
-					FoundStreamObject->UpdateActiveStatus(bObjectActive);
-					FoundStreamObject->UpdateSendAnimatableStatus(bStreamOAnimatableActive);
-
-					// Add the object last so the SubjectName is correct
-					AddStreamObject(GetNextUID(), FoundStreamObject);
-				}
-				else
-				{
-					pFbxObject->FieldReadC();
-					pFbxObject->FieldReadI();
-					pFbxObject->FieldReadI();
-					pFbxObject->FieldReadI();
-				}
-			}
-			pFbxObject->FieldReadEnd();
+			FbxObject->FieldReadEnd();
 
 			SetRefreshUI(true);
 			FBTrace("FbxRetrieve finished\n");
 		}
 	}
 	return true;
+}
+
+void FMobuLiveLink::FbxRetrieveV4(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
+{
+	// Provider Name
+	SetProviderName(CharToFString(pFbxObject->FieldReadC()));
+
+	// Stream editor camera
+	const bool bStreamEditorCamera = pFbxObject->FieldReadI() != 0;
+	SetEditorCameraStreamed(bStreamEditorCamera);
+
+	// Use Local or System time for timecode
+	const int32 ReadTimecodeModeInt = pFbxObject->FieldReadI();
+	SetTimecodeModeFromInt(ReadTimecodeModeInt);
+
+	// Sample rate index
+	const int32 CurrentSampleIndex = pFbxObject->FieldReadI();
+	if (CurrentSampleIndex > 0 && CurrentSampleIndex < SampleOptions.Num())
+	{
+		CurrentSampleRate = SampleOptions[CurrentSampleIndex].Value;
+		UpdateSampleRate();
+	}
+
+	// NumberOfObjects
+	const int32 NumberOfObjects = pFbxObject->FieldReadI();
+
+	for (int32 i = 0; i < NumberOfObjects; ++i)
+	{
+		FBComponentList FoundModels;
+		FString StreamObjectRootName(pFbxObject->FieldReadC());
+		FBFindObjectsByName(TCHAR_TO_UTF8(*StreamObjectRootName), FoundModels, true, false);
+
+		if (FoundModels.GetCount() > 0)
+		{
+			FBModel* FoundFBModel = (FBModel*)FoundModels[0];
+			TSharedPtr<IStreamObject> FoundStreamObject = StreamObjectManagement::FBModelToStreamObject(FoundFBModel);
+
+			FName SubjectName(pFbxObject->FieldReadC());
+			int32 StreamingMode = pFbxObject->FieldReadI();
+
+			bool bObjectActive = pFbxObject->FieldReadI() != 0;
+			bool bStreamOAnimatableActive = pFbxObject->FieldReadI() != 0;
+
+			FoundStreamObject->UpdateSubjectName(SubjectName);
+			FoundStreamObject->UpdateStreamingMode(StreamingMode);
+			FoundStreamObject->UpdateActiveStatus(bObjectActive);
+			FoundStreamObject->UpdateSendAnimatableStatus(bStreamOAnimatableActive);
+
+			// Add the object last so the SubjectName is correct
+			AddStreamObject(GetNextUID(), FoundStreamObject);
+		}
+		else
+		{
+			pFbxObject->FieldReadC();
+			pFbxObject->FieldReadI();
+			pFbxObject->FieldReadI();
+			pFbxObject->FieldReadI();
+		}
+	}
 }
 
 
@@ -521,14 +566,11 @@ void FMobuLiveLink::AddStreamObject(int32 NewUID, StreamObjectPtr NewObject)
 
 void FMobuLiveLink::RemoveStreamObject(int32 DeletionKey, StreamObjectPtr RemoveObject)
 {
-	if (RemoveObject->IsValid())
-	{
-		FBTrace("Removed Subject '%s' from StreamObjects\n", FStringToChar(RemoveObject->GetSubjectName().ToString()));
-		StreamObjects.Remove(DeletionKey);
-		LiveLinkProvider->RemoveSubject(RemoveObject->GetSubjectName());
+	FBTrace("Removed Subject '%s' from StreamObjects\n", FStringToChar(RemoveObject->GetSubjectName().ToString()));
+	StreamObjects.Remove(DeletionKey);
+	LiveLinkProvider->RemoveSubject(RemoveObject->GetSubjectName());
 
-		SetDirty(true);
-	}
+	SetDirty(true);
 }
 
 void FMobuLiveLink::ChangeSubjectName(StreamObjectPtr ObjectPtr, const char* NewSubjectNameStr)
@@ -545,6 +587,8 @@ void FMobuLiveLink::ChangeSubjectName(StreamObjectPtr ObjectPtr, const char* New
 
 void FMobuLiveLink::UpdateStreamObjects()
 {
+	decltype(StreamObjects) StreamObjectsToRemove;
+
 	for (TPair<int32, TSharedPtr<IStreamObject>>& MapPair : StreamObjects)
 	{
 		const TSharedPtr<IStreamObject>& StreamObject = MapPair.Value;
@@ -554,9 +598,15 @@ void FMobuLiveLink::UpdateStreamObjects()
 		}
 		else
 		{
-			FBTrace("UpdateStreamObjects - StreamObject for key %d isn't valid - this should never happen!\nPossible error in LiveLink subject list!", MapPair.Key);
-		}	
+			StreamObjectsToRemove.Add(MapPair);
+		}
 	}
+
+	for (const auto& MapPair : StreamObjectsToRemove)
+	{
+		RemoveStreamObject(MapPair.Key, MapPair.Value);
+	}
+
 	SetDirty(false);
 	SetRefreshUI(true);
 }
@@ -634,4 +684,59 @@ void FMobuLiveLink::SetProviderName(const FString& NewValue)
 
 		SetRefreshUI(true);
 	}
+}
+
+FString FMobuLiveLink::GetUnicastEndpoint() const
+{
+	if (IModularFeatures::Get().IsModularFeatureAvailable(INetworkMessagingExtension::ModularFeatureName))
+	{
+		UUdpMessagingSettings* Settings = GetMutableDefault<UUdpMessagingSettings>();
+		return Settings->UnicastEndpoint;
+	}
+
+	return TEXT("0.0.0.0:0");
+}
+
+void FMobuLiveLink::SetUnicastEndpoint(const FString& InEndpoint)
+{
+	if (InEndpoint != GetUnicastEndpoint())
+	{
+		if (IModularFeatures::Get().IsModularFeatureAvailable(INetworkMessagingExtension::ModularFeatureName))
+		{
+			StopLiveLink();
+			UUdpMessagingSettings* Settings = GetMutableDefault<UUdpMessagingSettings>();
+			Settings->UnicastEndpoint = InEndpoint;
+			INetworkMessagingExtension& NetworkExtension = IModularFeatures::Get().GetModularFeature<INetworkMessagingExtension>(INetworkMessagingExtension::ModularFeatureName);
+			NetworkExtension.RestartServices();
+
+			StartLiveLink();
+			SetRefreshUI(true);
+		}
+	}
+}
+
+bool FMobuLiveLink::AddStaticEndpoint(const FString& InEndpoint)
+{
+	if (IModularFeatures::Get().IsModularFeatureAvailable(INetworkMessagingExtension::ModularFeatureName))
+	{
+		INetworkMessagingExtension& NetworkExtension = IModularFeatures::Get().GetModularFeature<INetworkMessagingExtension>(INetworkMessagingExtension::ModularFeatureName);
+		NetworkExtension.AddEndpoint(InEndpoint);
+		StaticEndpoints.Push(InEndpoint);
+		SetRefreshUI(true);
+		return true;
+	}
+	return false;
+}
+
+bool FMobuLiveLink::RemoveStaticEndpoint(const FString& InEndpoint)
+{
+	if (IModularFeatures::Get().IsModularFeatureAvailable(INetworkMessagingExtension::ModularFeatureName))
+	{
+		INetworkMessagingExtension& NetworkExtension = IModularFeatures::Get().GetModularFeature<INetworkMessagingExtension>(INetworkMessagingExtension::ModularFeatureName);
+		NetworkExtension.RemoveEndpoint(InEndpoint);
+		StaticEndpoints.RemoveSingle(InEndpoint);
+		SetRefreshUI(true);
+		return true;
+	}
+	return false;
 }

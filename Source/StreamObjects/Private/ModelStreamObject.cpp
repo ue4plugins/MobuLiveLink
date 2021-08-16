@@ -153,6 +153,7 @@ void FModelStreamObject::UpdateBaseStaticData(const FBModel* Model, bool bSendAn
 
 void FModelStreamObject::UpdateSubjectTransformStaticData(const FBModel* Model, bool bSendAnimatable, FLiveLinkTransformStaticData& InOutTransformStatic)
 {
+	InOutTransformStatic.bIsScaleSupported = true;
 	UpdateBaseStaticData(Model, bSendAnimatable, InOutTransformStatic);
 }
 

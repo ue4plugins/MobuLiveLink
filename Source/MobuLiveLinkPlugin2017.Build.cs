@@ -16,7 +16,7 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 		{
 			Path.Combine(EngineDirectory, "Source/Runtime/Launch/Public"),
 			Path.Combine(EngineDirectory, "Source/Runtime/Launch/Private"),
-			Path.Combine(ModuleDirectory, "StreamObjects/Public")
+			Path.Combine(ModuleDirectory, "StreamObjects/Public"),
 		});
 
 		// Unreal dependency modules
@@ -25,6 +25,7 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 			"Core",
 			"CoreUObject",
 			"ApplicationCore",
+			"Messaging",
 			"Projects",
 			"UdpMessaging",
 			"LiveLinkInterface",
