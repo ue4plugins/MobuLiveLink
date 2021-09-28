@@ -2,7 +2,7 @@
 
 Enables Unreal to receives data from MotionBuilder via the Live Link system.
 
-Currently built and tested with Unreal 4.23 and MotionBuilder 2016, 2017, 2018, 2019
+Currently built and tested with Unreal 4.27 and MotionBuilder 2016, 2017, 2018, 2019, 2020, and 2022
 
 ### Pre-built plugins are available on the Releases tab here: [https://github.com/ue4plugins/MobuLiveLink/releases](https://github.com/ue4plugins/MobuLiveLink/releases)
 
