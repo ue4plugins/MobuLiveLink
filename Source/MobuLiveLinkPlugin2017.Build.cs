@@ -5,8 +5,6 @@ using System.IO;
 
 public abstract class MobuLiveLinkPluginBase : ModuleRules
 {
-	public abstract string PyFullVerFloat();
-	public abstract string PyVer();
 	public MobuLiveLinkPluginBase(ReadOnlyTargetRules Target, string MobuVersionString) : base(Target)
 	{
 		PrivatePCHHeaderFile = "Private/MobuLiveLinkPluginPrivatePCH.h";
@@ -58,19 +56,13 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 			if (Directory.Exists(MobuInstallFolder))
 			{
 				PrivateIncludePaths.Add(Path.Combine(MobuInstallFolder, "include"));
-				PrivateIncludePaths.Add(Path.Combine(MobuInstallFolder, "include\\pyfbsdk"));
-				PrivateIncludePaths.Add(Path.Combine(MobuInstallFolder, "include\\boost"));
-				PrivateIncludePaths.Add(Path.Combine(MobuInstallFolder, $"include\\python-{PyFullVerFloat()}"));
 
 				if (Target.Platform == UnrealTargetPlatform.Win64)  // @todo: Support other platforms?
 				{
 					string LibDir = Path.Combine(MobuInstallFolder, "lib/x64");
-					string PyLibDir = Path.Combine(MobuInstallFolder, $"lib/x64/python{PyVer()}");
 
 					// Mobu library we're depending on
 					PublicAdditionalLibraries.Add(Path.Combine(LibDir, "fbsdk.lib"));
-					PublicAdditionalLibraries.Add(Path.Combine(LibDir, $"boost_python{PyVer()}.lib"));
-					PublicAdditionalLibraries.Add(Path.Combine(PyLibDir, "pyfbsdk.lib"));
 				}
 			}
 		}
@@ -79,8 +71,6 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 
 public class MobuLiveLinkPlugin2017 : MobuLiveLinkPluginBase
 {
-	public override string PyFullVerFloat() => "2.7.6";
-	public override string PyVer() => "27";
 	public MobuLiveLinkPlugin2017(ReadOnlyTargetRules Target) : base(Target, "2017")
 	{
 	}
