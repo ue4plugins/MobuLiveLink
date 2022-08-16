@@ -54,16 +54,13 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 				}
 			}
 
-			PrivateDefinitions.Add($"FBPYTHON_VERSION ={PyVer()}");
-			PrivateDefinitions.Add("MOBU_PYTHON_PLUGIN");
-
 			// Make sure this version of Mobu is actually installed
 			if (Directory.Exists(MobuInstallFolder))
 			{
 				PrivateIncludePaths.Add(Path.Combine(MobuInstallFolder, "include"));
 				PrivateIncludePaths.Add(Path.Combine(MobuInstallFolder, "include\\pyfbsdk"));
 				PrivateIncludePaths.Add(Path.Combine(MobuInstallFolder, "include\\boost"));
-				PrivateIncludePaths.Add(Path.Combine(MobuInstallFolder, $"include\\python-{PyFullVerFloat()}\\include"));
+				PrivateIncludePaths.Add(Path.Combine(MobuInstallFolder, $"include\\python-{PyFullVerFloat()}"));
 
 				if (Target.Platform == UnrealTargetPlatform.Win64)  // @todo: Support other platforms?
 				{
