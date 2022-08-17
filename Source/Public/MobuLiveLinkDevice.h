@@ -12,6 +12,8 @@
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/OutputDevice.h"
 
+#include <fbsdk/fbsdk.h>
+
 //--- Registration defines
 #define MOBULIVELINK__CLASSNAME		FMobuLiveLink
 #define MOBULIVELINK__CLASSSTR		"MobuLiveLink"

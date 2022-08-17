@@ -7,5 +7,6 @@ using System.IO;
 public class MobuLiveLinkPlugin2022Target : MobuLiveLinkPluginTargetBase
 {
 	public MobuLiveLinkPlugin2022Target(TargetInfo Target) : base(Target, "2022")
-	{}
+	{
+	}
 }
