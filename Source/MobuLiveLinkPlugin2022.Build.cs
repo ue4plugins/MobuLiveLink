@@ -14,7 +14,5 @@ public class MobuLiveLinkPlugin2022 : MobuLiveLinkPluginBase
 		CppStandard = CppStandardVersion.Cpp17;
 		IncludePyFbSdkVersionSpecific();
 		IncludePythonBoostVersionSpecific();
-		IncludePythonVersionSpecific();
-		AddPythonPreprocessDefinitions();
 	}
 }

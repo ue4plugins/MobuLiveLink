@@ -96,13 +96,14 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 
 					// Mobu library we're depending on
 					PublicAdditionalLibraries.Add(Path.Combine(LibDir, "fbsdk.lib"));
+					PublicAdditionalLibraries.Add(Path.Combine(LibDir, "libfbxsdk-adsk.lib"));
 				}
 			}
 		}
 	}
 	public void IncludePyFbSdkVersionSpecific()
 	{
-		if(Directory.Exists(MotionBuilderOpenRealitySDK))
+		if (Directory.Exists(MotionBuilderOpenRealitySDK))
 		{
 			string pyFbSdkIncludeFolder = Path.Combine(MotionBuilderOpenRealitySDK, "include\\pyfbsdk");
 			PrivateIncludePaths.Add(pyFbSdkIncludeFolder);
@@ -121,28 +122,14 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 		{
 			string pythonBoostIncludeFolder = Path.Combine(MotionBuilderOpenRealitySDK, "include\\boost");
 			PrivateIncludePaths.Add(pythonBoostIncludeFolder);
+			string pythonIncludeFolder = Path.Combine(MotionBuilderOpenRealitySDK, $"include\\python-{PythonFullVersion}\\include");
+			PrivateIncludePaths.Add(pythonIncludeFolder);
 			if (Target.Platform == UnrealTargetPlatform.Win64)
 			{
 				string pythonBoostLibPath = Path.Combine(MotionBuilderOpenRealitySDK, $"lib\\x64\\boost_python{PythonVersion}.lib");
 				PublicAdditionalLibraries.Add(pythonBoostLibPath);
 			}
 		}
-	}
-
-	public void IncludePythonVersionSpecific()
-	{
-		if (Directory.Exists(MotionBuilderOpenRealitySDK))
-		{
-			string pythonIncludeFolder = Path.Combine(MotionBuilderOpenRealitySDK, $"include\\python-{PythonFullVersion}\\include");
-			PrivateIncludePaths.Add(pythonIncludeFolder);
-		}
-	}
-
-	public void AddPythonPreprocessDefinitions()
-	{
-		PublicDefinitions.Add($"FBPYTHON_VERSION={PythonVersion}");
-		PublicDefinitions.Add("MOBU_PYTHON_PLUGIN");
-		// PublicDefinitions.Add("_DEBUG");
 	}
 }
 
