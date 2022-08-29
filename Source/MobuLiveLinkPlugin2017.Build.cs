@@ -96,7 +96,6 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 
 					// Mobu library we're depending on
 					PublicAdditionalLibraries.Add(Path.Combine(LibDir, "fbsdk.lib"));
-					PublicAdditionalLibraries.Add(Path.Combine(LibDir, "libfbxsdk-adsk.lib"));
 				}
 			}
 		}
@@ -106,29 +105,20 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 		if (Directory.Exists(MotionBuilderOpenRealitySDK))
 		{
 			string pyFbSdkIncludeFolder = Path.Combine(MotionBuilderOpenRealitySDK, "include\\pyfbsdk");
-			PrivateIncludePaths.Add(pyFbSdkIncludeFolder);
-			if (Target.Platform == UnrealTargetPlatform.Win64)  // @todo: Support other platforms?
-			{
-				string pyFbSdkLibDir = Path.Combine(MotionBuilderOpenRealitySDK, $"lib\\x64\\python{PythonVersion}");
-				// Mobu library we're depending on
-				PublicAdditionalLibraries.Add(Path.Combine(pyFbSdkLibDir, "pyfbsdk.lib"));
-			}
-		}
-	}
-
-	public void IncludePythonBoostVersionSpecific()
-	{
-		if (Directory.Exists(MotionBuilderOpenRealitySDK))
-		{
 			string pythonBoostIncludeFolder = Path.Combine(MotionBuilderOpenRealitySDK, "include\\boost");
-			PrivateIncludePaths.Add(pythonBoostIncludeFolder);
 			string pythonIncludeFolder = Path.Combine(MotionBuilderOpenRealitySDK, $"include\\python-{PythonFullVersion}\\include");
+			PrivateIncludePaths.Add(pyFbSdkIncludeFolder);
+			PrivateIncludePaths.Add(pythonBoostIncludeFolder);
 			PrivateIncludePaths.Add(pythonIncludeFolder);
 			if (Target.Platform == UnrealTargetPlatform.Win64)
 			{
-				string pythonBoostLibPath = Path.Combine(MotionBuilderOpenRealitySDK, $"lib\\x64\\boost_python{PythonVersion}.lib");
-				PublicAdditionalLibraries.Add(pythonBoostLibPath);
+				string LibDir = Path.Combine(MotionBuilderOpenRealitySDK, "lib\\x64");
+				PublicAdditionalLibraries.Add(Path.Combine(LibDir, $"boost_python{PythonVersion}.lib"));
+				string pyFbSdkLibDir = Path.Combine(MotionBuilderOpenRealitySDK, $"lib\\x64\\python{PythonVersion}");
+				PublicAdditionalLibraries.Add(Path.Combine(pyFbSdkLibDir, "pyfbsdk.lib"));
 			}
+			PrivateDefinitions.Add("MOBU_PYTHON_PLUGIN");
+			PrivateDefinitions.Add($"FBPYTHON_VERSION={PythonVersion}");
 		}
 	}
 }
