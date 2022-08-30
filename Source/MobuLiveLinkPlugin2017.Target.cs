@@ -3,7 +3,7 @@
 using UnrealBuildTool;
 using System;
 using System.IO;
-using Tools.DotNETCommon;
+using EpicGames.Core;
 using System.Runtime.CompilerServices;
 
 [SupportedPlatforms(UnrealPlatformClass.Desktop)]

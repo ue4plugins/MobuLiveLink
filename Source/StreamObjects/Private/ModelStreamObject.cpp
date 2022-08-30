@@ -102,8 +102,12 @@ const FString FModelStreamObject::GetRootName() const
 
 bool FModelStreamObject::IsValid() const
 {
-	// By Default an object is valid if the root model is in the scene
-	return FBSystem().Scene->Components.Find((FBComponent*)RootModel) >= 0;
+	if (RootModel)
+	{
+		// By Default an object is valid if the root model is in the scene
+		return FBSystem().Scene->Components.Find((FBComponent*)RootModel) >= 0;
+	}
+	return false;
 };
 
 void FModelStreamObject::Refresh(const TSharedPtr<ILiveLinkProvider> Provider)
