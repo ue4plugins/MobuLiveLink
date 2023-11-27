@@ -665,7 +665,7 @@ void FMobuLiveLinkLayout::EventAddStaticEndpoint(HISender Sender, HKEvent Event)
 {
 	char NewAddressString[1024] = "0.0.0.0:6666";
 
-	const std::string Description("Enter a new Static Endpoint Address of the PC running UE4.");
+	const std::string Description("Enter a new Static Endpoint Address of the PC running Unreal Engine.");
 	const std::string FormatHint("\n\nThe entered address was not formatted correctly. The format must match this pattern:\nIpAddress:Port");
 	int ButtonClicked = 0;
 	bool bTryAgain = false;

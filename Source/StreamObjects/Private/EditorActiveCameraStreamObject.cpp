@@ -97,7 +97,7 @@ bool FEditorActiveCameraStreamObject::IsValid() const
 void FEditorActiveCameraStreamObject::Refresh(const TSharedPtr<ILiveLinkProvider> Provider)
 {
 	FBSystem System;
-	const FBCamera* CameraModel = System.Scene->Renderer->CurrentCamera;
+	const FBCamera* CameraModel = System.Scene->Renderer->GetCameraInPane(0);
 
 	FLiveLinkStaticDataStruct CameraData(FLiveLinkCameraStaticData::StaticStruct());
 	FModelStreamObject::UpdateSubjectTransformStaticData(CameraModel, bSendAnimatable, *CameraData.Cast<FLiveLinkCameraStaticData>());
@@ -113,7 +113,7 @@ void FEditorActiveCameraStreamObject::UpdateSubjectFrame(const TSharedPtr<ILiveL
 	}
 
 	FBSystem System;
-	const FBCamera* CameraModel = System.Scene->Renderer->CurrentCamera;
+	const FBCamera* CameraModel = System.Scene->Renderer->GetCameraInPane(0);
 
 	if (CameraModel)
 	{

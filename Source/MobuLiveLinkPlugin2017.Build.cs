@@ -7,15 +7,13 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 {
 	public MobuLiveLinkPluginBase(ReadOnlyTargetRules Target, string MobuVersionString) : base(Target)
 	{
-		PrivatePCHHeaderFile = "Private/MobuLiveLinkPluginPrivatePCH.h";
-
-		bEnforceIWYU = false;
+		IWYUSupport = IWYUSupport.None;
 		bUseRTTI = true;
+
+		PrivateIncludePathModuleNames.Add("Launch");
 
 		PrivateIncludePaths.AddRange(new string[]
 		{
-			Path.Combine(EngineDirectory, "Source/Runtime/Launch/Public"),
-			Path.Combine(EngineDirectory, "Source/Runtime/Launch/Private"),
 			Path.Combine(ModuleDirectory, "StreamObjects/Public"),
 		});
 
@@ -65,6 +63,8 @@ public abstract class MobuLiveLinkPluginBase : ModuleRules
 					PublicAdditionalLibraries.Add(Path.Combine(LibDir, "fbsdk.lib"));
 				}
 			}
+
+			PublicDefinitions.Add("PRODUCT_VERSION=" + MobuVersionString);
 		}
 	}
 }

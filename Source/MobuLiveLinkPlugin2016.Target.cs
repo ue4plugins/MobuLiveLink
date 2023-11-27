@@ -10,5 +10,6 @@ public class MobuLiveLinkPlugin2016Target : MobuLiveLinkPluginTargetBase
 	{
 		//Mobu is not strict c++ compliant before Mobu 2019 
 		WindowsPlatform.bStrictConformanceMode = false;
+		CppStandard = CppStandardVersion.Cpp17;
 	}
 }

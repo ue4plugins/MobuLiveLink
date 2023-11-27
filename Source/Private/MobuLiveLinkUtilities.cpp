@@ -236,6 +236,19 @@ FQualifiedFrameTime MobuUtilities::GetSceneTimecode(ETimecodeMode TimecodeMode)
 	else if (TimecodeMode == ETimecodeMode::TimecodeMode_Reference)	// Reference time (Incoming LTC)
 	{
 		FBReferenceTime MobuRefTime;
+		#if PRODUCT_VERSION >= 2019
+		FBArrayTemplate<int> Identifiers;
+		MobuRefTime.GetUniqueIDList(&Identifiers);
+		if (Identifiers.GetCount() > 0)
+		{
+			FBTime RefTime = MobuRefTime.GetTime(MobuRefTime.CurrentTimeReferenceID, FBTime(0));
+			FrameTime = FFrameTime(FrameRate.AsFrameTime(RefTime.GetSecondDouble()));
+		}
+		else
+		{
+			FBTrace("GetSceneTimecode - No Reference time sources\n");
+		}
+		#else
 		if (MobuRefTime.Count > 0)
 		{
 			FBTime RefTime = MobuRefTime.GetTime(MobuRefTime.ItemIndex, FBTime(0));
@@ -245,6 +258,8 @@ FQualifiedFrameTime MobuUtilities::GetSceneTimecode(ETimecodeMode TimecodeMode)
 		{
 			FBTrace("GetSceneTimecode - No Reference time sources\n");
 		}
+		#endif
+		
 	}
 	else
 	{

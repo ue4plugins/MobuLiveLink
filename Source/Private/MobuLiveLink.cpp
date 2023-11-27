@@ -30,6 +30,10 @@ bool FBLibrary::LibInit()
 	// Tell the module manager that it may now process newly-loaded UObjects when new C++ modules are loaded
 	FModuleManager::Get().StartProcessingNewlyLoadedObjects();
 	FModuleManager::Get().LoadModule(TEXT("UdpMessaging"));
+
+	IPluginManager::Get().LoadModulesForEnabledPlugins(ELoadingPhase::PreDefault);
+	IPluginManager::Get().LoadModulesForEnabledPlugins(ELoadingPhase::Default);
+	IPluginManager::Get().LoadModulesForEnabledPlugins(ELoadingPhase::PostDefault);
 	
 	FBTrace("MobuLiveLink Library Initialized\n");
 	return true;

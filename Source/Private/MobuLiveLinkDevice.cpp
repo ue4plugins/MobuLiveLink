@@ -150,7 +150,7 @@ bool FMobuLiveLink::DeviceOperation(kDeviceOperations pOperation)
 
 void FMobuLiveLink::SetDeviceInformation(const char* NewDeviceInformation)
 {
-	FString VersionString("v2.5.0 (");
+	FString VersionString("v3.0.3 (");
 	VersionString += __DATE__;
 	VersionString += ")";
 	HardwareVersionInfo.SetString(FStringToChar(VersionString));
@@ -614,7 +614,7 @@ void FMobuLiveLink::UpdateStreamObjects()
 void FMobuLiveLink::TickCoreTicker()
 {
 	double CurrentTime = FPlatformTime::Seconds();
-	FTicker::GetCoreTicker().Tick(CurrentTime - LastEvaluationTime);
+	FTSTicker::GetCoreTicker().Tick(CurrentTime - LastEvaluationTime);
 	LastEvaluationTime = CurrentTime;
 }
 

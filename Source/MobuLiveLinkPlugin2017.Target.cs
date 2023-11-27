@@ -3,7 +3,7 @@
 using UnrealBuildTool;
 using System;
 using System.IO;
-using Tools.DotNETCommon;
+using EpicGames.Core;
 using System.Runtime.CompilerServices;
 
 [SupportedPlatforms(UnrealPlatformClass.Desktop)]
@@ -54,7 +54,6 @@ public abstract class MobuLiveLinkPluginTargetBase : TargetRules
 
 		// We only need minimal use of the engine for this plugin
 		bBuildDeveloperTools = false;
-		bUseMallocProfiler = false;
 		bBuildWithEditorOnlyData = true;
 		bCompileAgainstEngine = false;
 		bCompileAgainstCoreUObject = true;
@@ -95,6 +94,8 @@ public abstract class MobuLiveLinkPluginTargetBase : TargetRules
 
 		string ResourcesDir = Path.Combine(ProgramsDir, "MobuLiveLink", "Resources");
 		string PostBuildBinDir = Path.Combine(DefaultBinDir, "MotionBuilder", InMobuVersionString);
+		string TbbDependency = Path.Combine(EngineBinariesDir, "tbb.dll");
+		string TbbMallocDependency = Path.Combine(EngineBinariesDir, "tbbmalloc.dll");
 
 		// Copy resources
 		PostBuildSteps.Add(string.Format("echo Copying {0} to {1}...", ResourcesDir, PostBuildBinDir));
@@ -103,6 +104,11 @@ public abstract class MobuLiveLinkPluginTargetBase : TargetRules
 		// Copy binaries
 		PostBuildSteps.Add(string.Format("echo Copying {0} to {1}...", EngineBinariesDir, PostBuildBinDir));
 		PostBuildSteps.Add(string.Format("xcopy /y /i /v \"{0}\\{1}.*\" \"{2}\" 1>nul", EngineBinariesDir, LaunchModuleName, PostBuildBinDir));
+		
+		// Copy support dlls
+		PostBuildSteps.Add(string.Format("echo Copying {0} to {1}...", TbbDependency, PostBuildBinDir));
+		PostBuildSteps.Add(string.Format("xcopy /y /i /r /v \"{0}\" \"{1}\" 1>nul", TbbDependency, PostBuildBinDir));
+		PostBuildSteps.Add(string.Format("xcopy /y /i /r /v \"{0}\" \"{1}\" 1>nul", TbbMallocDependency, PostBuildBinDir));
 	}
 }
 
@@ -112,5 +118,6 @@ public class MobuLiveLinkPlugin2017Target : MobuLiveLinkPluginTargetBase
 	{
 		//Mobu is not strict c++ compliant before Mobu 2019 
 		WindowsPlatform.bStrictConformanceMode = false;
+		CppStandard = CppStandardVersion.Cpp17;
 	}
 }
