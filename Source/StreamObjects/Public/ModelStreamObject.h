@@ -8,6 +8,8 @@ struct FLiveLinkSkeletonStaticData;
 struct FLiveLinkAnimationFrameData;
 struct FLiveLinkTransformStaticData;
 struct FLiveLinkTransformFrameData;
+struct FLiveLinkLocatorStaticData;
+struct FLiveLinkLocatorFrameData;
 
 // Generic object that supports FBModels
 // Either used for simple objects where no more specific class exists (Nulls, etc.)
@@ -15,11 +17,12 @@ struct FLiveLinkTransformFrameData;
 class FModelStreamObject : public IStreamObject
 {
 private:
-	const TArray<FString> ModelStreamOptions = { TEXT("Root Only"), TEXT("Full Hierarchy") };
+	const TArray<FString> ModelStreamOptions = { TEXT("Root Only"), TEXT("Locators"), TEXT("Full Hierarchy") };
 
 	enum FModelStreamMode
 	{
 		RootOnly,
+		Locators,
 		FullHierarchy,
 	};
 
@@ -64,14 +67,20 @@ public:
 	static void UpdateSubjectTransformStaticData(const FBModel* Model, bool bSendAnimatable, FLiveLinkTransformStaticData& InOutTransformFrame);
 	static void UpdateSubjectTransformFrameData(const FBModel* Model, bool bSendAnimatable, FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime, FLiveLinkTransformFrameData& InOutTransformFrame);
 
+	void UpdateSubjectLocatorStaticData(FLiveLinkLocatorStaticData& InOutLocatorFrame);
+	void UpdateSubjectLocatorFrameData(FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime, FLiveLinkLocatorFrameData& InOutLocatorFrame);
+
 protected:
 	// Stream Variables
 	const FBModel* const RootModel;
 
 	FName SubjectName;
-	TArray<int32> BoneParents;
-	TArray<const FBModel*> BoneModels;
+	TArray<int32> Parents;
+	TArray<const FBModel*> Models;
 	bool bIsActive;
 	bool bSendAnimatable;
 	int StreamingMode;
+
+	// Get the names of the selected hierarchy and each object's parent ID
+	void GetHierarchy(TArray<FName>& ObjectNames, TArray<int32>& OutParents, TArray<const FBModel*>& OutModels);
 };

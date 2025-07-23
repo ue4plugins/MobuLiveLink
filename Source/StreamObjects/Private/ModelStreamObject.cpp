@@ -6,8 +6,11 @@
 
 #include "Roles/LiveLinkAnimationRole.h"
 #include "Roles/LiveLinkAnimationTypes.h"
+#include "Roles/LiveLinkLocatorRole.h"
+#include "Roles/LiveLinkLocatorTypes.h"
 #include "Roles/LiveLinkTransformRole.h"
 #include "Roles/LiveLinkTransformTypes.h"
+#include "UObject/ObjectPtr.h"
 
 // Creation / Destruction
 FModelStreamObject::FModelStreamObject(const FBModel* ModelPointer)
@@ -114,6 +117,12 @@ void FModelStreamObject::Refresh(const TSharedPtr<ILiveLinkProvider> Provider)
 		UpdateSubjectSkeletalStaticData(*SkeletonData.Cast<FLiveLinkSkeletonStaticData>());
 		Provider->UpdateSubjectStaticData(SubjectName, ULiveLinkAnimationRole::StaticClass(), MoveTemp(SkeletonData));
 	}
+	else if(GetStreamingMode() == FModelStreamMode::Locators)
+	{
+		FLiveLinkStaticDataStruct LocatorData(FLiveLinkLocatorStaticData::StaticStruct());
+		UpdateSubjectLocatorStaticData(*LocatorData.Cast<FLiveLinkLocatorStaticData>());
+		Provider->UpdateSubjectStaticData(SubjectName, ULiveLinkLocatorRole::StaticClass(), MoveTemp(LocatorData));
+	}
 	else
 	{
 		FLiveLinkStaticDataStruct TransformData(FLiveLinkTransformStaticData::StaticStruct());
@@ -134,6 +143,12 @@ void FModelStreamObject::UpdateSubjectFrame(const TSharedPtr<ILiveLinkProvider> 
 		FLiveLinkFrameDataStruct TransformData = (FLiveLinkAnimationFrameData::StaticStruct());
 		UpdateSubjectSkeletalFrameData(WorldTime, QualifiedFrameTime, *TransformData.Cast<FLiveLinkAnimationFrameData>());
 		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(TransformData));
+	}
+	else if(GetStreamingMode() == FModelStreamMode::Locators)
+	{
+		FLiveLinkFrameDataStruct LocatorData = (FLiveLinkLocatorFrameData::StaticStruct());
+		UpdateSubjectLocatorFrameData(WorldTime, QualifiedFrameTime, *LocatorData.Cast<FLiveLinkLocatorFrameData>());
+		Provider->UpdateSubjectFrameData(SubjectName, MoveTemp(LocatorData));
 	}
 	else
 	{
@@ -162,51 +177,23 @@ void FModelStreamObject::UpdateSubjectSkeletalStaticData(FLiveLinkSkeletonStatic
 	UpdateBaseStaticData(RootModel, bSendAnimatable, InOutAnimationStatic);
 
 	InOutAnimationStatic.BoneNames.Reset();
-	BoneParents.Reset();
-	BoneModels.Reset();
+	Parents.Reset();
+	Models.Reset();
 
 	InOutAnimationStatic.BoneNames.Emplace(RootModel->Name);
-	BoneParents.Emplace(-1);
-	BoneModels.Emplace(RootModel);
+	Parents.Emplace(-1);
+	Models.Emplace(RootModel);
 
-	{
-		TArray<TPair<int, FBModel*>> SearchList;
-		TArray<TPair<int, FBModel*>> SearchListNext;
+	GetHierarchy(InOutAnimationStatic.BoneNames, Parents, Models);
+	
+	InOutAnimationStatic.BoneParents = Parents;
 
-		SearchList.Emplace(0, (FBModel*)RootModel);
-
-		while (SearchList.Num() > 0)
-		{
-			for (const TPair<int, FBModel*>& SearchPair : SearchList)
-			{
-				int ParentIdx = SearchPair.Key;
-				FBModel* SearchModel = SearchPair.Value;
-				int ChildCount = SearchModel->Children.GetCount();
-
-				for (int ChildIdx = 0; ChildIdx < ChildCount; ++ChildIdx)
-				{
-					FBModel* ChildModel = SearchModel->Children[ChildIdx];
-
-					InOutAnimationStatic.BoneNames.Emplace(ChildModel->Name);
-					BoneParents.Emplace(ParentIdx);
-					BoneModels.Emplace(ChildModel);
-
-					SearchListNext.Emplace(BoneModels.Num() - 1, ChildModel);
-				}
-			}
-			SearchList = SearchListNext;
-			SearchListNext.Reset();
-		}
-	}
-
-	InOutAnimationStatic.BoneParents = BoneParents;
-
-	check(BoneModels.Num() == InOutAnimationStatic.BoneNames.Num());
+	check(Models.Num() == InOutAnimationStatic.BoneNames.Num());
 	if (bSendAnimatable)
 	{
-		for (int32 BoneIndex = 0; BoneIndex < BoneModels.Num(); ++BoneIndex)
+		for (int32 Index = 0; Index < Models.Num(); ++Index)
 		{
-			InOutAnimationStatic.PropertyNames.Append(MobuUtilities::GetAllAnimatableCurveNames(const_cast<FBModel*>(BoneModels[BoneIndex]), InOutAnimationStatic.BoneNames[BoneIndex].ToString()));
+			InOutAnimationStatic.PropertyNames.Append(MobuUtilities::GetAllAnimatableCurveNames(const_cast<FBModel*>(Models[Index]), InOutAnimationStatic.BoneNames[Index].ToString()));
 		}
 	}
 }
@@ -231,21 +218,21 @@ void FModelStreamObject::UpdateSubjectSkeletalFrameData(FLiveLinkWorldTime World
 {
 	UpdateBaseFrameData(RootModel, bSendAnimatable, WorldTime, QualifiedFrameTime, InOutAnimationFrame);
 
-	if (BoneParents.Num() != BoneModels.Num())
+	if (Parents.Num() != Models.Num())
 	{
 		return;
 	}
 
-	const int32 BoneCount = BoneParents.Num();
+	const int32 BoneCount = Parents.Num();
 	InOutAnimationFrame.Transforms.SetNum(BoneCount);
 
 	TArray<FTransform> ParentInverseTransforms;
 	ParentInverseTransforms.SetNum(BoneCount);
 
 	// loop through children here
-	for (int BoneIndex = 0; BoneIndex < BoneModels.Num(); ++BoneIndex)
+	for (int BoneIndex = 0; BoneIndex < Models.Num(); ++BoneIndex)
 	{
-		InOutAnimationFrame.Transforms[BoneIndex] = MobuUtilities::UnrealTransformFromModel(const_cast<FBModel*>(BoneModels[BoneIndex]));
+		InOutAnimationFrame.Transforms[BoneIndex] = MobuUtilities::UnrealTransformFromModel(const_cast<FBModel*>(Models[BoneIndex]));
 
 		// We seem to be getting NaNs from somewhere for some reason, so let's trap them here to prevent the engine from hitting the Ensure()
 		if (InOutAnimationFrame.Transforms[BoneIndex].ContainsNaN())
@@ -257,16 +244,98 @@ void FModelStreamObject::UpdateSubjectSkeletalFrameData(FLiveLinkWorldTime World
 		else
 		{
 			ParentInverseTransforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex].Inverse();
-			if (BoneParents[BoneIndex] != -1)
+			if (Parents[BoneIndex] != -1)
 			{
-				InOutAnimationFrame.Transforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex] * ParentInverseTransforms[BoneParents[BoneIndex]];
+				InOutAnimationFrame.Transforms[BoneIndex] = InOutAnimationFrame.Transforms[BoneIndex] * ParentInverseTransforms[Parents[BoneIndex]];
 			}
 		}
 
 		if (bSendAnimatable)
 		{
 			// Stream all parameters of all bones as "<BoneName>:<ParameterName>"
-			InOutAnimationFrame.PropertyValues.Append(MobuUtilities::GetAllAnimatableCurveValues(const_cast<FBModel*>(BoneModels[BoneIndex])));
+			InOutAnimationFrame.PropertyValues.Append(MobuUtilities::GetAllAnimatableCurveValues(const_cast<FBModel*>(Models[BoneIndex])));
 		}
 	}
 }
+
+void FModelStreamObject::UpdateSubjectLocatorStaticData(FLiveLinkLocatorStaticData& InOutLocatorFrame)
+{
+	UpdateBaseStaticData(RootModel, bSendAnimatable, InOutLocatorFrame);
+
+	InOutLocatorFrame.LocatorNames.Reset();
+	Models.Reset();
+	
+	InOutLocatorFrame.LocatorNames.Emplace(RootModel->Name);
+	Models.Emplace(RootModel);
+
+	GetHierarchy(InOutLocatorFrame.LocatorNames, Parents, Models);
+		
+	check(Models.Num() == InOutLocatorFrame.LocatorNames.Num());
+	if (bSendAnimatable)
+	{
+		for (int32 Index = 0; Index < Models.Num(); ++Index)
+		{
+			InOutLocatorFrame.PropertyNames.Append(MobuUtilities::GetAllAnimatableCurveNames(const_cast<FBModel*>(Models[Index]), InOutLocatorFrame.LocatorNames[Index].ToString()));
+		}
+		InOutLocatorFrame.bUnlabelledData = false;
+	}
+}
+
+void FModelStreamObject::UpdateSubjectLocatorFrameData(FLiveLinkWorldTime WorldTime, FQualifiedFrameTime QualifiedFrameTime, FLiveLinkLocatorFrameData& InOutLocatorFrame)
+{
+	UpdateBaseFrameData(RootModel, bSendAnimatable, WorldTime, QualifiedFrameTime, InOutLocatorFrame);
+
+	const int32 LocatorCount = Models.Num();
+	InOutLocatorFrame.Locators.SetNum(LocatorCount);
+
+	//loop through children
+	for (int Index = 0; Index < Models.Num(); ++Index)
+	{
+		InOutLocatorFrame.Locators[Index] = MobuUtilities::UnrealTransformFromModel(const_cast<FBModel*>(Models[Index])).GetLocation();
+
+		//If there are Nans handle it
+
+		if(InOutLocatorFrame.Locators[Index].ContainsNaN())
+		{
+			InOutLocatorFrame.Locators[Index].ZeroVector;
+		}
+		
+		if (bSendAnimatable)
+		{
+			InOutLocatorFrame.PropertyValues.Append(MobuUtilities::GetAllAnimatableCurveValues(const_cast<FBModel*>(Models[Index])));
+		}
+	}
+}
+
+void FModelStreamObject::GetHierarchy(TArray<FName>& ObjectNames, TArray<int32>& OutParents, TArray<const FBModel*>& OutModels)
+{
+	{
+		TArray<TPair<int, FBModel*>> SearchList;
+		TArray<TPair<int, FBModel*>> SearchListNext;
+
+		SearchList.Emplace(0, (FBModel*)RootModel);
+
+		while (SearchList.Num() > 0)
+		{
+			for (const TPair<int, FBModel*>& SearchPair : SearchList)
+			{
+				int ParentIndex = SearchPair.Key;
+				FBModel* SearchModel = SearchPair.Value;
+				int ChildCount = SearchModel->Children.GetCount();
+
+				for (int ChildIndex = 0; ChildIndex < ChildCount; ++ChildIndex)
+				{
+					FBModel* ChildModel = SearchModel->Children[ChildIndex];
+
+					ObjectNames.Emplace(ChildModel->Name);
+					OutParents.Emplace(ParentIndex);
+					OutModels.Emplace(ChildModel);
+					SearchListNext.Emplace(OutModels.Num() - 1, ChildModel);
+				}
+			}
+			SearchList = SearchListNext;
+			SearchListNext.Reset();
+		}
+	}
+}
+

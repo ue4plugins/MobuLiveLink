@@ -47,6 +47,8 @@ public abstract class MobuLiveLinkPluginTargetBase : TargetRules
 	{
 		Type = TargetType.Program;
 
+		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+
 		bShouldCompileAsDLL = true;
 		LinkType = TargetLinkType.Monolithic;
 		SolutionDirectory = "Programs/LiveLink";
@@ -59,6 +61,7 @@ public abstract class MobuLiveLinkPluginTargetBase : TargetRules
 		bCompileAgainstCoreUObject = true;
 		bCompileICU = false;
 		bHasExports = false;
+		bWarningsAsErrors = false;
 
 		// This .cs file must be inside the source folder of this Program. We later use this to find other key directories.
 		string TargetFilePath = GetCallerFilePath();
@@ -94,7 +97,7 @@ public abstract class MobuLiveLinkPluginTargetBase : TargetRules
 
 		string ResourcesDir = Path.Combine(ProgramsDir, "MobuLiveLink", "Resources");
 		string PostBuildBinDir = Path.Combine(DefaultBinDir, "MotionBuilder", InMobuVersionString);
-		string TbbDependency = Path.Combine(EngineBinariesDir, "tbb.dll");
+		string TbbDependency = Path.Combine(EngineBinariesDir, "tbb12.dll");
 		string TbbMallocDependency = Path.Combine(EngineBinariesDir, "tbbmalloc.dll");
 
 		// Copy resources
@@ -116,8 +119,5 @@ public class MobuLiveLinkPlugin2017Target : MobuLiveLinkPluginTargetBase
 {
 	public MobuLiveLinkPlugin2017Target(TargetInfo Target) : base(Target, "2017")
 	{
-		//Mobu is not strict c++ compliant before Mobu 2019 
-		WindowsPlatform.bStrictConformanceMode = false;
-		CppStandard = CppStandardVersion.Cpp17;
 	}
 }
