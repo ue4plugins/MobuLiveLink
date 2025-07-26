@@ -515,7 +515,7 @@ void FMobuLiveLink::StartLiveLink()
 }
 
 
-void FMobuLiveLink::StopLiveLink()
+void FMobuLiveLink::()
 {
 	TickCoreTicker();
 	if (LiveLinkProvider.IsValid())
@@ -703,13 +703,16 @@ void FMobuLiveLink::SetUnicastEndpoint(const FString& InEndpoint)
 	{
 		if (IModularFeatures::Get().IsModularFeatureAvailable(INetworkMessagingExtension::ModularFeatureName))
 		{
-			StopLiveLink();
+			if (Online){
+				StopLiveLink();
+			}
 			UUdpMessagingSettings* Settings = GetMutableDefault<UUdpMessagingSettings>();
 			Settings->UnicastEndpoint = InEndpoint;
 			INetworkMessagingExtension& NetworkExtension = IModularFeatures::Get().GetModularFeature<INetworkMessagingExtension>(INetworkMessagingExtension::ModularFeatureName);
 			NetworkExtension.RestartServices();
-
-			StartLiveLink();
+			if (Online){
+				StartLiveLink();
+			}
 			SetRefreshUI(true);
 		}
 	}
